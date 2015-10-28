@@ -194,7 +194,7 @@ static void axis_angle_to_quat(const float axis[3], const float angle, float q[4
 	q[3] = w / norm;
 }
 
-static void quat_rotate(const float q[4], float v[3], float out[3]) {
+static void quat_rotate(const float q[4], const float v[3], float out[3]) {
 	float uv[3];
 	float uuv[3];
 

@@ -12,6 +12,7 @@ RocketRenderer::RocketRenderer() : FTCube(colors) {
 	setPosition(glm::vec3(0, 0, 0));
 	//setRotationDegrees(glm::vec3(0, 0, 0));
 	setScale(glm::vec3(1, 10, 1));
+    setAnchorPoint(glm::vec3(0.5f, 0.5f, 0.5f));
 }
 
 RocketRenderer::~RocketRenderer() {

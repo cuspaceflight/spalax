@@ -13,13 +13,13 @@
 #define UNLOCK_STATE_ESTIMATE
 
 // Number of data points to calculate the bias and offset of the sensors
-#define CALIBRATION_COUNT 1000
+#define CALIBRATION_COUNT 100
 
 // Whether to use the QUEST algorithm or the mag rotation estimator
-#define USE_QUEST
+//#define USE_QUEST
 
 // Whether to run the orientation kalman - disabling will use just the quaternion estimator
-//#define USE_ORIENTATION_KALMAN
+#define USE_ORIENTATION_KALMAN
 
 // Whether to print the acceleration rotated by the computed quaternion
 // This is usefull for determining the accuracy of the orientation
@@ -156,6 +156,10 @@ void state_estimate_new_magnetometer_raw(const int16_t raw_mag[3]) {
 
 	if (is_calibrated) {
 		//PRINT("Mag %f %f %f\n", mag[0], mag[1], mag[2]);
+
+        //float magnitude = sqrtf(mag[0] * mag[0] + mag[1] * mag[1] + mag[2] * mag[2]);
+        //PRINT("%.2f\n", magnitude);
+
 #ifdef USE_QUEST
 		quest_estimator_new_mag(mag);
 #else
@@ -218,7 +222,7 @@ void state_estimate_compute_next(state_estimate_t* next_estimate, float dt) {
 	//PRINT("Quest Orientation %f %f %f\n", next_estimate->orientation_euler[0] * 57.2957795131f, next_estimate->orientation_euler[1] * 57.2957795131f, next_estimate->orientation_euler[2] * 57.2957795131f);
 	//PRINT("QUEST: %f %f %f %f\n",next_estimate->orientation_q[0],next_estimate->orientation_q[1],next_estimate->orientation_q[2],next_estimate->orientation_q[3]);
 #else
-	mag_rotation_estimator_update(next_estimate->orientation_euler,next_estimate->orientation_q);
+	mag_rotation_estimator_update(next_estimate->orientation_q);
 	//PRINT("Orientation %f %f %f\n", next_estimate->orientation_euler[0] * 57.2957795131f, next_estimate->orientation_euler[1] * 57.2957795131f, next_estimate->orientation_euler[2] * 57.2957795131f);
 #endif
 	

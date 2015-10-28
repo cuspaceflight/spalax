@@ -164,10 +164,9 @@ disp(M);
 fprintf('Bias Vector\n\n');
 disp(B);
 
-Errors = Errors
-
+average_error = mean(Errors);
 covariance = evar(Errors);
-fprintf('Covariance: %0.9g',covariance);
+fprintf('Average Error: %0.9g Covariance: %0.9g',average_error, covariance);
 
 end
 

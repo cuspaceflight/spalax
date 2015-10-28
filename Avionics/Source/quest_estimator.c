@@ -165,6 +165,7 @@ void quest_estimator_update(float q[4]) {
 		// No rotation
 		sequential_rotations = 0;
 	}
+    sequential_rotations = 0;
 #ifdef PRINT_SEQUENTIAL_ROTATION
 	PRINT("Rotation %i\n", sequential_rotations);
 #endif

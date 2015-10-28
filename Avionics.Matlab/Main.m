@@ -9,7 +9,7 @@ set(SerialPort,'BaudRate',38400);
 fopen(SerialPort);
 
 [AccelM AccelB] = calibrate('AccelData3.txt',false,9.80665);
-[MagM MagB] = calibrate('MagData4.txt',false,1.0)
+[MagM MagB] = calibrate('MagData5.txt',false,1.0)
 
 
 %Discard any data already on buffer
