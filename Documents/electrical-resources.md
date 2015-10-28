@@ -11,6 +11,13 @@ resources:
 * [Reference manual](http://www.st.com/web/en/resource/technical/document/reference_manual/DM00031020.pdf)
 * [Programming manual](http://www.st.com/web/en/resource/technical/document/programming_manual/DM00046982.pdf)
 
+## Sensor module
+
+The module is a [ADIS16405BMLZ MEMS
+Module](http://onecall.farnell.com/analog-devices/adis16405bmlz/ic-module-gyro-accel-mag-24pin/dp/1849515?categoryId=&categoryName=&searchRef=SearchLookAhead).
+
+* [Datasheet](http://www.farnell.com/datasheets/1914493.pdf)
+
 ## Other components
 
 * [ADP3335 voltage regulator](http://www.analog.com/media/en/technical-documentation/data-sheets/ADP3335.pdf)
