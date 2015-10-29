@@ -189,3 +189,9 @@ Makefile
 cmake_install.cmake
 install_manifest.txt
 Build/
+
+# temp files
+*.bak
+*.bck
+*.kicad_pcb-bak
+*-cache.lib
