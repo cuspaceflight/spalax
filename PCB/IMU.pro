@@ -80,6 +80,7 @@ LibName28=atmel
 LibName29=contrib
 LibName30=valves
 LibName31=stm32f405vgt
+LibName32=adp3335
 [cvpcb]
 version=1
 NetIExt=net
