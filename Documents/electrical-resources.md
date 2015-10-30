@@ -11,6 +11,9 @@ resources:
 * [Reference manual](http://www.st.com/web/en/resource/technical/document/reference_manual/DM00031020.pdf)
 * [Programming manual](http://www.st.com/web/en/resource/technical/document/programming_manual/DM00046982.pdf)
 
+For reference, STMicroelectronics make available the schematics for their "STM32F4Discovery" board from the 
+[corresponding page](http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/PF252419) on their website.
+
 ## Sensor module
 
 The module is a [ADIS16405BMLZ MEMS
