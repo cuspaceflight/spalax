@@ -32,8 +32,8 @@ LIBS:valves
 LIBS:stm32f405vgt
 LIBS:adp3335
 LIBS:buzzer
-LIBS:resistor
 LIBS:q_nmos_gsd
+LIBS:ADIS16405
 LIBS:IMU-cache
 EELAYER 25 0
 EELAYER END

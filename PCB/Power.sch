@@ -10,6 +10,7 @@ LIBS:cmos4000
 LIBS:adc-dac
 LIBS:memory
 LIBS:xilinx
+LIBS:special
 LIBS:microcontrollers
 LIBS:dsp
 LIBS:microchip
@@ -30,6 +31,9 @@ LIBS:contrib
 LIBS:valves
 LIBS:stm32f405vgt
 LIBS:adp3335
+LIBS:buzzer
+LIBS:q_nmos_gsd
+LIBS:ADIS16405
 LIBS:IMU-cache
 EELAYER 25 0
 EELAYER END

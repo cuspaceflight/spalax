@@ -1,6 +1,6 @@
-update=29/10/2015 00:11:35
+update=03/11/2015 09:35:04
 version=1
-last_client=cvpcb
+last_client=kicad
 [pcbnew]
 version=1
 LastNetListRead=
@@ -40,14 +40,14 @@ LibName16=valves
 LibDir=
 [general]
 version=1
+[cvpcb]
+version=1
+NetIExt=net
+[cvpcb/libraries]
+EquName1=devcms
 [eeschema]
 version=1
 LibDir=Library
-NetFmtName=
-RptD_X=0
-RptD_Y=100
-RptLab=1
-LabSize=60
 [eeschema/libraries]
 LibName1=power
 LibName2=device
@@ -83,8 +83,4 @@ LibName31=stm32f405vgt
 LibName32=adp3335
 LibName33=buzzer
 LibName34=q_nmos_gsd
-[cvpcb]
-version=1
-NetIExt=net
-[cvpcb/libraries]
-EquName1=devcms
+LibName35=Library/ADIS16405

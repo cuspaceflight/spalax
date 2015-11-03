@@ -30,6 +30,10 @@ LIBS:atmel
 LIBS:contrib
 LIBS:valves
 LIBS:stm32f405vgt
+LIBS:adp3335
+LIBS:buzzer
+LIBS:q_nmos_gsd
+LIBS:ADIS16405
 LIBS:IMU-cache
 EELAYER 25 0
 EELAYER END
@@ -54,4 +58,15 @@ F0 "LevelShifter" 60
 F1 "LevelShifter.sch" 60
 F2 "Test" I L 1600 1550 60 
 $EndSheet
+$Comp
+L ADIS16405BMLZ U?
+U 1 1 563882BB
+P 3150 3400
+F 0 "U?" H 4750 3800 60  0000 C CNN
+F 1 "ADIS16405BMLZ" H 4750 3700 60  0000 C CNN
+F 2 "ML_24_2" H 4750 3640 60  0001 C CNN
+F 3 "" H 3150 3400 60  0000 C CNN
+	1    3150 3400
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
