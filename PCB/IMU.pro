@@ -1,4 +1,4 @@
-update=03/11/2015 09:35:04
+update=03/11/2015 22:01:03
 version=1
 last_client=kicad
 [pcbnew]
@@ -85,3 +85,4 @@ LibName33=buzzer
 LibName34=q_nmos_gsd
 LibName35=ADIS16405
 LibName36=uSD_holder
+LibName37=Library/ms5611-01ba03
