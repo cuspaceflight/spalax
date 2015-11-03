@@ -83,4 +83,5 @@ LibName31=stm32f405vgt
 LibName32=adp3335
 LibName33=buzzer
 LibName34=q_nmos_gsd
-LibName35=Library/ADIS16405
+LibName35=ADIS16405
+LibName36=uSD_holder
