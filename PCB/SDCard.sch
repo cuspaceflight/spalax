@@ -10,7 +10,6 @@ LIBS:cmos4000
 LIBS:adc-dac
 LIBS:memory
 LIBS:xilinx
-LIBS:special
 LIBS:microcontrollers
 LIBS:dsp
 LIBS:microchip
@@ -134,7 +133,7 @@ F 3 "" H 2050 3350 60  0000 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	5650 2850 2050 2850
+	2050 2750 5650 2750
 Wire Wire Line
 	2050 3850 3800 3850
 Wire Wire Line
@@ -165,11 +164,11 @@ Connection ~ 5400 3450
 Wire Wire Line
 	5650 3150 5650 3550
 Connection ~ 5650 3550
-Connection ~ 3800 2850
+Connection ~ 3800 2750
 Wire Wire Line
 	3800 2600 3800 2950
 Wire Wire Line
-	2050 2850 2050 3200
+	2050 2750 2050 3200
 Wire Wire Line
 	2050 3500 2050 3850
 $Comp
@@ -194,4 +193,15 @@ F 3 "" H 3800 3950 60  0000 C CNN
 	1    3800 3950
 	1    0    0    -1  
 $EndComp
+Wire Wire Line
+	4900 2850 4900 2750
+Connection ~ 4900 2750
+Wire Wire Line
+	5150 2850 5150 2750
+Connection ~ 5150 2750
+Wire Wire Line
+	5400 2850 5400 2750
+Connection ~ 5400 2750
+Wire Wire Line
+	5650 2750 5650 2850
 $EndSCHEMATC

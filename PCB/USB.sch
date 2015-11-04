@@ -10,7 +10,6 @@ LIBS:cmos4000
 LIBS:adc-dac
 LIBS:memory
 LIBS:xilinx
-LIBS:special
 LIBS:microcontrollers
 LIBS:dsp
 LIBS:microchip
@@ -106,12 +105,12 @@ Wire Wire Line
 $Comp
 L GND #PWR?
 U 1 1 56395BD6
-P 2450 2850
-F 0 "#PWR?" H 2450 2850 30  0001 C CNN
-F 1 "GND" H 2450 2780 30  0001 C CNN
-F 2 "" H 2450 2850 60  0000 C CNN
-F 3 "" H 2450 2850 60  0000 C CNN
-	1    2450 2850
+P 2400 2850
+F 0 "#PWR?" H 2400 2850 30  0001 C CNN
+F 1 "GND" H 2400 2780 30  0001 C CNN
+F 2 "" H 2400 2850 60  0000 C CNN
+F 3 "" H 2400 2850 60  0000 C CNN
+	1    2400 2850
 	0    1    1    0   
 $EndComp
 $Comp
@@ -130,4 +129,6 @@ NoConn ~ 2200 3250
 NoConn ~ 2200 3350
 NoConn ~ 2200 3450
 NoConn ~ 2200 3550
+Wire Wire Line
+	2400 2850 2450 2850
 $EndSCHEMATC

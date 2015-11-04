@@ -10,7 +10,6 @@ LIBS:cmos4000
 LIBS:adc-dac
 LIBS:memory
 LIBS:xilinx
-LIBS:special
 LIBS:microcontrollers
 LIBS:dsp
 LIBS:microchip
@@ -106,17 +105,21 @@ ALT_SDO
 Text HLabel 3000 2100 2    60   Input ~ 0
 ALT_CSB
 Wire Wire Line
-	2000 2000 2100 2000
+	2000 2000 2050 2000
+Wire Wire Line
+	2050 2000 2100 2000
 Wire Wire Line
 	2100 2100 2050 2100
 Wire Wire Line
-	2050 2100 2050 2250
+	2050 2100 2050 2350
 Wire Wire Line
-	2050 2250 2850 2250
+	2050 2350 2850 2350
 Wire Wire Line
-	2850 2250 2850 2100
+	2850 2350 2850 2100
 Wire Wire Line
-	2800 2100 3000 2100
+	2800 2100 2850 2100
+Wire Wire Line
+	2850 2100 3000 2100
 Connection ~ 2850 2100
 Wire Wire Line
 	2800 2000 3000 2000
@@ -140,7 +143,13 @@ Wire Wire Line
 Wire Wire Line
 	2000 1700 1900 1700
 Wire Wire Line
-	1900 1700 1900 1650
+	1900 1650 1900 1700
+Wire Wire Line
+	1900 1700 1900 1750
+Wire Wire Line
+	1900 2050 1900 2100
 Wire Wire Line
 	1900 2100 1900 2150
+Connection ~ 1900 1700
+Connection ~ 1900 2100
 $EndSCHEMATC
