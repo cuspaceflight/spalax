@@ -24,4 +24,4 @@ Module](http://onecall.farnell.com/analog-devices/adis16405bmlz/ic-module-gyro-a
 ## Other components
 
 * [ADP3335 voltage regulator](http://www.analog.com/media/en/technical-documentation/data-sheets/ADP3335.pdf)
-
+* [USBLC6-2 ESD protection](http://www.st.com/web/en/resource/technical/document/datasheet/CD00050750.pdf)

@@ -1,4 +1,4 @@
-update=03/11/2015 22:01:03
+update=04/11/2015 00:50:00
 version=1
 last_client=kicad
 [pcbnew]
@@ -86,3 +86,5 @@ LibName34=q_nmos_gsd
 LibName35=ADIS16405
 LibName36=uSD_holder
 LibName37=Library/ms5611-01ba03
+LibName38=Library/microusb
+LibName39=Library/usblc6-2

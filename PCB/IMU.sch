@@ -36,6 +36,8 @@ LIBS:q_nmos_gsd
 LIBS:ADIS16405
 LIBS:uSD_holder
 LIBS:ms5611-01ba03
+LIBS:microusb
+LIBS:usblc6-2
 LIBS:IMU-cache
 EELAYER 25 0
 EELAYER END
