@@ -37,6 +37,7 @@ LIBS:uSD_holder
 LIBS:ms5611-01ba03
 LIBS:microusb
 LIBS:usblc6-2
+LIBS:IMU-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
@@ -140,28 +141,6 @@ F 4 "9406140" H 1050 1250 60  0001 C CNN "Farnell"
 	1    0    0    -1  
 $EndComp
 $Comp
-L Earth #PWR?
-U 1 1 563A77D0
-P 800 1500
-F 0 "#PWR?" H 800 1250 50  0001 C CNN
-F 1 "Earth" H 800 1350 50  0001 C CNN
-F 2 "" H 800 1500 60  0000 C CNN
-F 3 "" H 800 1500 60  0000 C CNN
-	1    800  1500
-	1    0    0    -1  
-$EndComp
-$Comp
-L Earth #PWR?
-U 1 1 563A8411
-P 2650 2500
-F 0 "#PWR?" H 2650 2250 50  0001 C CNN
-F 1 "Earth" H 2650 2350 50  0001 C CNN
-F 2 "" H 2650 2500 60  0000 C CNN
-F 3 "" H 2650 2500 60  0000 C CNN
-	1    2650 2500
-	1    0    0    -1  
-$EndComp
-$Comp
 L C C?
 U 1 1 563A87D6
 P 2150 2200
@@ -209,28 +188,6 @@ F 4 "2211179" H 1350 2300 60  0001 C CNN "Farnell"
 	1    0    0    -1  
 $EndComp
 $Comp
-L Earth #PWR?
-U 1 1 563AA303
-P 1250 2550
-F 0 "#PWR?" H 1250 2300 50  0001 C CNN
-F 1 "Earth" H 1250 2400 50  0001 C CNN
-F 2 "" H 1250 2550 60  0000 C CNN
-F 3 "" H 1250 2550 60  0000 C CNN
-	1    1250 2550
-	1    0    0    -1  
-$EndComp
-$Comp
-L Earth #PWR?
-U 1 1 563AB903
-P 2650 2900
-F 0 "#PWR?" H 2650 2650 50  0001 C CNN
-F 1 "Earth" H 2650 2750 50  0001 C CNN
-F 2 "" H 2650 2900 60  0000 C CNN
-F 3 "" H 2650 2900 60  0000 C CNN
-	1    2650 2900
-	1    0    0    -1  
-$EndComp
-$Comp
 L C C?
 U 1 1 563AC2F8
 P 1600 3050
@@ -259,9 +216,9 @@ Wire Wire Line
 Wire Wire Line
 	1250 2100 1850 2100
 Wire Wire Line
-	1850 2100 1850 2650
+	1850 2100 1850 2750
 Wire Wire Line
-	1850 2650 2950 2650
+	1850 2750 2950 2750
 Wire Wire Line
 	2150 1850 2950 1850
 Wire Wire Line
@@ -279,7 +236,7 @@ Connection ~ 2650 2450
 Connection ~ 2650 2250
 Connection ~ 2650 2350
 Wire Wire Line
-	2950 2350 2650 2350
+	2650 2350 2950 2350
 Wire Wire Line
 	2150 2450 2950 2450
 Wire Wire Line
@@ -310,9 +267,9 @@ Wire Wire Line
 Wire Wire Line
 	800  1400 800  1500
 Wire Wire Line
-	2550 1450 800  1450
+	800  1450 2550 1450
 Wire Wire Line
-	2550 1400 2550 1450
+	2550 1450 2550 1400
 Connection ~ 800  1050
 Connection ~ 1050 1050
 Wire Wire Line
@@ -375,11 +332,6 @@ Wire Wire Line
 	1250 2500 1250 2550
 Connection ~ 1350 2500
 Wire Wire Line
-	2950 2750 2850 2750
-Wire Wire Line
-	2850 2750 2850 2650
-Connection ~ 2850 2650
-Wire Wire Line
 	2650 2850 2950 2850
 Wire Wire Line
 	2950 3050 2850 3050
@@ -421,17 +373,6 @@ Wire Wire Line
 Wire Wire Line
 	1750 3750 1950 3750
 Connection ~ 1800 3750
-$Comp
-L Earth #PWR?
-U 1 1 563ACDA6
-P 1250 3850
-F 0 "#PWR?" H 1250 3600 50  0001 C CNN
-F 1 "Earth" H 1250 3700 50  0001 C CNN
-F 2 "" H 1250 3850 60  0000 C CNN
-F 3 "" H 1250 3850 60  0000 C CNN
-	1    1250 3850
-	1    0    0    -1  
-$EndComp
 $Comp
 L R R?
 U 1 1 563AD480
@@ -534,4 +475,64 @@ F 4 "2211185" H 2400 2200 60  0001 C CNN "Farnell"
 	1    2400 2200
 	1    0    0    -1  
 $EndComp
+$Comp
+L GND #PWR?
+U 1 1 563A4AF2
+P 2650 2500
+F 0 "#PWR?" H 2650 2250 50  0001 C CNN
+F 1 "GND" H 2650 2350 50  0000 C CNN
+F 2 "" H 2650 2500 60  0000 C CNN
+F 3 "" H 2650 2500 60  0000 C CNN
+	1    2650 2500
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 563A4C04
+P 2650 2900
+F 0 "#PWR?" H 2650 2650 50  0001 C CNN
+F 1 "GND" H 2650 2750 50  0000 C CNN
+F 2 "" H 2650 2900 60  0000 C CNN
+F 3 "" H 2650 2900 60  0000 C CNN
+	1    2650 2900
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 563A4D5B
+P 1250 2550
+F 0 "#PWR?" H 1250 2300 50  0001 C CNN
+F 1 "GND" H 1250 2400 50  0000 C CNN
+F 2 "" H 1250 2550 60  0000 C CNN
+F 3 "" H 1250 2550 60  0000 C CNN
+	1    1250 2550
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 563A4DBD
+P 800 1500
+F 0 "#PWR?" H 800 1250 50  0001 C CNN
+F 1 "GND" H 800 1350 50  0000 C CNN
+F 2 "" H 800 1500 60  0000 C CNN
+F 3 "" H 800 1500 60  0000 C CNN
+	1    800  1500
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 563A5366
+P 1250 3850
+F 0 "#PWR?" H 1250 3600 50  0001 C CNN
+F 1 "GND" H 1250 3700 50  0000 C CNN
+F 2 "" H 1250 3850 60  0000 C CNN
+F 3 "" H 1250 3850 60  0000 C CNN
+	1    1250 3850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2950 2650 2850 2650
+Wire Wire Line
+	2850 2650 2850 2750
+Connection ~ 2850 2750
 $EndSCHEMATC
