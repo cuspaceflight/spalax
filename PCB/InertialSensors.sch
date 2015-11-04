@@ -37,12 +37,11 @@ LIBS:uSD_holder
 LIBS:ms5611-01ba03
 LIBS:microusb
 LIBS:usblc6-2
-LIBS:IMU-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 5 8
+Sheet 5 7
 Title ""
 Date ""
 Rev ""
@@ -52,15 +51,6 @@ Comment2 ""
 Comment3 ""
 Comment4 ""
 $EndDescr
-Text HLabel 1800 3200 0    60   Input ~ 0
-Test
-$Sheet
-S 1600 1200 1700 1100
-U 563193BA
-F0 "LevelShifter" 60
-F1 "LevelShifter.sch" 60
-F2 "Test" I L 1600 1550 60 
-$EndSheet
 $Comp
 L ADIS16405BMLZ U?
 U 1 1 563882BB

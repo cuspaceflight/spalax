@@ -37,12 +37,11 @@ LIBS:uSD_holder
 LIBS:ms5611-01ba03
 LIBS:microusb
 LIBS:usblc6-2
-LIBS:IMU-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 4 8
+Sheet 4 7
 Title "Power Supply"
 Date "29 oct 2015"
 Rev ""

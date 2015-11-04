@@ -37,12 +37,11 @@ LIBS:uSD_holder
 LIBS:ms5611-01ba03
 LIBS:microusb
 LIBS:usblc6-2
-LIBS:IMU-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 3 8
+Sheet 3 7
 Title "6DOF IMU Indicators"
 Date "2015-10-31"
 Rev "0.1"
@@ -266,17 +265,7 @@ F 4 "1510761" H 4900 4000 60  0001 C CNN "Farnell"
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	3100 2000 3100 2500
-Wire Wire Line
-	3100 2500 3100 3000
-Wire Wire Line
-	3100 3000 3100 3500
-Wire Wire Line
-	3100 3500 3100 4000
-Wire Wire Line
-	3100 4000 3100 4500
-Wire Wire Line
-	3100 4500 3100 4750
+	3100 2000 3100 4750
 Connection ~ 3100 2500
 Connection ~ 3100 3000
 Connection ~ 3100 3500
