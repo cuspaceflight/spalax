@@ -14,6 +14,7 @@ Papers:
 
 * [Stochastic modeling of MEMS sensors](http://www.cit.iit.bas.bg/cit_2010/v10-2/31-40.pdf)
 * [Attitude Estimation Using Modified Rodrigues Parameters](http://ntrs.nasa.gov/archive/nasa/casi.ntrs.nasa.gov/19960035754.pdf)
+* [Analog Device's Application Note on the EKF implementation in another of their sensors](http://www.analog.com/media/en/technical-documentation/application-notes/AN-1157.pdf)
 
 Existing projects:
 
