@@ -62,16 +62,6 @@ F 3 "" H 4250 3400 60  0000 C CNN
 	1    3850 3400
 	1    0    0    -1  
 $EndComp
-Text HLabel 2950 3250 0    60   Input ~ 0
-CMD
-Text HLabel 5950 3250 2    60   Input ~ 0
-DAT0
-Text HLabel 5950 3350 2    60   Input ~ 0
-DAT1
-Text HLabel 5950 3450 2    60   Input ~ 0
-DAT2
-Text HLabel 5950 3550 2    60   Input ~ 0
-DAT3
 $Comp
 L R R?
 U 1 1 563872C8
@@ -116,10 +106,8 @@ F 3 "" H 5650 3000 30  0000 C CNN
 	1    5650 3000
 	1    0    0    -1  
 $EndComp
-Text HLabel 2950 3400 0    60   Input ~ 0
-CLK
 Text HLabel 2950 3550 0    60   Input ~ 0
-CardDetect
+CARD_DETECT
 $Comp
 L C C?
 U 1 1 56387499
@@ -144,13 +132,13 @@ Wire Wire Line
 Wire Wire Line
 	3350 3550 2950 3550
 Wire Wire Line
-	4400 3250 5950 3250
+	4400 3250 6050 3250
 Wire Wire Line
-	4400 3350 5950 3350
+	4400 3350 6100 3350
 Wire Wire Line
-	4400 3450 5950 3450
+	4400 3450 6100 3450
 Wire Wire Line
-	4400 3550 5950 3550
+	4400 3550 6050 3550
 Wire Wire Line
 	4900 3150 4900 3250
 Connection ~ 4900 3250
@@ -203,4 +191,32 @@ Wire Wire Line
 Connection ~ 5400 2750
 Wire Wire Line
 	5650 2750 5650 2850
+Text GLabel 6150 3150 2    60   Input ~ 0
+SDIO_D0
+Text GLabel 6150 3300 2    60   Input ~ 0
+SDIO_D1
+Text GLabel 6150 3500 2    60   Input ~ 0
+SDIO_D2
+Text GLabel 6150 3650 2    60   Input ~ 0
+SDIO_D3
+Wire Wire Line
+	6100 3450 6100 3500
+Wire Wire Line
+	6100 3500 6150 3500
+Wire Wire Line
+	6100 3350 6100 3300
+Wire Wire Line
+	6100 3300 6150 3300
+Wire Wire Line
+	6050 3250 6050 3150
+Wire Wire Line
+	6050 3150 6150 3150
+Wire Wire Line
+	6050 3550 6050 3650
+Wire Wire Line
+	6050 3650 6150 3650
+Text GLabel 2950 3250 0    60   Input ~ 0
+SDIO_CMD
+Text GLabel 2950 3400 0    60   Input ~ 0
+SDIO_CK
 $EndSCHEMATC
