@@ -67,7 +67,7 @@ S 6850 1100 1350 650
 U 56316C38
 F0 "SDCard" 60
 F1 "SDCard.sch" 60
-F2 "Test" I L 6850 1350 60 
+F2 "CARD_DETECT" I L 6850 1200 60 
 $EndSheet
 $Sheet
 S 9050 1100 1500 600 
@@ -213,17 +213,11 @@ $EndComp
 Wire Wire Line
 	1600 2100 1600 2150
 Wire Wire Line
-	1250 2100 1350 2100
-Wire Wire Line
-	1350 2100 1600 2100
-Wire Wire Line
-	1600 2100 1850 2100
+	1250 2100 1850 2100
 Wire Wire Line
 	1850 2100 1850 2750
 Wire Wire Line
-	1850 2750 2850 2750
-Wire Wire Line
-	2850 2750 2950 2750
+	1850 2750 2950 2750
 Wire Wire Line
 	2150 1850 2950 1850
 Wire Wire Line
@@ -243,19 +237,9 @@ Connection ~ 2650 2350
 Wire Wire Line
 	2650 2350 2950 2350
 Wire Wire Line
-	2150 2450 2400 2450
+	2150 2450 2950 2450
 Wire Wire Line
-	2400 2450 2650 2450
-Wire Wire Line
-	2650 2450 2950 2450
-Wire Wire Line
-	2650 2150 2650 2250
-Wire Wire Line
-	2650 2250 2650 2350
-Wire Wire Line
-	2650 2350 2650 2450
-Wire Wire Line
-	2650 2450 2650 2500
+	2650 2150 2650 2500
 Wire Wire Line
 	2950 2250 2650 2250
 Wire Wire Line
@@ -280,31 +264,15 @@ Connection ~ 1050 1450
 Wire Wire Line
 	1050 1400 1050 1450
 Wire Wire Line
-	800  1400 800  1450
+	800  1400 800  1500
 Wire Wire Line
-	800  1450 800  1500
-Wire Wire Line
-	800  1450 1050 1450
-Wire Wire Line
-	1050 1450 1300 1450
-Wire Wire Line
-	1300 1450 1550 1450
-Wire Wire Line
-	1550 1450 1800 1450
-Wire Wire Line
-	1800 1450 2050 1450
-Wire Wire Line
-	2050 1450 2300 1450
-Wire Wire Line
-	2300 1450 2550 1450
+	800  1450 2550 1450
 Wire Wire Line
 	2550 1450 2550 1400
 Connection ~ 800  1050
 Connection ~ 1050 1050
 Wire Wire Line
-	800  950  800  1050
-Wire Wire Line
-	800  1050 800  1100
+	800  950  800  1100
 Connection ~ 1300 1050
 Wire Wire Line
 	1050 1050 1050 1100
@@ -344,35 +312,9 @@ Wire Wire Line
 Wire Wire Line
 	2850 1150 2950 1150
 Wire Wire Line
-	2850 1050 2850 1150
+	2850 1050 2850 1650
 Wire Wire Line
-	2850 1150 2850 1250
-Wire Wire Line
-	2850 1250 2850 1350
-Wire Wire Line
-	2850 1350 2850 1450
-Wire Wire Line
-	2850 1450 2850 1550
-Wire Wire Line
-	2850 1550 2850 1650
-Wire Wire Line
-	800  1050 1050 1050
-Wire Wire Line
-	1050 1050 1300 1050
-Wire Wire Line
-	1300 1050 1550 1050
-Wire Wire Line
-	1550 1050 1800 1050
-Wire Wire Line
-	1800 1050 2050 1050
-Wire Wire Line
-	2050 1050 2300 1050
-Wire Wire Line
-	2300 1050 2550 1050
-Wire Wire Line
-	2550 1050 2850 1050
-Wire Wire Line
-	2850 1050 2950 1050
+	800  1050 2950 1050
 Wire Wire Line
 	1350 2100 1350 2150
 Connection ~ 1600 2100
@@ -382,18 +324,14 @@ Connection ~ 1350 2100
 Wire Wire Line
 	1350 2450 1350 2500
 Wire Wire Line
-	1250 2500 1350 2500
-Wire Wire Line
-	1350 2500 1600 2500
+	1250 2500 1600 2500
 Wire Wire Line
 	1600 2500 1600 2450
 Wire Wire Line
 	1250 2500 1250 2550
 Connection ~ 1350 2500
 Wire Wire Line
-	2650 2850 2850 2850
-Wire Wire Line
-	2850 2850 2950 2850
+	2650 2850 2950 2850
 Wire Wire Line
 	2950 3050 2850 3050
 Wire Wire Line
@@ -404,20 +342,16 @@ Connection ~ 2850 2850
 Wire Wire Line
 	2950 3350 1750 3350
 Wire Wire Line
-	1750 3350 1750 3050
+	1750 3050 1750 3350
 Wire Wire Line
-	1750 3050 1400 3050
-Wire Wire Line
-	1400 3050 1350 3050
+	1350 3050 1750 3050
 Wire Wire Line
 	1400 3050 1400 3250
 Connection ~ 1400 3050
 Wire Wire Line
 	1050 3050 850  3050
 Wire Wire Line
-	850  3050 850  3750
-Wire Wire Line
-	850  3750 850  3850
+	850  3050 850  3850
 Wire Wire Line
 	850  3750 1050 3750
 Connection ~ 850  3750
@@ -436,9 +370,7 @@ $EndComp
 Wire Wire Line
 	1400 3550 1400 3750
 Wire Wire Line
-	1350 3750 1400 3750
-Wire Wire Line
-	1400 3750 1550 3750
+	1350 3750 1550 3750
 Connection ~ 1400 3750
 $Comp
 L R R?
