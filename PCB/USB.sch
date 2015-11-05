@@ -37,11 +37,12 @@ LIBS:uSD_holder
 LIBS:ms5611-01ba03
 LIBS:microusb
 LIBS:usblc6-2
+LIBS:IMU-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 8 7
+Sheet 7 7
 Title ""
 Date ""
 Rev ""
@@ -75,24 +76,18 @@ F 4 "1521869" H 1900 3100 60  0001 C CNN "Farnell"
 	1    1900 3100
 	1    0    0    -1  
 $EndComp
-Text HLabel 2300 2550 2    60   Output ~ 0
-USB5V
-Text HLabel 3400 2750 2    60   Output ~ 0
-USB_DM
-Text HLabel 3400 2950 2    60   Output ~ 0
-USB_DP
-Text HLabel 3400 2850 2    60   Output ~ 0
+Text HLabel 4300 1900 2    60   Output ~ 0
 USB5V
 Wire Wire Line
-	3200 2750 3400 2750
+	3200 2750 3600 2750
 Wire Wire Line
 	3200 2850 3400 2850
 Wire Wire Line
-	3200 2950 3400 2950
+	3200 2950 3600 2950
 Wire Wire Line
 	2200 2700 2200 2550
 Wire Wire Line
-	2200 2550 2300 2550
+	2200 2550 2600 2550
 Wire Wire Line
 	2200 2800 2200 2750
 Wire Wire Line
@@ -115,13 +110,13 @@ $EndComp
 $Comp
 L GND #PWR?
 U 1 1 56395C0E
-P 2200 3100
-F 0 "#PWR?" H 2200 3100 30  0001 C CNN
-F 1 "GND" H 2200 3030 30  0001 C CNN
-F 2 "" H 2200 3100 60  0000 C CNN
-F 3 "" H 2200 3100 60  0000 C CNN
-	1    2200 3100
-	0    -1   -1   0   
+P 2300 3150
+F 0 "#PWR?" H 2300 3150 30  0001 C CNN
+F 1 "GND" H 2300 3080 30  0001 C CNN
+F 2 "" H 2300 3150 60  0000 C CNN
+F 3 "" H 2300 3150 60  0000 C CNN
+	1    2300 3150
+	1    0    0    -1  
 $EndComp
 NoConn ~ 2200 3000
 NoConn ~ 2200 3250
@@ -130,4 +125,20 @@ NoConn ~ 2200 3450
 NoConn ~ 2200 3550
 Wire Wire Line
 	2400 2850 2450 2850
+Wire Wire Line
+	4300 1900 4000 1900
+Text Label 4000 1900 0    60   ~ 0
+VBUS
+Text Label 2600 2550 2    60   ~ 0
+VBUS
+Text Label 3400 2850 2    60   ~ 0
+VBUS
+Text GLabel 3600 2750 2    60   Input ~ 0
+OTG_FS_DM
+Text GLabel 3600 2950 2    60   Input ~ 0
+OTG_FS_DP
+Wire Wire Line
+	2200 3100 2300 3100
+Wire Wire Line
+	2300 3100 2300 3150
 $EndSCHEMATC

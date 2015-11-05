@@ -37,6 +37,7 @@ LIBS:uSD_holder
 LIBS:ms5611-01ba03
 LIBS:microusb
 LIBS:usblc6-2
+LIBS:IMU-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
@@ -70,11 +71,14 @@ F1 "SDCard.sch" 60
 F2 "CARD_DETECT" I L 6850 1200 60 
 $EndSheet
 $Sheet
-S 9050 1100 1500 600 
+S 9050 1100 1400 700 
 U 56316CB8
 F0 "StatusIndicators" 60
 F1 "StatusIndicators.sch" 60
-F2 "Test" I L 9050 1350 60 
+F2 "IMU" I L 9050 1200 60 
+F3 "Buzzer" I L 9050 1350 60 
+F4 "Sensors" I L 9050 1500 60 
+F5 "~Sensors" I L 9050 1650 60 
 $EndSheet
 $Sheet
 S 6850 2100 1350 600 
@@ -99,13 +103,6 @@ F2 "ALT_SCLK" I L 9050 3150 60
 F3 "ALT_SDI" I L 9050 3300 60 
 F4 "ALT_SDO" I L 9050 3450 60 
 F5 "ALT_CSB" I L 9050 3600 60 
-$EndSheet
-$Sheet
-S 9050 2100 1350 600 
-U 56316E4F
-F0 "USB" 60
-F1 "USB.sch" 60
-F2 "Test" I L 9050 2350 60 
 $EndSheet
 $Comp
 L +3.3V #PWR?
@@ -797,4 +794,37 @@ Wire Wire Line
 	8950 3300 9050 3300
 Wire Wire Line
 	9050 3150 8950 3150
+$Sheet
+S 9050 2100 1350 600 
+U 56316E4F
+F0 "USB" 60
+F1 "USB.sch" 60
+F2 "USB5V" O L 9050 2200 60 
+$EndSheet
+Wire Wire Line
+	9050 2200 8450 2200
+Text Label 8450 2200 0    60   ~ 0
+USB_VBUS
+Wire Wire Line
+	6850 2200 6250 2200
+Text Label 6250 2200 0    60   ~ 0
+USB_VBUS
+Wire Wire Line
+	6250 1200 6850 1200
+Wire Wire Line
+	8450 1200 9050 1200
+Wire Wire Line
+	8450 1350 9050 1350
+Wire Wire Line
+	8450 1500 9050 1500
+Wire Wire Line
+	8450 1650 9050 1650
+Wire Wire Line
+	2950 3150 2050 3150
+Text Label 2050 3150 0    60   ~ 0
+~RST
+Wire Wire Line
+	6350 4900 5450 4900
+Text Label 5450 4900 0    60   ~ 0
+~RST
 $EndSCHEMATC
