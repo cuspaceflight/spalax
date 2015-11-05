@@ -81,7 +81,7 @@ S 6850 2100 1350 600
 U 56316D3B
 F0 "Power" 60
 F1 "Power.sch" 60
-F2 "Test" I L 6850 2300 60 
+F2 "USB5V" I L 6850 2200 60 
 $EndSheet
 $Sheet
 S 6850 3050 1350 600 
@@ -91,11 +91,14 @@ F1 "InertialSensors.sch" 60
 F2 "Test" I L 6850 3300 60 
 $EndSheet
 $Sheet
-S 9050 3050 1450 550 
+S 9050 3050 1450 650 
 U 56316E4B
 F0 "Altimeter" 60
 F1 "Altimeter.sch" 60
-F2 "Test" I L 9050 3300 60 
+F2 "ALT_SCLK" I L 9050 3150 60 
+F3 "ALT_SDI" I L 9050 3300 60 
+F4 "ALT_SDO" I L 9050 3450 60 
+F5 "ALT_CSB" I L 9050 3600 60 
 $EndSheet
 $Sheet
 S 9050 2100 1350 600 
@@ -342,9 +345,9 @@ Connection ~ 2850 2850
 Wire Wire Line
 	2950 3350 1750 3350
 Wire Wire Line
-	1750 3050 1750 3350
+	1750 3350 1750 3050
 Wire Wire Line
-	1350 3050 1750 3050
+	1750 3050 1350 3050
 Wire Wire Line
 	1400 3050 1400 3250
 Connection ~ 1400 3050
@@ -778,4 +781,20 @@ Wire Wire Line
 	4350 2250 4350 2400
 Wire Wire Line
 	4350 2400 4500 2400
+Text GLabel 8950 3600 0    60   Input ~ 0
+SPI2_NSS
+Text GLabel 8950 3150 0    60   Input ~ 0
+SPI2_SCK
+Text GLabel 8950 3450 0    60   Input ~ 0
+SPI2_MISO
+Text GLabel 8950 3300 0    60   Input ~ 0
+SPI2_MOSI
+Wire Wire Line
+	8950 3600 9050 3600
+Wire Wire Line
+	9050 3450 8950 3450
+Wire Wire Line
+	8950 3300 9050 3300
+Wire Wire Line
+	9050 3150 8950 3150
 $EndSCHEMATC

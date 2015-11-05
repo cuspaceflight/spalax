@@ -41,7 +41,7 @@ EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
-Sheet 7 7
+Sheet 6 7
 Title ""
 Date ""
 Rev ""
@@ -104,9 +104,7 @@ ALT_SDO
 Text HLabel 3000 2100 2    60   Input ~ 0
 ALT_CSB
 Wire Wire Line
-	2000 2000 2050 2000
-Wire Wire Line
-	2050 2000 2100 2000
+	2000 2000 2100 2000
 Wire Wire Line
 	2100 2100 2050 2100
 Wire Wire Line
@@ -116,9 +114,7 @@ Wire Wire Line
 Wire Wire Line
 	2850 2350 2850 2100
 Wire Wire Line
-	2800 2100 2850 2100
-Wire Wire Line
-	2850 2100 3000 2100
+	2800 2100 3000 2100
 Connection ~ 2850 2100
 Wire Wire Line
 	2800 2000 3000 2000
@@ -142,13 +138,9 @@ Wire Wire Line
 Wire Wire Line
 	2000 1700 1900 1700
 Wire Wire Line
-	1900 1650 1900 1700
+	1900 1650 1900 1750
 Wire Wire Line
-	1900 1700 1900 1750
-Wire Wire Line
-	1900 2050 1900 2100
-Wire Wire Line
-	1900 2100 1900 2150
+	1900 2050 1900 2150
 Connection ~ 1900 1700
 Connection ~ 1900 2100
 $EndSCHEMATC
