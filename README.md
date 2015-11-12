@@ -23,4 +23,6 @@ Existing projects:
 * [An existing sensor](https://www.bosch-sensortec.com/en/homepage/products_3/sensor_hubs/iot_solutions/bno055_1/bno055_4) which does sensor fusion whose SPI interface we may take inspiration from.
 * https://github.com/kriswiner/BNO-055 - A driver for the above which does
     attitude estimation on an Arduino via a quaternion filter
-
+* http://www.x-io.co.uk/res/doc/madgwick_internal_report.pdf - An efficient
+    orientation filter for inertial and inertial/magnetic sensor arrays (Some
+    existing work on putting this into some efficient embedded C)
