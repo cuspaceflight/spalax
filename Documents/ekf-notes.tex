@@ -135,11 +135,17 @@ is assumed to be a Gaussian random walk. (I.e., $\dot{b}_k$ are drawn from some
 stationary zero-mean Gaussian process.)
 
 In order to allow for gyro bias in our model, we shall estimate the
-instantaneous gyro bias $b_k$ as part of the state vector.
-
-The zero-noise kinematics of most of the state components may now be written
-directly:
+instantaneous gyro bias $b_k$ as part of the state vector. Our complete state
+vector is therefore
 $$
+x_k \triangleq \left[
+	\mbox{mrp}(\Delta q_k), \omega_k, \dot{\omega}_k, b_k
+\right]
+$$
+and has 12 components. The zero-noise kinematics of the state components may now
+be written directly:
+$$
+\frac{\partial}{\partial t} \mbox{mrp}(\Delta q_k) = 0, \quad
 \frac{\partial}{\partial t} \omega_k = \dot{\omega}_k, \quad
 \frac{\partial}{\partial t} \dot{\omega}_k = 0, \quad
 \frac{\partial}{\partial t} b_k = 0.
