@@ -154,7 +154,8 @@ $k$.
 Our \emph{a priori} state prediction step is therefore a simple Euler integration:
 $$
 \hat{x}_{k|k-1} = f\left(\hat{x}_{k-1|k-1}; \Delta t\right)
-\triangleq \hat{x}_{k-1|k-1} + \Delta t \frac{\partial}{\partial t} \hat{x}_{k-1|k-1}
+\triangleq \hat{x}_{k-1|k-1} + \Delta t \frac{\partial}{\partial t}
+\hat{x}_{k-1|k-1}.
 $$
 
 In addition we set $\mbox{mrp}(\hat{\Delta q}_{k|k-1}) = \vec{0}$ to reflect our
