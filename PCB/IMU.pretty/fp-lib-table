@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name avionics14)(type KiCad)(uri ${KIPRJMOD}/avionics14.pretty)(options "")(descr ""))
+)

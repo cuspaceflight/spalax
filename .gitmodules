@@ -1,0 +1,3 @@
+[submodule "Frontier.Engine"]
+	path = Frontier.Engine
+	url = https://github.com/Tustvold/Frontier.Engine.git
