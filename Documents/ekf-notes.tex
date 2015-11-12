@@ -157,6 +157,13 @@ $$
 \triangleq \hat{x}_{k-1|k-1} + \Delta t \frac{\partial}{\partial t} \hat{x}_{k-1|k-1}
 $$
 
+In addition we set $\mbox{mrp}(\hat{\Delta q}_{k|k-1}) = \vec{0}$ to reflect our
+belief that the prediction error is zero and we also set
+$\hat{\dot{\omega}}_{k|k-1} = \vec{0}$ to reflect our belief that there is no
+imposed angular acceleration. In the case of active control, this last
+assumption should be replaced with the angular acceleration vector due to
+applied thrust.
+
 The Jacobian of $f(\cdot)$ at $\hat{x}_{k-1|k-1}$ with respect to the state
 vector components, $F_k$, may be written down directly from the definition of
 the differential above.
@@ -174,13 +181,6 @@ $$
 where $q_{\hat{\omega}_{k-1|k-1}}$ is a rotation around the axis aligned with
 $\hat{\omega}_{k-1|k-1}$. The angle of the rotation is the magnitude of
 $\hat{\omega}_{k-1|k-1}$.
-
-In addition we set $\mbox{mrp}(\hat{\Delta q}_{k|k-1}) = \vec{0}$ to reflect our
-belief that the prediction error is zero and we also set
-$\hat{\dot{\omega}}_{k|k-1} = \vec{0}$ to reflect our belief that there is no
-imposed angular acceleration. In the case of active control, this last
-assumption should be replaced with the angular acceleration vector due to
-applied thrust.
 
 The \emph{a posteriori} estimate of attitude is obtained by applying the
 estimated error quaternion:
