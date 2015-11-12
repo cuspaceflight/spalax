@@ -20,3 +20,7 @@ Papers:
 Existing projects:
 
 * https://github.com/sfwa/ukf
+* [An existing sensor](https://www.bosch-sensortec.com/en/homepage/products_3/sensor_hubs/iot_solutions/bno055_1/bno055_4) which does sensor fusion whose SPI interface we may take inspiration from.
+* https://github.com/kriswiner/BNO-055 - A driver for the above which does
+    attitude estimation on an Arduino via a quaternion filter
+
