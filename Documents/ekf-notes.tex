@@ -273,6 +273,32 @@ on the data. (Assuming that each sensor's measurement covariance is
 data-independent.) It follows that the state estimate covariance is entirely
 pre-determined.
 
+\section{Extensions}
+
+These notes cover attitude-only motion. Extending the algorithm to include
+linear motion is relatively straightforward. Firstly, we should add the
+reference-frame linear position, $p_k$, velocity $\dot{p}_k$ and acceleration,
+$\ddot{p}_k$ to the state vector. The prediction function $f(\cdot)$ and
+associated Jacobian $F_k$ should be updated with the observation
+$$
+\frac{\partial}{\partial t} p_k = \dot{p}_k, \quad
+\frac{\partial}{\partial t} \dot{p}_k = \ddot{p}_k, \quad
+\frac{\partial}{\partial t} \ddot{p}_k = 0
+$$
+and the prior belief that $\hat{\ddot{p}_k} = \vec{0}$.
+
+We shall assume that the reference frame is one which is stationary with respect
+to the gravitational field so that our accelerometer measurement function now
+becomes
+$$
+h_a(x_k; \hat{q}_{k|k-1}) = q'_k \, (\ddot{p}_k + g) \, {q'_k}^*
+$$
+
+In order for the state estimate covariance of linear position and velocity to
+come down to some sensible value we also need some sensor measuring $p_k$ and
+$\dot{p}_k$. This need not be massively accurate and could come from, e.g.\ ,
+GPS or be supplied externally.
+
 \bibliographystyle{plain}
 \bibliography{references}
 
