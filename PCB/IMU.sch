@@ -866,7 +866,7 @@ Wire Wire Line
 	1250 4700 1250 4850
 Connection ~ 1250 4700
 Text Notes 7000 4900 0    60   ~ 0
-To do:\n-SPI port, JTAG debug port (see badger 3)\n-Component names, values, farnell numbers and footprints for every component\n-???
+To do:\n-Component names, values, farnell numbers and footprints for every component
 Text Label 6250 1200 0    60   ~ 0
 SD_DETECT
 Text Label 8300 1200 0    60   ~ 0
