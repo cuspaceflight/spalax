@@ -361,9 +361,9 @@ Connection ~ 2850 2850
 Wire Wire Line
 	2950 3350 1750 3350
 Wire Wire Line
-	1750 3050 1750 3350
+	1750 3350 1750 3050
 Wire Wire Line
-	1350 3050 1750 3050
+	1750 3050 1350 3050
 Wire Wire Line
 	1400 3050 1400 3250
 Connection ~ 1400 3050
@@ -905,7 +905,7 @@ Wire Wire Line
 	1250 4700 1250 4850
 Connection ~ 1250 4700
 Text Notes 7000 4900 0    60   ~ 0
-To do:\n-2 serial ports, SPI port, JTAG debug port (see badger 3)\n-Component names, values, farnell numbers and footprints for every component\n-Connect stateindicators to gpio pins\n-???
+To do:\n-SPI port, JTAG debug port (see badger 3)\n-Component names, values, farnell numbers and footprints for every component\n-???
 Text Label 6250 1200 0    60   ~ 0
 SD_DETECT
 Text Label 8450 1200 0    60   ~ 0
@@ -967,4 +967,118 @@ Wire Wire Line
 Wire Wire Line
 	2300 2950 2300 3150
 Connection ~ 2300 3150
+$Comp
+L CONN_01X04 P?
+U 1 1 56495CD8
+P 5250 7250
+F 0 "P?" H 5250 7500 50  0000 C CNN
+F 1 "UART1" V 5350 7250 50  0000 C CNN
+F 2 "" H 5250 7250 60  0000 C CNN
+F 3 "" H 5250 7250 60  0000 C CNN
+	1    5250 7250
+	1    0    0    -1  
+$EndComp
+$Comp
+L CONN_01X04 P?
+U 1 1 56495FC5
+P 6550 7250
+F 0 "P?" H 6550 7500 50  0000 C CNN
+F 1 "UART2" V 6650 7250 50  0000 C CNN
+F 2 "" H 6550 7250 60  0000 C CNN
+F 3 "" H 6550 7250 60  0000 C CNN
+	1    6550 7250
+	1    0    0    -1  
+$EndComp
+Text GLabel 4800 7150 0    60   Input ~ 0
+USART1_TX
+Text GLabel 4800 7350 0    60   Input ~ 0
+USART1_RX
+$Comp
+L +3.3V #PWR?
+U 1 1 56496C13
+P 4950 7050
+F 0 "#PWR?" H 4950 6900 50  0001 C CNN
+F 1 "+3.3V" H 4950 7190 50  0000 C CNN
+F 2 "" H 4950 7050 60  0000 C CNN
+F 3 "" H 4950 7050 60  0000 C CNN
+	1    4950 7050
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 56496F2A
+P 4950 7450
+F 0 "#PWR?" H 4950 7200 50  0001 C CNN
+F 1 "GND" H 4950 7300 50  0000 C CNN
+F 2 "" H 4950 7450 60  0000 C CNN
+F 3 "" H 4950 7450 60  0000 C CNN
+	1    4950 7450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4950 7050 4950 7100
+Wire Wire Line
+	4950 7100 5050 7100
+Wire Wire Line
+	5050 7400 4950 7400
+Wire Wire Line
+	4950 7400 4950 7450
+Wire Wire Line
+	4800 7350 4900 7350
+Wire Wire Line
+	4900 7350 4900 7300
+Wire Wire Line
+	4900 7300 5050 7300
+Wire Wire Line
+	4800 7150 4900 7150
+Wire Wire Line
+	4900 7150 4900 7200
+Wire Wire Line
+	4900 7200 5050 7200
+Text GLabel 6100 7150 0    60   Input ~ 0
+USART2_TX
+Text GLabel 6100 7350 0    60   Input ~ 0
+USART2_RX
+$Comp
+L +3.3V #PWR?
+U 1 1 56497C14
+P 6250 7050
+F 0 "#PWR?" H 6250 6900 50  0001 C CNN
+F 1 "+3.3V" H 6250 7190 50  0000 C CNN
+F 2 "" H 6250 7050 60  0000 C CNN
+F 3 "" H 6250 7050 60  0000 C CNN
+	1    6250 7050
+	1    0    0    -1  
+$EndComp
+$Comp
+L GND #PWR?
+U 1 1 56497C1A
+P 6250 7450
+F 0 "#PWR?" H 6250 7200 50  0001 C CNN
+F 1 "GND" H 6250 7300 50  0000 C CNN
+F 2 "" H 6250 7450 60  0000 C CNN
+F 3 "" H 6250 7450 60  0000 C CNN
+	1    6250 7450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6250 7050 6250 7100
+Wire Wire Line
+	6250 7100 6350 7100
+Wire Wire Line
+	6350 7400 6250 7400
+Wire Wire Line
+	6250 7400 6250 7450
+Wire Wire Line
+	6100 7350 6200 7350
+Wire Wire Line
+	6200 7350 6200 7300
+Wire Wire Line
+	6200 7300 6350 7300
+Wire Wire Line
+	6100 7150 6200 7150
+Wire Wire Line
+	6200 7150 6200 7200
+Wire Wire Line
+	6200 7200 6350 7200
 $EndSCHEMATC
