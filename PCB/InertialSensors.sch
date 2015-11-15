@@ -64,9 +64,6 @@ F 3 "" H 3150 3400 60  0000 C CNN
 	1    3150 3400
 	1    0    0    -1  
 $EndComp
-NoConn ~ 6350 3400
-NoConn ~ 6350 3500
-NoConn ~ 6350 3600
 $Comp
 L GND #PWR044
 U 1 1 56490925
@@ -89,10 +86,6 @@ F 3 "" H 6600 4750 60  0000 C CNN
 	1    6600 4750
 	1    0    0    -1  
 $EndComp
-NoConn ~ 3150 4600
-NoConn ~ 3150 4700
-NoConn ~ 3150 4800
-NoConn ~ 3150 4900
 Text GLabel 2950 4400 0    60   Input ~ 0
 ~RST
 Text HLabel 2950 4200 0    60   Input ~ 0
@@ -105,7 +98,6 @@ Text HLabel 2950 3900 0    60   Input ~ 0
 ~SS
 Text HLabel 2950 3400 0    60   Input ~ 0
 IRQ
-NoConn ~ 3150 3500
 NoConn ~ 3150 3600
 NoConn ~ 3150 3700
 NoConn ~ 6350 3900
@@ -147,4 +139,5 @@ Wire Wire Line
 	2950 3400 3150 3400
 Wire Wire Line
 	6350 4000 6450 4000
+NoConn ~ 3150 3500
 $EndSCHEMATC
