@@ -63,4 +63,87 @@ F 3 "" H 3150 3400 60  0000 C CNN
 	1    3150 3400
 	1    0    0    -1  
 $EndComp
+NoConn ~ 6350 3400
+NoConn ~ 6350 3500
+NoConn ~ 6350 3600
+$Comp
+L GND #PWR?
+U 1 1 56490925
+P 6600 4250
+F 0 "#PWR?" H 6600 4000 50  0001 C CNN
+F 1 "GND" H 6600 4100 50  0000 C CNN
+F 2 "" H 6600 4250 60  0000 C CNN
+F 3 "" H 6600 4250 60  0000 C CNN
+	1    6600 4250
+	1    0    0    -1  
+$EndComp
+$Comp
+L +5V #PWR?
+U 1 1 56490962
+P 6600 4750
+F 0 "#PWR?" H 6600 4600 50  0001 C CNN
+F 1 "+5V" H 6600 4890 50  0000 C CNN
+F 2 "" H 6600 4750 60  0000 C CNN
+F 3 "" H 6600 4750 60  0000 C CNN
+	1    6600 4750
+	1    0    0    -1  
+$EndComp
+NoConn ~ 3150 4600
+NoConn ~ 3150 4700
+NoConn ~ 3150 4800
+NoConn ~ 3150 4900
+Text GLabel 2950 4400 0    60   Input ~ 0
+~RST
+Text HLabel 2950 4200 0    60   Input ~ 0
+SCLK
+Text HLabel 2950 4100 0    60   Input ~ 0
+MISO
+Text HLabel 2950 4000 0    60   Input ~ 0
+MOSI
+Text HLabel 2950 3900 0    60   Input ~ 0
+~SS
+Text HLabel 2950 3400 0    60   Input ~ 0
+IRQ
+NoConn ~ 3150 3500
+NoConn ~ 3150 3600
+NoConn ~ 3150 3700
+NoConn ~ 6350 3900
+Wire Wire Line
+	6350 4200 6600 4200
+Wire Wire Line
+	6450 4000 6450 4400
+Wire Wire Line
+	6450 4400 6350 4400
+Wire Wire Line
+	6350 4300 6450 4300
+Connection ~ 6450 4300
+Wire Wire Line
+	6600 4200 6600 4250
+Connection ~ 6450 4200
+Wire Wire Line
+	6350 4600 6450 4600
+Wire Wire Line
+	6450 4600 6450 4800
+Wire Wire Line
+	6350 4800 6600 4800
+Wire Wire Line
+	6600 4800 6600 4750
+Connection ~ 6450 4800
+Wire Wire Line
+	6350 4700 6450 4700
+Connection ~ 6450 4700
+Wire Wire Line
+	2950 4400 3150 4400
+Wire Wire Line
+	2950 4200 3150 4200
+Wire Wire Line
+	2950 4100 3150 4100
+Wire Wire Line
+	3150 4000 2950 4000
+Wire Wire Line
+	2950 3900 3150 3900
+Wire Wire Line
+	2950 3400 3150 3400
+Wire Wire Line
+	6350 4000 6450 4000
 $EndSCHEMATC

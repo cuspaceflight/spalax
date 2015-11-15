@@ -91,11 +91,15 @@ F1 "Power.sch" 60
 F2 "USB5V" I L 6850 2200 60 
 $EndSheet
 $Sheet
-S 6850 3050 1350 600 
+S 6850 3050 1350 850 
 U 56316E47
 F0 "IntertialSensors" 60
 F1 "InertialSensors.sch" 60
-F2 "Test" I L 6850 3300 60 
+F2 "SCLK" I L 6850 3150 60 
+F3 "MISO" I L 6850 3300 60 
+F4 "MOSI" I L 6850 3450 60 
+F5 "~SS" I L 6850 3600 60 
+F6 "IRQ" I L 6850 3750 60 
 $EndSheet
 $Sheet
 S 9050 3050 1450 650 
@@ -908,4 +912,34 @@ Wire Wire Line
 Connection ~ 1250 4700
 Text Notes 7000 4900 0    60   ~ 0
 To do:\n-2 serial ports, SPI port, JTAG debug port (see badger 3)\n-Component names, values, farnell numbers and footprints for every component\n-Connect stateindicators to gpio pins\n-???
+Text Label 6250 1200 0    60   ~ 0
+SD_DETECT
+Text Label 8450 1200 0    60   ~ 0
+STAT_IMU
+Text Label 8450 1350 0    60   ~ 0
+STAT_BUZZER
+Text Label 8450 1500 0    60   ~ 0
+STAT_SENSORS
+Text Label 8450 1650 0    60   ~ 0
+STAT_~SENSORS
+Wire Wire Line
+	4850 4050 5450 4050
+Wire Wire Line
+	4850 4200 5450 4200
+Wire Wire Line
+	4850 4350 5450 4350
+Wire Wire Line
+	4850 4500 5450 4500
+Text Label 4850 4050 0    60   ~ 0
+STAT_IMU
+Text Label 4850 4200 0    60   ~ 0
+STAT_BUZZER
+Text Label 4850 4350 0    60   ~ 0
+STAT_SENSORS
+Text Label 4850 4500 0    60   ~ 0
+STAT_~SENSORS
+Wire Wire Line
+	4850 4800 5450 4800
+Text Label 4850 4800 0    60   ~ 0
+SD_DETECT
 $EndSCHEMATC
