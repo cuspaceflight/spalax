@@ -1,4 +1,4 @@
-update=Thu Nov  5 12:45:41 2015
+update=Sun Nov 15 22:40:19 2015
 version=1
 last_client=kicad
 [pcbnew]
@@ -87,3 +87,4 @@ LibName35=uSD_holder
 LibName36=Library/ms5611-01ba03
 LibName37=Library/microusb
 LibName38=Library/usblc6-2
+LibName39=Library/swd
