@@ -75,14 +75,15 @@ F1 "SDCard.sch" 60
 F2 "CARD_DETECT" I L 6850 1200 60 
 $EndSheet
 $Sheet
-S 9050 1100 1400 700 
+S 9050 1100 1400 800 
 U 56316CB8
 F0 "StatusIndicators" 60
 F1 "StatusIndicators.sch" 60
 F2 "IMU" I L 9050 1200 60 
-F3 "Buzzer" I L 9050 1350 60 
-F4 "Sensors" I L 9050 1500 60 
-F5 "~Sensors" I L 9050 1650 60 
+F3 "Buzzer" I L 9050 1500 60 
+F4 "Sensors" I L 9050 1650 60 
+F5 "~Sensors" I L 9050 1800 60 
+F6 "~IMU" I L 9050 1350 60 
 $EndSheet
 $Sheet
 S 6850 2100 1350 600 
@@ -575,10 +576,6 @@ Text GLabel 4500 2100 2    60   Input ~ 0
 SDIO_D2
 Text GLabel 4500 2250 2    60   Input ~ 0
 SDIO_D3
-Text GLabel 2700 6100 0    60   Input ~ 0
-SDIO_D4
-Text GLabel 2700 6250 0    60   Input ~ 0
-SDIO_D5
 Text GLabel 4500 2400 2    60   Input ~ 0
 SDIO_CK
 Text GLabel 4500 2950 2    60   Input ~ 0
@@ -678,14 +675,6 @@ NoConn ~ 2950 6050
 NoConn ~ 2950 6350
 NoConn ~ 2950 6450
 Wire Wire Line
-	2700 6250 2950 6250
-Wire Wire Line
-	2950 6150 2750 6150
-Wire Wire Line
-	2750 6150 2750 6100
-Wire Wire Line
-	2750 6100 2700 6100
-Wire Wire Line
 	2700 5750 2950 5750
 Wire Wire Line
 	2700 5900 2750 5900
@@ -727,7 +716,6 @@ NoConn ~ 4250 5550
 NoConn ~ 4250 5450
 NoConn ~ 4250 5350
 NoConn ~ 4250 5250
-NoConn ~ 4250 5150
 NoConn ~ 4250 4250
 NoConn ~ 4250 4150
 NoConn ~ 4250 4050
@@ -814,13 +802,13 @@ USB_VBUS
 Wire Wire Line
 	6250 1200 6850 1200
 Wire Wire Line
-	8450 1200 9050 1200
+	8300 1200 9050 1200
 Wire Wire Line
-	8450 1350 9050 1350
+	8300 1500 9050 1500
 Wire Wire Line
-	8450 1500 9050 1500
+	8300 1650 9050 1650
 Wire Wire Line
-	8450 1650 9050 1650
+	8300 1800 9050 1800
 Wire Wire Line
 	2050 3150 2950 3150
 Text Label 2050 3150 0    60   ~ 0
@@ -881,33 +869,33 @@ Text Notes 7000 4900 0    60   ~ 0
 To do:\n-SPI port, JTAG debug port (see badger 3)\n-Component names, values, farnell numbers and footprints for every component\n-???
 Text Label 6250 1200 0    60   ~ 0
 SD_DETECT
-Text Label 8450 1200 0    60   ~ 0
+Text Label 8300 1200 0    60   ~ 0
 STAT_IMU
-Text Label 8450 1350 0    60   ~ 0
+Text Label 8300 1500 0    60   ~ 0
 STAT_BUZZER
-Text Label 8450 1500 0    60   ~ 0
+Text Label 8300 1650 0    60   ~ 0
 STAT_SENSORS
-Text Label 8450 1650 0    60   ~ 0
+Text Label 8300 1800 0    60   ~ 0
 STAT_~SENSORS
 Wire Wire Line
 	5000 4550 4250 4550
 Wire Wire Line
-	5000 4650 4250 4650
-Wire Wire Line
 	5000 4750 4250 4750
 Wire Wire Line
 	5000 4850 4250 4850
-Text Label 5000 4550 2    60   ~ 0
-STAT_IMU
-Text Label 5000 4650 2    60   ~ 0
-STAT_BUZZER
-Text Label 5000 4750 2    60   ~ 0
-STAT_SENSORS
-Text Label 5000 4850 2    60   ~ 0
-STAT_~SENSORS
 Wire Wire Line
 	5000 4950 4250 4950
+Text Label 5000 4550 2    60   ~ 0
+STAT_IMU
+Text Label 5000 4750 2    60   ~ 0
+STAT_BUZZER
+Text Label 5000 4850 2    60   ~ 0
+STAT_SENSORS
 Text Label 5000 4950 2    60   ~ 0
+STAT_~SENSORS
+Wire Wire Line
+	5000 5050 4250 5050
+Text Label 5000 5050 2    60   ~ 0
 SD_DETECT
 Text GLabel 6700 3150 0    60   Input ~ 0
 SPI1_SCK
@@ -1142,54 +1130,38 @@ Wire Wire Line
 	8400 5850 9050 5850
 Text Label 9050 5850 2    60   ~ 0
 DATA_RDY
-Text Label 5000 5050 2    60   ~ 0
+Text Label 5000 5150 2    60   ~ 0
 DATA_RDY
 Wire Wire Line
-	4250 5050 5000 5050
+	4250 5150 5000 5150
 Text Label 2600 3050 0    60   ~ 0
 BOOT0
-Text Label 900  6100 0    60   ~ 0
+Text Label 800  6150 0    60   ~ 0
 BOOT0
 $Comp
 L R R1
 U 1 1 5649CDB3
-P 1300 6300
-F 0 "R1" V 1380 6300 50  0000 C CNN
-F 1 "10K" V 1300 6300 50  0000 C CNN
-F 2 "" V 1230 6300 30  0000 C CNN
-F 3 "" H 1300 6300 30  0000 C CNN
-	1    1300 6300
-	1    0    0    -1  
+P 1400 6150
+F 0 "R1" V 1480 6150 50  0000 C CNN
+F 1 "10K" V 1400 6150 50  0000 C CNN
+F 2 "" V 1330 6150 30  0000 C CNN
+F 3 "" H 1400 6150 30  0000 C CNN
+	1    1400 6150
+	0    1    1    0   
 $EndComp
-Wire Wire Line
-	900  6100 1400 6100
-Wire Wire Line
-	1300 6100 1300 6150
 $Comp
 L GND #PWR016
 U 1 1 5649D1F8
-P 1300 6500
-F 0 "#PWR016" H 1300 6250 50  0001 C CNN
-F 1 "GND" H 1300 6350 50  0000 C CNN
-F 2 "" H 1300 6500 60  0000 C CNN
-F 3 "" H 1300 6500 60  0000 C CNN
-	1    1300 6500
+P 1600 6200
+F 0 "#PWR016" H 1600 5950 50  0001 C CNN
+F 1 "GND" H 1600 6050 50  0000 C CNN
+F 2 "" H 1600 6200 60  0000 C CNN
+F 3 "" H 1600 6200 60  0000 C CNN
+	1    1600 6200
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	1300 6450 1300 6500
-$Comp
-L CONN_01X01 TP1
-U 1 1 5649D6D5
-P 1600 6100
-F 0 "TP1" H 1600 6200 50  0000 C CNN
-F 1 "BOOT0" H 1600 6000 50  0000 C CNN
-F 2 "" H 1600 6100 60  0000 C CNN
-F 3 "" H 1600 6100 60  0000 C CNN
-	1    1600 6100
-	1    0    0    -1  
-$EndComp
-Connection ~ 1300 6100
+	1600 6150 1600 6200
 $Comp
 L SWD P2
 U 1 1 5649E1B2
@@ -1279,4 +1251,32 @@ Text Label 2200 5350 0    60   ~ 0
 SWDCLK
 NoConn ~ 4250 1650
 NoConn ~ 4250 1750
+NoConn ~ 2950 6150
+NoConn ~ 2950 6250
+Wire Wire Line
+	8300 1350 9050 1350
+Text Label 8300 1350 0    60   ~ 0
+STAT_~IMU
+Wire Wire Line
+	5000 4650 4250 4650
+Text Label 5000 4650 2    60   ~ 0
+STAT_~IMU
+Wire Wire Line
+	1550 6150 1600 6150
+Wire Wire Line
+	800  6150 1250 6150
+$Comp
+L TST TP1
+U 1 1 564A7F8A
+P 1200 6100
+F 0 "TP1" H 1200 6400 50  0000 C BNN
+F 1 "BOOT0" H 1200 6350 50  0000 C CNN
+F 2 "" H 1200 6100 60  0000 C CNN
+F 3 "" H 1200 6100 60  0000 C CNN
+	1    1200 6100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1200 6100 1200 6150
+Connection ~ 1200 6150
 $EndSCHEMATC
