@@ -360,9 +360,9 @@ Wire Wire Line
 Wire Wire Line
 	2950 3350 1750 3350
 Wire Wire Line
-	1750 3350 1750 3050
+	1750 3050 1750 3350
 Wire Wire Line
-	1750 3050 1350 3050
+	1350 3050 1750 3050
 Wire Wire Line
 	1400 3050 1400 3250
 Connection ~ 1400 3050
@@ -578,7 +578,7 @@ Text GLabel 4500 2250 2    60   Input ~ 0
 SDIO_D3
 Text GLabel 4500 2400 2    60   Input ~ 0
 SDIO_CK
-Text GLabel 4500 2950 2    60   Input ~ 0
+Text GLabel 4500 2850 2    60   Input ~ 0
 SDIO_CMD
 Text GLabel 2700 3950 0    60   Input ~ 0
 SPI1_NSS
@@ -728,11 +728,10 @@ NoConn ~ 4250 3450
 NoConn ~ 4250 3350
 NoConn ~ 4250 3250
 NoConn ~ 4250 3150
-NoConn ~ 4250 3050
 NoConn ~ 4250 2850
 NoConn ~ 4250 2750
 Wire Wire Line
-	4500 2950 4250 2950
+	4400 2950 4250 2950
 NoConn ~ 4250 2550
 NoConn ~ 4250 2450
 NoConn ~ 4250 2350
@@ -894,8 +893,8 @@ STAT_SENSORS
 Text Label 5000 4950 2    60   ~ 0
 STAT_~SENSORS
 Wire Wire Line
-	5000 5050 4250 5050
-Text Label 5000 5050 2    60   ~ 0
+	5000 3050 4250 3050
+Text Label 5000 3050 2    60   ~ 0
 SD_DETECT
 Text GLabel 6700 3150 0    60   Input ~ 0
 SPI1_SCK
@@ -1279,4 +1278,9 @@ $EndComp
 Wire Wire Line
 	1200 6100 1200 6150
 Connection ~ 1200 6150
+NoConn ~ 4250 5050
+Wire Wire Line
+	4400 2950 4400 2850
+Wire Wire Line
+	4400 2850 4500 2850
 $EndSCHEMATC
