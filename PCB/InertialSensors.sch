@@ -1,5 +1,4 @@
 EESchema Schematic File Version 2
-LIBS:IMU-rescue
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -138,7 +137,10 @@ F 0 "U2" H 6100 2650 60  0000 C CNN
 F 1 "ADIS16405BMLZ" H 6100 4550 60  0000 C CNN
 F 2 "ML_24_2" H 6100 3500 60  0001 C CNN
 F 3 "" H 5450 4350 60  0000 C CNN
+F 4 "FTMH-112-03-L-DV" H 6100 3600 60  0001 C CNN "DigiKey"
 	1    6100 3600
 	1    0    0    -1  
 $EndComp
+Text Notes 5400 4850 0    60   ~ 0
+Connector is FTMH-112-03-L-DV
 $EndSCHEMATC
