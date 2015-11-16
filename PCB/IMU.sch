@@ -949,9 +949,9 @@ F 3 "" H 6550 7250 60  0000 C CNN
 	1    6550 7250
 	1    0    0    -1  
 $EndComp
-Text GLabel 4800 7150 0    60   Input ~ 0
-USART1_TX
 Text GLabel 4800 7350 0    60   Input ~ 0
+USART1_TX
+Text GLabel 4800 7150 0    60   Input ~ 0
 USART1_RX
 $Comp
 L +3.3V #PWR09
@@ -984,20 +984,20 @@ Wire Wire Line
 Wire Wire Line
 	4950 7400 4950 7450
 Wire Wire Line
-	4800 7350 4900 7350
+	4800 7150 4900 7150
 Wire Wire Line
 	4900 7350 4900 7300
 Wire Wire Line
 	4900 7300 5050 7300
 Wire Wire Line
-	4800 7150 4900 7150
+	4800 7350 4900 7350
 Wire Wire Line
 	4900 7150 4900 7200
 Wire Wire Line
 	4900 7200 5050 7200
-Text GLabel 6100 7150 0    60   Input ~ 0
-USART2_TX
 Text GLabel 6100 7350 0    60   Input ~ 0
+USART2_TX
+Text GLabel 6100 7150 0    60   Input ~ 0
 USART2_RX
 $Comp
 L +3.3V #PWR011
@@ -1030,13 +1030,13 @@ Wire Wire Line
 Wire Wire Line
 	6250 7400 6250 7450
 Wire Wire Line
-	6100 7350 6200 7350
+	6100 7150 6200 7150
 Wire Wire Line
 	6200 7350 6200 7300
 Wire Wire Line
 	6200 7300 6350 7300
 Wire Wire Line
-	6100 7150 6200 7150
+	6100 7350 6200 7350
 Wire Wire Line
 	6200 7150 6200 7200
 Wire Wire Line
