@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /kicad/project/IMU.sch)
-    (date "Sun Nov 15 23:29:28 2015")
+    (date "Mon Nov 16 09:55:31 2015")
     (tool "Eeschema 4.0.0-rc1-stable")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -618,6 +618,31 @@
       (sheetpath (names /USB/) (tstamps /56316E4F/))
       (tstamp 56492413)))
   (libparts
+    (libpart (lib device) (part R)
+      (description Resistor)
+      (footprints
+        (fp R_*)
+        (fp Resistor_*))
+      (fields
+        (field (name Reference) R)
+        (field (name Value) R))
+      (pins
+        (pin (num 1) (name ~) (type passive))
+        (pin (num 2) (name ~) (type passive))))
+    (libpart (lib device) (part SW_PUSH)
+      (description Button)
+      (fields
+        (field (name Reference) SW)
+        (field (name Value) SW_PUSH))
+      (pins
+        (pin (num 1) (name 1) (type passive))
+        (pin (num 2) (name 2) (type passive))))
+    (libpart (lib device) (part TST)
+      (fields
+        (field (name Reference) P)
+        (field (name Value) TST))
+      (pins
+        (pin (num 1) (name ~) (type passive))))
     (libpart (lib device) (part C)
       (description "Unpolarized capacitor")
       (footprints
@@ -680,31 +705,6 @@
         (pin (num 1) (name G) (type input))
         (pin (num 2) (name S) (type passive))
         (pin (num 3) (name D) (type passive))))
-    (libpart (lib device) (part R)
-      (description Resistor)
-      (footprints
-        (fp R_*)
-        (fp Resistor_*))
-      (fields
-        (field (name Reference) R)
-        (field (name Value) R))
-      (pins
-        (pin (num 1) (name ~) (type passive))
-        (pin (num 2) (name ~) (type passive))))
-    (libpart (lib device) (part SW_PUSH)
-      (description Button)
-      (fields
-        (field (name Reference) SW)
-        (field (name Value) SW_PUSH))
-      (pins
-        (pin (num 1) (name 1) (type passive))
-        (pin (num 2) (name 2) (type passive))))
-    (libpart (lib device) (part TST)
-      (fields
-        (field (name Reference) P)
-        (field (name Value) TST))
-      (pins
-        (pin (num 1) (name ~) (type passive))))
     (libpart (lib conn) (part CONN_01X02)
       (footprints
         (fp Pin_Header_Straight_1X02)
@@ -763,19 +763,6 @@
         (pin (num 4) (name ID) (type power_in))
         (pin (num 5) (name GND) (type power_in))
         (pin (num 6) (name shield) (type passive))))
-    (libpart (lib adp3335) (part ADP3335)
-      (fields
-        (field (name Reference) IC)
-        (field (name Value) ADP3335))
-      (pins
-        (pin (num 1) (name OUT) (type power_out))
-        (pin (num 2) (name OUT) (type passive))
-        (pin (num 3) (name OUT) (type passive))
-        (pin (num 4) (name GND) (type power_in))
-        (pin (num 5) (name NR) (type power_out))
-        (pin (num 6) (name SD) (type input))
-        (pin (num 7) (name IN) (type power_in))
-        (pin (num 8) (name IN) (type power_in))))
     (libpart (lib stm32f405vgt) (part STM32F405VGT)
       (fields
         (field (name Reference) IC)
@@ -881,6 +868,19 @@
         (pin (num 98) (name PE1) (type BiDi))
         (pin (num 99) (name VSS) (type power_in))
         (pin (num 100) (name VDD) (type power_in))))
+    (libpart (lib adp3335) (part ADP3335)
+      (fields
+        (field (name Reference) IC)
+        (field (name Value) ADP3335))
+      (pins
+        (pin (num 1) (name OUT) (type power_out))
+        (pin (num 2) (name OUT) (type passive))
+        (pin (num 3) (name OUT) (type passive))
+        (pin (num 4) (name GND) (type power_in))
+        (pin (num 5) (name NR) (type power_out))
+        (pin (num 6) (name SD) (type input))
+        (pin (num 7) (name IN) (type power_in))
+        (pin (num 8) (name IN) (type power_in))))
     (libpart (lib buzzer) (part BUZZER)
       (fields
         (field (name Value) BUZZER))
@@ -972,22 +972,22 @@
         (pin (num 9) (name GND) (type power_in))
         (pin (num 10) (name nRESET) (type output)))))
   (libraries
-    (library (logical device)
-      (uri /usr/share/kicad/library/device.lib))
     (library (logical conn)
       (uri /usr/share/kicad/library/conn.lib))
+    (library (logical device)
+      (uri /usr/share/kicad/library/device.lib))
     (library (logical stm32f405vgt)
       (uri /kicad/project/Library/stm32f405vgt.lib))
     (library (logical adp3335)
       (uri /kicad/project/Library/adp3335.lib))
     (library (logical buzzer)
       (uri /kicad/project/Library/buzzer.lib))
+    (library (logical ms5611-01ba03)
+      (uri /kicad/project/Library/ms5611-01ba03.lib))
     (library (logical ADIS16405)
       (uri /kicad/project/Library/ADIS16405.lib))
     (library (logical uSD_holder)
       (uri /kicad/project/Library/uSD_holder.lib))
-    (library (logical ms5611-01ba03)
-      (uri /kicad/project/Library/ms5611-01ba03.lib))
     (library (logical usblc6-2)
       (uri /kicad/project/Library/usblc6-2.lib))
     (library (logical swd)
@@ -1110,7 +1110,7 @@
       (node (ref IC1) (pin 29)))
     (net (code 20) (name /IntertialSensors/IRQ)
       (node (ref U2) (pin 7))
-      (node (ref IC1) (pin 97)))
+      (node (ref IC1) (pin 38)))
     (net (code 21) (name SDIO_D1)
       (node (ref U1) (pin 8))
       (node (ref IC1) (pin 66))
@@ -1256,14 +1256,14 @@
       (node (ref P3) (pin 1))
       (node (ref C7) (pin 1)))
     (net (code 71) (name SPI3_MOSI)
-      (node (ref P4) (pin 5))
-      (node (ref IC1) (pin 91)))
+      (node (ref IC1) (pin 91))
+      (node (ref P4) (pin 5)))
     (net (code 72) (name SPI3_NSS)
       (node (ref P4) (pin 4))
       (node (ref IC1) (pin 77)))
     (net (code 73) (name /DATA_RDY)
       (node (ref P4) (pin 6))
-      (node (ref IC1) (pin 38)))
+      (node (ref IC1) (pin 97)))
     (net (code 74) (name /StatusIndicators/~IMU)
       (node (ref R12) (pin 2))
       (node (ref IC1) (pin 1)))
@@ -1285,8 +1285,8 @@
       (node (ref P1) (pin 3))
       (node (ref IC1) (pin 69)))
     (net (code 82) (name USART1_TX)
-      (node (ref P1) (pin 2))
-      (node (ref IC1) (pin 68)))
+      (node (ref IC1) (pin 68))
+      (node (ref P1) (pin 2)))
     (net (code 83) (name USART2_TX)
       (node (ref P3) (pin 2))
       (node (ref IC1) (pin 25)))

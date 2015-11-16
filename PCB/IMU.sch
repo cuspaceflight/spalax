@@ -918,8 +918,8 @@ Wire Wire Line
 Text Label 6150 3800 0    60   ~ 0
 SENSOR_IRQ
 Wire Wire Line
-	4250 4450 5000 4450
-Text Label 5000 4450 2    60   ~ 0
+	4250 5150 5000 5150
+Text Label 5000 5150 2    60   ~ 0
 SENSOR_IRQ
 Text GLabel 2200 2950 0    60   Output ~ 0
 ~RST
@@ -1130,10 +1130,10 @@ Wire Wire Line
 	8400 5850 9050 5850
 Text Label 9050 5850 2    60   ~ 0
 DATA_RDY
-Text Label 5000 5150 2    60   ~ 0
+Text Label 5000 4450 2    60   ~ 0
 DATA_RDY
 Wire Wire Line
-	4250 5150 5000 5150
+	4250 4450 5000 4450
 Text Label 2600 3050 0    60   ~ 0
 BOOT0
 Text Label 800  6150 0    60   ~ 0
