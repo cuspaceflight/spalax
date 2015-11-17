@@ -1,5 +1,41 @@
 # state-estimators
 
+## Compilation
+
+The project can be configured to build in one of two ways: to build the device firmware or to build the GUI.
+The instructions below describe how to perform configuration using the CMake GUI, although using the command line does also work.
+For Windows specific instructions see [windows-setup.md](Documents/windows-setup.md)
+
+### GUI Build Configuration
+
+* Open the CMake GUI
+* Set the source code to the root directory of this repo
+* Set the build directory to ${ROOT_DIR}/Avionics.GUI.Build
+* Click Configure - if it asks to create the directory select yes
+* Select your desired build system as the generator (only MSVC has been tested)
+* Click Finish
+* Configuration will fail as you haven't selected the configuration to build
+* Select the BUILD_GUI checkbox and click configure again
+* Finally click Generate
+* Avionics.GUI.Build should now contain the files to build the GUI
+
+### Firmware Build Configuration
+
+* Make sure you have the [ARM GCC toolchain](https://launchpad.net/gcc-arm-embedded) installed and added to your PATH
+* Open the CMake GUI
+* Set the source code the root directory of this repo
+* Set the build directory to ${ROOT_DIR}/Avionics.Firmware.Build
+* Click Configure - if it asks to create the directory select yes
+* For the generator select the Makefiles appropriate to your system
+* Select 'Specify toolchain file for cross-compiling'
+* Click Next
+* Specify $[ROOT_DIR}/Toolchain-arm-none-eabi.cmake
+* Click Finish
+* Configuration will fail as you haven't selected the configuration to build
+* Select the BUILD_FIRMWARE checkbox and click configure again
+* Finally click Generate
+* Avionics.Firmware.Build should now contain the files to build the Firmware
+
 ## Resources
 
 Information which is of use for electrical design is in the [electrical-resources.md](Documents/electrical-resources.md) file.
