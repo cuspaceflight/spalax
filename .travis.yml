@@ -1,0 +1,9 @@
+language: c
+sudo: required
+dist: trusty
+install:
+  - sudo apt-get -y update
+  - sudo apt-get -y install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi
+script:
+  - scripts/travis-build-firmware.sh
+
