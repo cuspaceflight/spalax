@@ -2,9 +2,9 @@
 
 ## Compilation
 
-The project can be configured to build in one of two ways: to build the device firmware or to build the GUI.
-The instructions below describe how to perform configuration using the CMake GUI, although using the command line does also work.
-For Windows specific instructions see [windows-setup.md](Documents/windows-setup.md)
+* The project can be configured to build in one of two ways: to build the device firmware or to build the GUI.
+* The instructions below describe how to perform configuration using the CMake GUI, although using the command line does also work.
+* For Windows specific instructions see [windows-setup.md](Documents/windows-setup.md)
 
 ### GUI Build Configuration
 
@@ -29,7 +29,7 @@ For Windows specific instructions see [windows-setup.md](Documents/windows-setup
 * For the generator select the Makefiles appropriate to your system
 * Select 'Specify toolchain file for cross-compiling'
 * Click Next
-* Specify $[ROOT_DIR}/Toolchain-arm-none-eabi.cmake
+* Specify ${ROOT_DIR}/Toolchain-arm-none-eabi.cmake
 * Click Finish
 * Configuration will fail as you haven't selected the configuration to build
 * Select the BUILD_FIRMWARE checkbox and click configure again
