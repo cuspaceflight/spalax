@@ -21,7 +21,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${MYPRJOUTDIR})
 option(BUILD_GUI "Build the Avionics GUI" OFF)
 option(BUILD_FIRMWARE "Build the Avionics Firmware" OFF)
 
-cmake_minimum_required (VERSION 3.3)
+cmake_minimum_required (VERSION 3.2)
 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
