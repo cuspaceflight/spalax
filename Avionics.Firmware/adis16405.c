@@ -13,7 +13,7 @@
 #define ADIS16405_SPI_CS_PORT  GPIOC
 #define ADIS16405_SPI_CS_PIN   GPIOC_ACCEL_CS
 
-static Thread *sensor_thread = NULL;
+static BinarySemaphore sensor_semaphore;
 
 static uint16_t adis16405_read_u16(uint8_t addr_in) {
     // All transfers are 16 bits
@@ -63,7 +63,7 @@ static void adis16405_burst_read(uint16_t data_out[12]) {
     // The order is:
     //     SUPPLY_OUT, XGYRO_OUT, YGYRO_OUT, ZGYRO_OUT, XACCL_OUT, YACCL_OUT, ZACCL_OUT
     //     XMAGN_OUT, YMAGN_OUT, ZMAGN_OUT, TEMP_OUT, AUX_ADC
-    
+
     // All bar the final 2 have 14 bits of data - the final 2 are only 12 bits
     // The MSB (bit 15) is the ND flag - it is 1 if this data hasn't been read before
     // Bit 14 is the EA flag - it is 1 if there is an error flag in the DIAG_STAT register
@@ -91,10 +91,7 @@ void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
     (void)channel;
 
     chSysLockFromIsr();
-    if(sensor_thread != NULL && sensor_thread->p_state != THD_STATE_READY) {
-        chSchReadyI(sensor_thread);
-    }
-    sensor_thread = NULL;
+    chBSemSignalI(&sensor_semaphore);
     chSysUnlockFromIsr();
 }
 
@@ -111,6 +108,8 @@ msg_t adis16405_thread(void *arg) {
         SPI_CR1_BR_2 | SPI_CR1_CPOL | SPI_CR1_CPHA | SPI_CR1_DFF
     };
 
+    chBSemInit(&sensor_semaphore, true);
+
     chRegSetThreadName("ADIS16405");
 
     spiStart(&ADIS16405_SPID, &spi_cfg);
@@ -119,16 +118,13 @@ msg_t adis16405_thread(void *arg) {
     uint16_t raw_data[12];
 
     while(TRUE) {
+        chSysLock();
+        chBSemWaitTimeoutS(&sensor_semaphore, 100);
+        chSysUnlock();
+
         adis16405_burst_read(raw_data);
         // TODO: Separate sensor data and convert to meaningful numbers (e.g rad/s for gyros)
 
         // TODO: Send sensor data off to state estimators
-
-        /* Sleep until DRDY */
-        chSysLock();
-        sensor_thread = chThdSelf();
-        chSchGoSleepS(THD_STATE_SUSPENDED);
-        sensor_thread = NULL;
-        chSysUnlock();
     }
 }
