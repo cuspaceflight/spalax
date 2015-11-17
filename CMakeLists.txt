@@ -80,7 +80,7 @@ if (${BUILD_GUI})
     set_target_properties(glfw PROPERTIES FOLDER Frontier.Engine//ThirdParty//glfw)
 elseif (${BUILD_FIRMWARE})
     # For some reason 'set (CMAKE_C_STANDARD 99)' doesn't seem to work
-    set (CMAKE_C_FLAGS -std=c99)
+    set (CMAKE_C_FLAGS -std=gnu99)
     add_subdirectory(Avionics.Shared)
     add_subdirectory(Avionics.Firmware)
 else (${BUILD_GUI})
