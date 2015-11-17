@@ -1,5 +1,7 @@
 # state-estimators
 
+[![Build Status](https://travis-ci.org/cuspaceflight/state-estimators.svg)](https://travis-ci.org/cuspaceflight/state-estimators)
+
 ## Compilation
 
 * The project can be configured to build in one of two ways: to build the device firmware or to build the GUI.
