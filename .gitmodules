@@ -1,3 +1,7 @@
 [submodule "Frontier.Engine"]
 	path = Frontier.Engine
 	url = https://github.com/Tustvold/Frontier.Engine.git
+[submodule "ChibiOS-RT"]
+	path = ChibiOS-RT
+	url = https://github.com/ChibiOS/ChibiOS.git
+	branch = stable_2.6.x

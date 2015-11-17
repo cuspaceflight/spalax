@@ -1,8 +1,4 @@
 #include "state_estimate.h"
-#include <quest_estimator.h>
-#include <mag_rotation_estimator.h>
-#include <translation_kalman.h>
-#include <orientation_kalman.h>
 #include <calibration.h>
 #include <logging.h>
 #include <stdbool.h>
@@ -94,11 +90,13 @@ void calibrate() {
 	gyro_bias[1] = calibration_gyro_sum[1] / (float)calibration_gyro_count;
 	gyro_bias[2] = calibration_gyro_sum[2] / (float)calibration_gyro_count;
 
-#ifdef USE_QUEST
-	quest_estimator_set_reference_vectors(accel_bias, mag_reference);
-#else
-	mag_rotation_estimator_set_reference_vector(mag_reference);
-#endif
+    //TODO: Set reference vectors
+//#ifdef USE_QUEST
+//	quest_estimator_set_reference_vectors(accel_bias, mag_reference);
+//#else
+//	mag_rotation_estimator_set_reference_vector(mag_reference);
+//#endif
+    
 	is_calibrated = true;
 	PRINT("Calibrated!\n");
 }
@@ -114,10 +112,10 @@ void state_estimate_new_accel_raw(const int16_t raw_accel[3]) {
 	if (is_calibrated) {
 		
 
-		// TODO Call with (accel - previous_state_accel)
-#ifdef USE_QUEST
-		quest_estimator_new_accel(accel_calibrated);
-#endif
+		
+//#ifdef USE_QUEST
+//		quest_estimator_new_accel(accel_calibrated);
+//#endif
 		//PRINT("Accel %f %f %f\n", accel[0], accel[1], accel[2]);
 		//accel_calibrated[0] -= accel_bias[0];
 		//accel_calibrated[1] -= accel_bias[1];
@@ -160,11 +158,11 @@ void state_estimate_new_magnetometer_raw(const int16_t raw_mag[3]) {
         //float magnitude = sqrtf(mag[0] * mag[0] + mag[1] * mag[1] + mag[2] * mag[2]);
         //PRINT("%.2f\n", magnitude);
 
-#ifdef USE_QUEST
-		quest_estimator_new_mag(mag);
-#else
-		mag_rotation_estimator_new_mag(mag);
-#endif
+//#ifdef USE_QUEST
+//		quest_estimator_new_mag(mag);
+//#else
+//		mag_rotation_estimator_new_mag(mag);
+//#endif
 	} else {
 		calibration_mag_sum[0] += mag[0];
 		calibration_mag_sum[1] += mag[1];
@@ -183,7 +181,7 @@ void state_estimate_new_pressure_raw(int pressure) {
 		return;
 	LOCK_STATE_ESTIMATE;
     // TODO rotate this using the previous orientation estimate
-	translation_kalman_new_pressure_raw((float)pressure);
+	// translation_kalman_new_pressure_raw((float)pressure);
 	UNLOCK_STATE_ESTIMATE;
 }
 
@@ -198,7 +196,7 @@ void state_estimate_new_gyro_raw(const int16_t gyro_raw[3]) {
 	if (is_calibrated) {
 		//PRINT("Gyro: %f %f %f\n", gyro[0], gyro[1], gyro[2]);
 
-		orientation_kalman_new_gyro(gyro);
+		//orientation_kalman_new_gyro(gyro);
 	} else {
 		calibration_gyro_sum[0] += gyro[0];
 		calibration_gyro_sum[1] += gyro[1];
@@ -217,21 +215,21 @@ void state_estimate_compute_next(state_estimate_t* next_estimate, float dt) {
 	
 	LOCK_STATE_ESTIMATE;
 
-#ifdef USE_QUEST
-	quest_estimator_update(next_estimate->orientation_q);
-	//PRINT("Quest Orientation %f %f %f\n", next_estimate->orientation_euler[0] * 57.2957795131f, next_estimate->orientation_euler[1] * 57.2957795131f, next_estimate->orientation_euler[2] * 57.2957795131f);
-	//PRINT("QUEST: %f %f %f %f\n",next_estimate->orientation_q[0],next_estimate->orientation_q[1],next_estimate->orientation_q[2],next_estimate->orientation_q[3]);
-#else
-	mag_rotation_estimator_update(next_estimate->orientation_q);
-	//PRINT("Orientation %f %f %f\n", next_estimate->orientation_euler[0] * 57.2957795131f, next_estimate->orientation_euler[1] * 57.2957795131f, next_estimate->orientation_euler[2] * 57.2957795131f);
-#endif
-	
-#ifdef USE_ORIENTATION_KALMAN
-	orientation_kalman_new_quaternion(next_estimate->orientation_q);
-	orientation_kalman_prediction_step(next_estimate, dt);
-	//PRINT("Kalman: %f %f %f %f\n", next_estimate->orientation_q[0], next_estimate->orientation_q[1], next_estimate->orientation_q[2], next_estimate->orientation_q[3]);
-	//PRINT("Orientation %f %f %f\n", next_estimate->orientation_euler[0] * 57.2957795131f, next_estimate->orientation_euler[1] * 57.2957795131f, next_estimate->orientation_euler[2] * 57.2957795131f);
-#endif
+//#ifdef USE_QUEST
+//	quest_estimator_update(next_estimate->orientation_q);
+//	//PRINT("Quest Orientation %f %f %f\n", next_estimate->orientation_euler[0] * 57.2957795131f, next_estimate->orientation_euler[1] * 57.2957795131f, next_estimate->orientation_euler[2] * 57.2957795131f);
+//	//PRINT("QUEST: %f %f %f %f\n",next_estimate->orientation_q[0],next_estimate->orientation_q[1],next_estimate->orientation_q[2],next_estimate->orientation_q[3]);
+//#else
+//	mag_rotation_estimator_update(next_estimate->orientation_q);
+//	//PRINT("Orientation %f %f %f\n", next_estimate->orientation_euler[0] * 57.2957795131f, next_estimate->orientation_euler[1] * 57.2957795131f, next_estimate->orientation_euler[2] * 57.2957795131f);
+//#endif
+//	
+//#ifdef USE_ORIENTATION_KALMAN
+//	orientation_kalman_new_quaternion(next_estimate->orientation_q);
+//	orientation_kalman_prediction_step(next_estimate, dt);
+//	//PRINT("Kalman: %f %f %f %f\n", next_estimate->orientation_q[0], next_estimate->orientation_q[1], next_estimate->orientation_q[2], next_estimate->orientation_q[3]);
+//	//PRINT("Orientation %f %f %f\n", next_estimate->orientation_euler[0] * 57.2957795131f, next_estimate->orientation_euler[1] * 57.2957795131f, next_estimate->orientation_euler[2] * 57.2957795131f);
+//#endif
 
 #ifdef PRINT_ROTATED_ACCEL
 	//TODO Rotate accel data by quaternion

@@ -1,5 +1,3 @@
-add_definitions(-DGLEW_STATIC)
-
 add_subdirectory(Source)
 
 # We can use GLOB here as in order for a CMakeList to be used a pre-existing one
@@ -17,6 +15,8 @@ foreach(FILE ${SOURCES} ${HEADERS} ${CMAKELISTS})
 endforeach()
 
 add_library(Avionics ${HEADERS} ${SOURCES} ${CMAKELISTS})
+
+set_property(TARGET Avionics PROPERTY C_STANDARD 11)
 
 SET (AVIONICS_INCLUDES 
     ${CMAKE_CURRENT_SOURCE_DIR}/Source
