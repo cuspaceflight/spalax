@@ -280,7 +280,7 @@ Wire Wire Line
 Connection ~ 2700 3200
 Text Label 4000 2100 2    60   ~ 0
 VIN
-Text HLabel 7600 4050 0    60   Input ~ 0
+Text HLabel 7250 4050 0    60   Input ~ 0
 USB5V
 Wire Wire Line
 	7700 4000 7700 4050
@@ -301,8 +301,6 @@ Wire Wire Line
 	2850 2200 3050 2200
 Wire Wire Line
 	2950 2200 2950 2300
-Wire Wire Line
-	2950 2050 2950 2100
 Wire Wire Line
 	2850 2100 3450 2100
 Wire Wire Line
@@ -327,7 +325,7 @@ Text Notes 8700 4000 0    60   ~ 0
 Output\nsmoothing
 Text Notes 4600 4000 0    60   ~ 0
 Output\nsmoothing
-Text Notes 3150 1950 0    60   ~ 0
+Text Notes 2800 1950 0    60   ~ 0
 Input protection
 Wire Notes Line
 	2400 2700 2400 4200
@@ -359,7 +357,6 @@ Wire Notes Line
 	2400 2500 2400 1800
 Wire Notes Line
 	2400 1800 4150 1800
-Connection ~ 2950 2100
 $Comp
 L CONN_01X02 P5
 U 1 1 56320EA1
@@ -421,12 +418,12 @@ $EndComp
 $Comp
 L +BATT #PWR036
 U 1 1 56321B1B
-P 2950 2050
-F 0 "#PWR036" H 2950 1900 50  0001 C CNN
-F 1 "+BATT" H 2950 2190 50  0000 C CNN
-F 2 "" H 2950 2050 60  0000 C CNN
-F 3 "" H 2950 2050 60  0000 C CNN
-	1    2950 2050
+P 3800 2050
+F 0 "#PWR036" H 3800 1900 50  0001 C CNN
+F 1 "+BATT" H 3800 2190 50  0000 C CNN
+F 2 "" H 3800 2050 60  0000 C CNN
+F 3 "" H 3800 2050 60  0000 C CNN
+	1    3800 2050
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -589,4 +586,21 @@ Connection ~ 3300 2100
 Connection ~ 2950 2200
 Wire Wire Line
 	4000 2100 3750 2100
+Wire Wire Line
+	3800 2050 3800 2100
+Connection ~ 3800 2100
+$Comp
+L F_Small F1
+U 1 1 564D00E7
+P 7500 4050
+F 0 "F1" H 7460 4110 50  0000 L CNN
+F 1 "500mA" H 7380 3990 50  0000 L CNN
+F 2 "" H 7500 4050 60  0000 C CNN
+F 3 "" H 7500 4050 60  0000 C CNN
+F 4 "1800751" H 7500 4050 60  0001 C CNN "Farnell"
+	1    7500 4050
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7250 4050 7400 4050
 $EndSCHEMATC
