@@ -13,6 +13,7 @@
 #define ADIS16405_SPI_CS_PORT  GPIOC
 #define ADIS16405_SPI_CS_PIN   GPIOC_ACCEL_CS
 
+
 static BinarySemaphore sensor_semaphore;
 
 static uint16_t adis16405_read_u16(uint8_t addr_in) {
@@ -47,7 +48,6 @@ static void adis16405_write_u8(uint8_t addr_in, uint8_t val) {
     // 1 Write bit, 7 bit address, 8 bits of data
     // For example, 0xA11F loads 0x1F into location 0x21
 
-    // Set write bit
     addr_in |= (1 << 7);
     uint16_t tx = addr_in << 8 | val;
 
@@ -75,15 +75,49 @@ static void adis16405_burst_read(uint16_t data_out[12]) {
     spiUnselect(&ADIS16405_SPID);
 
     for (int i = 0; i < 12; i++) {
-        // TODO: Test EA/ND and if set do something appropriate
+
+        if((data_out[i]>>15) & 1 == 1)
+        {
+          // TODO Check what should happen if there is an error
+          //Do something error flag
+        }
+        if((data_out[i]>>14) & 1 == 1)
+        {
+          // Do something data has already been read
+        }
+
         data_out[i] &= ~(1<<15||1<<14);
     }
 }
 
 static void adis16405_init(SPIDriver* SPID) {
     (void)SPID;
+
     // TODO: Initialize sensor - setting control register to appropriate values
     // TODO: Perform self test - possibly split out as separate method
+    // Set the registers to the default value and perform
+    // Highest rate possible, doesn't matter about power,dynamic range, 75 degrees per sec
+
+    //Check the values below should more be defined
+    // Setting the data rate to 75 degrees per sec 0x0402
+    adis16405_write_u8(0x38,0x04);
+    adis16405_write_u8(0x39,0x01);
+
+    // Setting the data rate to the default of 819.2 samples per second 0x0001
+    adis16405_write_u8(0x36,0x01);
+
+    // Setting sleep mode 0x0000 turn sleep mode off
+    adis16405_write_u8(0x03,0x00);
+
+    //Self tests - using the internal testing routine - do all self test
+    adis16405_write_u8(0xB5,0x04);
+    // Infinite loop or use a better method
+    while (((adis16405_read_u16(0x34)>>10) & 1) = 0 )
+
+    if(adis16405_read_u16(0x3C) != 0x00)
+    {
+        // Error check what should be done
+    }
 }
 
 void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
@@ -117,13 +151,28 @@ msg_t adis16405_thread(void *arg) {
 
     uint16_t raw_data[12];
 
+    uint16_t gyro[3];
+    uint16_t accel[3];
+    uint16_t magno[3];
+
     while(TRUE) {
         chSysLock();
         chBSemWaitTimeoutS(&sensor_semaphore, 100);
         chSysUnlock();
 
         adis16405_burst_read(raw_data);
-        // TODO: Separate sensor data and convert to meaningful numbers (e.g rad/s for gyros)
+
+        //Factor of 0.0125 is for when operating with 75 degrees/sec
+        for (int i = 0;i<3;i++)
+        gyro[i] = 0.0125*3.141592654*(1/180)*(uint16_t)(raw_data[i+1]);
+
+        //Factor on data sheet 3.33mg
+        for (int i = 0;i<3;i++)
+        accel[i] = 0.001*9.81*3.33*(uint16_t)(raw_data[i+4]);
+
+        // Magno data in mgauss, prefer it in tesla
+        for (int i = 0;i<3;i++)
+        magno[i] = 0.5*(uint16_t)(raw_data[i+7]);
 
         // TODO: Send sensor data off to state estimators
     }
