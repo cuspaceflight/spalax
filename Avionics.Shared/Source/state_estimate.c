@@ -3,6 +3,7 @@
 #include <logging.h>
 #include <stdbool.h>
 #include <math_utils.h>
+#include <kalman.h>
 
 // Define these to add locking primitives to protect the data shared between threads
 #define LOCK_STATE_ESTIMATE

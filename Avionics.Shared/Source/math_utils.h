@@ -194,15 +194,66 @@ static void axis_angle_to_quat(const float axis[3], const float angle, float q[4
 	q[3] = w / norm;
 }
 
-static void quat_rotate(const float q[4], const float v[3], float out[3]) {
-	float uv[3];
-	float uuv[3];
 
-	vector_cross(q, v, uv);
-	vector_cross(q, uv, uuv);
-
-	out[0] = v[0] + ((uv[0] * q[3]) + uuv[0])*2.0f;
-	out[1] = v[1] + ((uv[1] * q[3]) + uuv[1])*2.0f;
-	out[2] = v[2] + ((uv[2] * q[3]) + uuv[2])*2.0f;
+static void quaternion_to_rodrigues(const float q[4], float mrp[3]) {
+    mrp[0] = q[0] / (1 + q[3]);
+    mrp[1] = q[1] / (1 + q[3]);
+    mrp[2] = q[2] / (1 + q[3]);
 }
+
+static void rodrigues_to_quaternion(const float mrp[3], float q[4]) {
+    //
+    //  mrp[0-2] = n * tan(theta/4) = 1/(1+q[3])q[0-2] = 1/(1+cos(theta/2)) * (n * sin(theta/2));
+    //
+    // sin(theta/2) = sin(2*atan(mag(mrp))) = 2 * mag(mrp) / (mag(mrp)*mag(mrp) + 1)
+    // cos(theta/2) = cos(2*atan(mag(mrp))) = (1 - mag(mrp)*mag(mrp)) / (a + mag(mrp)*mag(mrp))
+
+    float mag_mrp_squared = mrp[0] * mrp[0] + mrp[1] * mrp[1] + mrp[2] * mrp[2];
+    float mag_mrp = sqrtf(mag_mrp_squared);
+
+    float sin_theta_2 = 2 * mag_mrp / (mag_mrp_squared + 1);
+    float cos_theta_2 = (1 - mag_mrp_squared) / (mag_mrp_squared + 1);
+
+    q[0] = sin_theta_2 * mrp[0] / mag_mrp;
+    q[1] = sin_theta_2 * mrp[1] / mag_mrp;
+    q[2] = sin_theta_2 * mrp[2] / mag_mrp;
+
+    q[3] = cos_theta_2;
+
+}
+
+static void quat_mult(const float q1[4], const float q2[4], float out[4]) {
+    out[0] = q1[3] * q2[0] + q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1];
+    out[1] = q1[3] * q2[1] - q1[0] * q2[2] + q1[1] * q2[3] + q1[2] * q2[0];
+    out[2] = q1[3] * q2[2] + q1[0] * q2[1] - q1[1] * q2[0] + q1[2] * q2[3];
+    out[3] = q1[3] * q2[3] - q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2];
+}
+
+static float vector_mag(const float v[3]) {
+    return sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
+static void quat_rotate(const float q[4], const float v[3], float out[3]) {
+    float uv[3];
+    float uuv[3];
+
+    vector_cross(q, v, uv);
+    vector_cross(q, uv, uuv);
+
+    out[0] = v[0] + ((uv[0] * q[3]) + uuv[0])*2.0f;
+    out[1] = v[1] + ((uv[1] * q[3]) + uuv[1])*2.0f;
+    out[2] = v[2] + ((uv[2] * q[3]) + uuv[2])*2.0f;
+}
+
+// Wrapper around quaternion multiplication which handles zero length vectors
+static void apply_q(const float q[4], const float v[3], float out[3]) {
+    float v_mag = vector_mag(v);
+    if (v_mag < 1e-10f) {
+        for (int i = 0; i < 3; i++)
+            out[i] = v[i];
+        return;
+    }
+    quat_rotate(q, v, out);
+}
+
 #endif /* MATH_UTILS_H */

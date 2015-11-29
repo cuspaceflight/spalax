@@ -6,7 +6,8 @@ set (SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/mission.c
     ${CMAKE_CURRENT_SOURCE_DIR}/state_estimate.c
     ${CMAKE_CURRENT_SOURCE_DIR}/telemetry.c
-    
+    ${CMAKE_CURRENT_SOURCE_DIR}/kalman.c
+
     PARENT_SCOPE)
 
 set (HEADERS ${HEADERS}
@@ -17,4 +18,5 @@ set (HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/telemetry.h
     ${CMAKE_CURRENT_SOURCE_DIR}/time_utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/math_utils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/kalman.h
     PARENT_SCOPE)
