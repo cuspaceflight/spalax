@@ -8,10 +8,13 @@
 #include <crtdbg.h>
 #endif
 
-
+struct Tester {
+    float test[4];
+};
 
 int main() {
     int ret = -1;
+    
     if (FTEngine::setup()) {
         FTEngine::getFileManager()->addSearchPath("Resources");
 

@@ -1,4 +1,5 @@
 ﻿#include "MainScene.h"
+#include <Frontier.h>
 #include "StateDetailView.h"
 #include "State3DRenderer.h"
 #include <Data/FileDataSource.h>
@@ -51,13 +52,11 @@ void MainScene::update(const FTUpdateEvent& event) {
 
 	// TODO add some sort of accumulating remainder as otherwise this will slowly fall behind
 	for (int i = 0; i < num_cycles; ++i) {
-		// Bring input data up to date
-		
+		// Bring input data up to date		
 		data_source_->update(prediction_update_rate_clocks, &state_estimate_);
 		
-		
+        get_state_estimate(&state_estimate_);
 		//FTLog("Running state estimators\n");
-		state_estimate_compute_next(&state_estimate_, 1 / prediction_update_rate);
 	}
 	state_detail_view_->updateDisplay(state_estimate_);
 	state_3d_renderer_->nextStateEstimate(state_estimate_);

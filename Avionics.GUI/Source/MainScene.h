@@ -3,7 +3,6 @@
 
 extern "C" {
 #include <state_estimate.h>
-#include <telemetry.h>
 }
 
 

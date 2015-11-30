@@ -26,7 +26,7 @@ static float mat3x3_det(const float mat[3][3]) {
 static void mat3x3_inv(const float m[3][3], float out[3][3]) {
 	float invdet = 1 / mat3x3_det(m);
 	if (invdet != invdet) {
-		PRINT("4x4 inverse Nan Error!\n");
+		PRINT("3x3 inverse Nan Error!\n");
 		return;
 	}
 	out[0][0] = (m[1][1] * m[2][2] - m[1][2] * m[2][1]) * invdet;
@@ -211,15 +211,21 @@ static void rodrigues_to_quaternion(const float mrp[3], float q[4]) {
     float mag_mrp_squared = mrp[0] * mrp[0] + mrp[1] * mrp[1] + mrp[2] * mrp[2];
     float mag_mrp = sqrtf(mag_mrp_squared);
 
+    if (mag_mrp < FLT_EPSILON) {
+        q[0] = 0;
+        q[1] = 0;
+        q[2] = 0;
+        q[3] = 1;
+        return;
+    }
+
     float sin_theta_2 = 2 * mag_mrp / (mag_mrp_squared + 1);
     float cos_theta_2 = (1 - mag_mrp_squared) / (mag_mrp_squared + 1);
 
     q[0] = sin_theta_2 * mrp[0] / mag_mrp;
     q[1] = sin_theta_2 * mrp[1] / mag_mrp;
     q[2] = sin_theta_2 * mrp[2] / mag_mrp;
-
     q[3] = cos_theta_2;
-
 }
 
 static void quat_mult(const float q1[4], const float q2[4], float out[4]) {
@@ -254,6 +260,12 @@ static void apply_q(const float q[4], const float v[3], float out[3]) {
         return;
     }
     quat_rotate(q, v, out);
+}
+
+static void normalize(float v[3]) {
+    float v_mag = vector_mag(v);
+    for (int i = 0; i < 3; i++)
+        v[i] /= v_mag;
 }
 
 #endif /* MATH_UTILS_H */

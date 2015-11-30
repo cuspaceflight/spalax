@@ -13,4 +13,8 @@ void kalman_new_gyro(const float gyro[3]);
 
 void kalman_predict(state_estimate_t* next_estimate, float dt);
 
+void kalman_init(const float g_ref[3], const float b_ref[3]);
+
+void kalman_set_reference_vectors(const float g_ref[3], const float b_ref[3]);
+
 #endif

@@ -7,6 +7,7 @@ set (SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/state_estimate.c
     ${CMAKE_CURRENT_SOURCE_DIR}/telemetry.c
     ${CMAKE_CURRENT_SOURCE_DIR}/kalman.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/time_utils.c
 
     PARENT_SCOPE)
 
