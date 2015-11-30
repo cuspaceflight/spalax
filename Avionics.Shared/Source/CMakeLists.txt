@@ -20,4 +20,5 @@ set (HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/time_utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/math_utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/kalman.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/platform.h
     PARENT_SCOPE)

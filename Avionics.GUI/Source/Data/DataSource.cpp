@@ -28,7 +28,7 @@ bool DataSource::isPacketInFuture(const telemetry_t& data) {
 }
 
 void DataSource::handlePacket(const telemetry_t& data) {
-    set_simulation_time(data.timestamp_);
+    platform_set_counter_value(data.timestamp_);
 	switch (data.channel_) {
 	case PACKET_PRESSURE_RAW: {
 		state_estimate_new_pressure_raw(data.int32_data_[0]);

@@ -6,24 +6,24 @@
 
 #define PI 3.14159265358979323846f
 
-static float mat2x2_det(const float mat[2][2]) {
+static float mat2x2_det(float mat[2][2]) {
 	return mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0];
 }
 
-static void mat2x2_inv(const float mat[2][2], float out[2][2]) {
+static void mat2x2_inv(float mat[2][2], float out[2][2]) {
 	out[0][0] = mat[1][1];
 	out[1][1] = mat[0][0];
 	out[0][1] = -mat[0][1];
 	out[1][0] = -mat[1][0];
 }
 
-static float mat3x3_det(const float mat[3][3]) {
+static float mat3x3_det(float mat[3][3]) {
 	return mat[0][0] * (mat[1][1] * mat[2][2] - mat[2][1] * mat[1][2])
 		- mat[0][1] * (mat[1][0] * mat[2][2] - mat[1][2] * mat[2][0])
 		+ mat[0][2] * (mat[1][0] * mat[2][1] - mat[1][1] * mat[2][0]);
 }
 
-static void mat3x3_inv(const float m[3][3], float out[3][3]) {
+static void mat3x3_inv(float m[3][3], float out[3][3]) {
 	float invdet = 1 / mat3x3_det(m);
 	if (invdet != invdet) {
 		PRINT("3x3 inverse Nan Error!\n");
@@ -40,7 +40,7 @@ static void mat3x3_inv(const float m[3][3], float out[3][3]) {
 	out[2][2] = (m[0][0] * m[1][1] - m[0][1] * m[1][0]) * invdet;
 }
 
-static void mat3x3_mult(const float a[3][3], const float b[3][3], float out[3][3]) {
+static void mat3x3_mult(float a[3][3], float b[3][3], float out[3][3]) {
 	out[0][0] = a[0][0] * b[0][0] + a[0][1] * b[1][0] + a[0][2] * b[2][0];
 	out[0][1] = a[0][0] * b[0][1] + a[0][1] * b[1][1] + a[0][2] * b[2][1];
 	out[0][2] = a[0][0] * b[0][2] + a[0][1] * b[1][2] + a[0][2] * b[2][2];
@@ -52,7 +52,7 @@ static void mat3x3_mult(const float a[3][3], const float b[3][3], float out[3][3
 	out[2][2] = a[2][0] * b[0][2] + a[2][1] * b[1][2] + a[2][2] * b[2][2];
 }
 
-static float mat4x4_det(const float m[4][4]) {
+static float mat4x4_det(float m[4][4]) {
 	return m[0][3] * m[1][2] * m[2][1] * m[3][0] - m[0][2] * m[1][3] * m[2][1] * m[3][0] - m[0][3] * m[1][1] * m[2][2] * m[3][0] + m[0][1] * m[1][3] * m[2][2] * m[3][0] +
 		m[0][2] * m[1][1] * m[2][3] * m[3][0] - m[0][1] * m[1][2] * m[2][3] * m[3][0] - m[0][3] * m[1][2] * m[2][0] * m[3][1] + m[0][2] * m[1][3] * m[2][0] * m[3][1] +
 		m[0][3] * m[1][0] * m[2][2] * m[3][1] - m[0][0] * m[1][3] * m[2][2] * m[3][1] - m[0][2] * m[1][0] * m[2][3] * m[3][1] + m[0][0] * m[1][2] * m[2][3] * m[3][1] +
@@ -61,7 +61,7 @@ static float mat4x4_det(const float m[4][4]) {
 		m[0][2] * m[1][0] * m[2][1] * m[3][3] - m[0][0] * m[1][2] * m[2][1] * m[3][3] - m[0][1] * m[1][0] * m[2][2] * m[3][3] + m[0][0] * m[1][1] * m[2][2] * m[3][3];
 }
 
-static void mat4x4_inv(const float m[4][4], float out[4][4]) {
+static void mat4x4_inv(float m[4][4], float out[4][4]) {
 	float invdet = 1 / mat4x4_det(m);
 	if (invdet != invdet) {
 		PRINT("4x4 inverse Nan Error!\n"); 
@@ -98,7 +98,7 @@ static void mat4x4_inv(const float m[4][4], float out[4][4]) {
 	out[3][3] = (m[0][1] * m[1][2] * m[2][0] - m[0][2] * m[1][1] * m[2][0] + m[0][2] * m[1][0] * m[2][1] - m[0][0] * m[1][2] * m[2][1] - m[0][1] * m[1][0] * m[2][2] + m[0][0] * m[1][1] * m[2][2]) * invdet;
 }
 
-static void mat4x4_mult(const float a[4][4], const float b[4][4], float out[4][4]) {
+static void mat4x4_mult(float a[4][4], float b[4][4], float out[4][4]) {
 	out[0][0] = a[0][0] * b[0][0] + a[0][1] * b[1][0] + a[0][2] * b[2][0] + a[0][3] * b[3][0];
 	out[0][1] = a[0][0] * b[0][1] + a[0][1] * b[1][1] + a[0][2] * b[2][1] + a[0][3] * b[3][1];
 	out[0][2] = a[0][0] * b[0][2] + a[0][1] * b[1][2] + a[0][2] * b[2][2] + a[0][3] * b[3][2];

@@ -75,7 +75,7 @@ const float process_noise_diag[12] = {
     1e-7f, 1e-7f, 1e-7f // gyro bias 
 };
 
-const float accelerometer_covariance[3][3] = {
+float accelerometer_covariance[3][3] = {
     {0.25f, 0, 0},
     {0, 0.25f, 0},
     {0,0,0.25f}
@@ -282,7 +282,7 @@ void kalman_predict(state_estimate_t* next_estimate, float dt) {
     }
 }
 
-void do_update(const float y[3], const float J[3][12], const float sensor_covariance[3][3]) {
+void do_update(const float y[3], float J[3][12], float sensor_covariance[3][3]) {
     float S[3][3];
 
     for (int i = 0; i < 3; i++)
