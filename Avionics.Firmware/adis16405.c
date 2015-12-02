@@ -82,11 +82,11 @@ static void adis16405_burst_read(uint16_t data_out[12]) {
 
     for (int i = 0; i < 12; i++) {
 
-        if((data_out[i]>>15) & 1 == 1)
+        if(((data_out[i]>>15) & 1) == 1)
         {
           // TODO Check what should happen if there is an error
         }
-        if((data_out[i]>>14) & 1 == 1)
+        if(((data_out[i]>>14) & 1) == 1)
         {
           // Do something data has already been read
         }
