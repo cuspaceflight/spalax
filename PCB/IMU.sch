@@ -38,7 +38,7 @@ LIBS:ms5611-01ba03
 LIBS:microusb
 LIBS:usblc6-2
 LIBS:swd
-LIBS:IMU-cache
+LIBS:cga0402mlc-12g
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
