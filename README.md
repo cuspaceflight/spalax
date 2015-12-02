@@ -7,6 +7,7 @@
 * The project can be configured to build in one of two ways: to build the device firmware or to build the GUI.
 * The instructions below describe how to perform configuration using the CMake GUI, although using the command line does also work.
 * For Windows specific instructions see [windows-setup.md](Documents/windows-setup.md)
+* The master branch is re-built on each commit. You can see the current [build status](https://travis-ci.org/cuspaceflight/state-estimators) on Travis.
 
 ### GUI Build Configuration
 
