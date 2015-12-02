@@ -2,6 +2,7 @@
 extern "C" {
 #include <state_estimate.h>
 #include <mission.h>
+#include "time_utils.h"
 }
 
 DataSource::DataSource() : simulation_time_(0), packet_timestep_correction_(0), last_packet_time_(0) {
@@ -14,7 +15,7 @@ DataSource::~DataSource() {
 
 bool DataSource::isPacketInFuture(const telemetry_t& data) {
 	if (data.timestamp_ < last_packet_time_) {
-		FTLog("uint32_t clock rollover");
+		FTLog("Data Source uint32_t clock rollover");
 		packet_timestep_correction_ += 0xFFFFFFFF;
 	}
 	last_packet_time_ = data.timestamp_;
@@ -27,7 +28,7 @@ bool DataSource::isPacketInFuture(const telemetry_t& data) {
 }
 
 void DataSource::handlePacket(const telemetry_t& data) {
-	
+    platform_set_counter_value(data.timestamp_);
 	switch (data.channel_) {
 	case PACKET_PRESSURE_RAW: {
 		state_estimate_new_pressure_raw(data.int32_data_[0]);

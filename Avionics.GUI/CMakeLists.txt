@@ -24,7 +24,7 @@ target_include_directories ( Avionics.GUI PUBLIC
     ${FRONTIER_ENGINE_INCLUDES}
 )
 
-ADD_EXECUTABLE(Avionics.GUI.Launcher Source/main.cpp)
+ADD_EXECUTABLE(Avionics.GUI.Launcher Source/main.cpp Source/platform_gui.c)
 
 TARGET_LINK_LIBRARIES(Avionics.GUI.Launcher 
     Avionics
