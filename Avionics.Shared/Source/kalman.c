@@ -273,10 +273,14 @@ void kalman_predict(state_estimate_t* next_estimate, float dt) {
     post_state.covariance_diag[5] += dt2 * prior_state.covariance_diag[8];
     
     predict_attitude(dt, &prior_state, prior_attitude);
+    update_attitude(&prior_state, prior_attitude, next_estimate->orientation_q);
+    for (int i = 0; i < 4; i++) {
+        prior_attitude[i] = next_estimate->orientation_q[i];
+    }
+
 
     prior_state = post_state;
-
-    update_attitude(&prior_state, prior_attitude, next_estimate->orientation_q);
+    
     for (int i = 0; i < 3; i++) {
         next_estimate->angular_velocity[i] = prior_state.ang_vel[i];
     }
