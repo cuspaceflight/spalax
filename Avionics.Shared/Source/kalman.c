@@ -1,3 +1,5 @@
+// Python implementation by Rich Wareham can be found at http://nbviewer.ipython.org/gist/rjw57/cbbf33bdf597d20c5083
+
 #include "kalman.h"
 #include "math_utils.h"
 
@@ -81,6 +83,18 @@ float accelerometer_covariance[3][3] = {
     {0,0,0.25f}
 };
 
+float mag_covariance[3][3] = {
+    { 0.1f, 0, 0 },
+    { 0, 0.1f, 0 },
+    { 0, 0, 0.1f }
+};
+
+float gyro_covariance[3][3] = {
+    { 0.1f, 0, 0 },
+    { 0, 0.1f, 0 },
+    { 0, 0, 0.1f }
+};
+
 void kalman_init(const float g_ref[3], const float b_ref[3]) {
     kalman_set_reference_vectors(g_ref, b_ref);
     
@@ -140,7 +154,7 @@ void mrp_application_jacobian(const float mrp_vector[3], const float target_vect
 
         apply_q(altered_mrp_q, target_vector, v1);
         for (int j = 0; j < 3; j++)
-            J[i][j] = (v1[j] - v0[j]) / epsilon;
+            J[j][i] = (v1[j] - v0[j]) / epsilon;
     }
 }
 
@@ -159,7 +173,7 @@ void q_target_jacobian(const float q[4], const float target_vector[3], float J[3
         altered_target_vector[i] += epsilon;
         apply_q(q, altered_target_vector, v1);
         for (int j = 0; j < 3; j++)
-            J[i][j] = (v1[j] - v0[j]) / epsilon;
+            J[j][i] = (v1[j] - v0[j]) / epsilon;
     }
 }
 
@@ -286,6 +300,7 @@ void kalman_predict(state_estimate_t* next_estimate, float dt) {
     }
 }
 
+// TODO Large portions of J and K will be zeroes - scope for optimisation here
 void do_update(const float y[3], float J[3][12], float sensor_covariance[3][3]) {
     float S[3][3];
 
@@ -314,13 +329,13 @@ void do_update(const float y[3], float J[3][12], float sensor_covariance[3][3]) 
     }
 
 
-    float post_attitude[4];
     kalman_state post_state = prior_state;
     for (int i = 0; i < 12; i++) {
         post_state.covariance_diag[i] -= prior_state.covariance_diag[i] * (J[0][i] * K[i][0] + J[1][i] * K[i][1] + J[2][i] * K[i][2]);
         post_state.state_vector[i] += K[i][0] * y[0] + K[i][1] * y[1] + K[i][2] * y[2];
     }
 
+    float post_attitude[4];
     update_attitude(&post_state, prior_attitude, post_attitude);
 
     for (int i = 0; i < 3; i++)
@@ -343,10 +358,6 @@ void kalman_new_accel(const float accel[3]) {
     do_update(y, J, accelerometer_covariance);
 }
 
-void kalman_new_pressure(float pressure) {
-    // Pure orientation filter atm - so not used
-}
-
 void kalman_new_mag(const float mag[3]) {
     float predicted_measurement[3];
     h_mag(&prior_state, prior_attitude, predicted_measurement);
@@ -356,7 +367,7 @@ void kalman_new_mag(const float mag[3]) {
 
     float J[3][12];
     h_mag_jacobian(&prior_state, prior_attitude, J);
-    do_update(y, J, accelerometer_covariance);
+    do_update(y, J, mag_covariance);
 }
 
 void kalman_new_gyro(const float gyro[3]) {
@@ -368,5 +379,5 @@ void kalman_new_gyro(const float gyro[3]) {
 
     float J[3][12];
     h_gyro_jacobian(&prior_state, prior_attitude, J);
-    do_update(y, J, accelerometer_covariance);
+    do_update(y, J, gyro_covariance);
 }

@@ -29,7 +29,6 @@ float calibration_gyro_sum[3] = { 0, 0, 0 };
 int calibration_gyro_count = 0;
 float gyro_bias[3]; 
 
-float accel_calibrated[3];
 state_estimate_t current_state;
 uint64_t last_prediction_time = 0;
 
@@ -87,8 +86,9 @@ void calibrate() {
 	gyro_bias[1] = calibration_gyro_sum[1] / (float)calibration_gyro_count;
 	gyro_bias[2] = calibration_gyro_sum[2] / (float)calibration_gyro_count;
 
-    normalize(mag_reference);
-    normalize(accel_bias);
+    
+    PRINT("Accel Reference (%f,%f,%f)\n", accel_bias[0], accel_bias[1], accel_bias[2]);
+    PRINT("Mag Reference (%f,%f,%f)\n", mag_reference[0], mag_reference[1], mag_reference[2]);
 
     //TODO: Set reference vectors
     kalman_init(accel_bias, mag_reference);
@@ -116,11 +116,10 @@ void do_prediction_step() {
 }
 
 void state_estimate_new_accel_raw(const int16_t raw_accel[3]) {
-	calibrate_accel(raw_accel, accel_calibrated);
+    float accel_calibrated[3];
 
-	accel_calibrated[0] = accel_calibrated[0];
-	accel_calibrated[1] = accel_calibrated[1];
-	accel_calibrated[2] = accel_calibrated[2];
+	calibrate_accel(raw_accel, accel_calibrated);
+    //PRINT("Accel (%f, %f, %f)\n", accel_calibrated[0], accel_calibrated[1], accel_calibrated[2]);
 
 	if (is_calibrated) {
         do_prediction_step();
@@ -145,6 +144,7 @@ void state_estimate_new_magnetometer_raw(const int16_t raw_mag[3]) {
 	mag[1] = raw_mag[1];
 	mag[2] = raw_mag[2];
 
+    //PRINT("Mag (%f, %f, %f)\n", mag[0], mag[1], mag[2]);
 
 	if (is_calibrated) {
         do_prediction_step();
@@ -169,12 +169,11 @@ void state_estimate_new_pressure_raw(int pressure) {
 
 void state_estimate_new_gyro_raw(const int16_t gyro_raw[3]) {
 	float gyro[3];
-	gyro[0] -= gyro_bias[0];
-	gyro[1] -= gyro_bias[1];
-	gyro[2] -= gyro_bias[2];
 
 	calibrate_gyro(gyro_raw, gyro);
-	if (is_calibrated) {
+    
+    
+    if (is_calibrated) {
 		//PRINT("Gyro: %f %f %f\n", gyro[0], gyro[1], gyro[2]);
         do_prediction_step();
         kalman_new_gyro(gyro);

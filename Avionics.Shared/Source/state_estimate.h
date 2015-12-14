@@ -2,6 +2,8 @@
 #define STATE_ESTIMATE_H
 #include <stdint.h>
 
+
+// We use a right handed coordinate system with the y axis being up
 typedef struct state_estimate_t {
 	float pos[3];
 	float vel[3];

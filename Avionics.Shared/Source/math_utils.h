@@ -262,10 +262,10 @@ static void apply_q(const float q[4], const float v[3], float out[3]) {
     quat_rotate(q, v, out);
 }
 
-static void normalize(float v[3]) {
+static void normalize(const float v[3], float out[3]) {
     float v_mag = vector_mag(v);
     for (int i = 0; i < 3; i++)
-        v[i] /= v_mag;
+        out[i] = v[i] / v_mag;
 }
 
 #endif /* MATH_UTILS_H */
