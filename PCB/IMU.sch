@@ -676,13 +676,13 @@ F 3 "" H 6250 7450 60  0000 C CNN
 	1    6250 7450
 	1    0    0    -1  
 $EndComp
-Text GLabel 7700 5550 0    60   Input ~ 0
+Text GLabel 8550 5800 2    60   Input ~ 0
 SPI3_SCK
-Text GLabel 7700 5700 0    60   Input ~ 0
+Text GLabel 8550 5950 2    60   Input ~ 0
 SPI3_MISO
-Text GLabel 7700 5850 0    60   Input ~ 0
+Text GLabel 7700 5900 0    60   Input ~ 0
 SPI3_MOSI
-Text GLabel 8550 5700 2    60   Input ~ 0
+Text GLabel 8550 5650 2    60   Input ~ 0
 SPI3_NSS
 $Comp
 L +3.3V #PWR013
@@ -698,26 +698,15 @@ $EndComp
 $Comp
 L GND #PWR014
 U 1 1 564998F1
-P 7800 5950
-F 0 "#PWR014" H 7800 5700 50  0001 C CNN
-F 1 "GND" H 7800 5800 50  0000 C CNN
-F 2 "" H 7800 5950 60  0000 C CNN
-F 3 "" H 7800 5950 60  0000 C CNN
-	1    7800 5950
+P 7100 5600
+F 0 "#PWR014" H 7100 5350 50  0001 C CNN
+F 1 "GND" H 7100 5450 50  0000 C CNN
+F 2 "" H 7100 5600 60  0000 C CNN
+F 3 "" H 7100 5600 60  0000 C CNN
+	1    7100 5600
 	1    0    0    -1  
 $EndComp
-$Comp
-L GND #PWR015
-U 1 1 56499E3E
-P 8400 5950
-F 0 "#PWR015" H 8400 5700 50  0001 C CNN
-F 1 "GND" H 8400 5800 50  0000 C CNN
-F 2 "" H 8400 5950 60  0000 C CNN
-F 3 "" H 8400 5950 60  0000 C CNN
-	1    8400 5950
-	1    0    0    -1  
-$EndComp
-Text Label 9050 5850 2    60   ~ 0
+Text Label 7700 5800 2    60   ~ 0
 DATA_RDY
 Text Label 5000 4450 2    60   ~ 0
 DATA_RDY
@@ -1217,40 +1206,6 @@ Wire Wire Line
 Wire Wire Line
 	6200 7200 6350 7200
 Wire Wire Line
-	7800 5950 7800 5900
-Wire Wire Line
-	7800 5900 7850 5900
-Wire Wire Line
-	8350 5900 8400 5900
-Wire Wire Line
-	8400 5900 8400 5950
-Wire Wire Line
-	8350 5600 8400 5600
-Wire Wire Line
-	8400 5600 8400 5550
-Wire Wire Line
-	7850 5600 7800 5600
-Wire Wire Line
-	7800 5600 7800 5550
-Wire Wire Line
-	7800 5550 7700 5550
-Wire Wire Line
-	7850 5700 7700 5700
-Wire Wire Line
-	7700 5850 7800 5850
-Wire Wire Line
-	7800 5850 7800 5800
-Wire Wire Line
-	7800 5800 7850 5800
-Wire Wire Line
-	8550 5700 8350 5700
-Wire Wire Line
-	8350 5800 8400 5800
-Wire Wire Line
-	8400 5800 8400 5850
-Wire Wire Line
-	8400 5850 9050 5850
-Wire Wire Line
 	4250 4450 5000 4450
 Wire Wire Line
 	1600 6150 1600 6200
@@ -1393,4 +1348,26 @@ NoConn ~ 4250 4550
 NoConn ~ 4250 4650
 NoConn ~ 4250 4850
 NoConn ~ 4250 4950
+Wire Wire Line
+	8350 5900 8350 5950
+Wire Wire Line
+	8350 5950 8550 5950
+Wire Wire Line
+	8550 5800 8350 5800
+Wire Wire Line
+	8350 5700 8550 5700
+Wire Wire Line
+	8550 5700 8550 5650
+Wire Wire Line
+	8350 5600 8400 5600
+Wire Wire Line
+	8400 5600 8400 5550
+Wire Wire Line
+	7700 5800 7850 5800
+Wire Wire Line
+	7700 5900 7850 5900
+Wire Wire Line
+	7850 5600 7850 5700
+Wire Wire Line
+	7100 5600 7850 5600
 $EndSCHEMATC
