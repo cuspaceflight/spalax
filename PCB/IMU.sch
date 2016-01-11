@@ -1,5 +1,4 @@
 EESchema Schematic File Version 2
-LIBS:IMU-rescue
 LIBS:power
 LIBS:device
 LIBS:transistors
@@ -40,6 +39,8 @@ LIBS:microusb
 LIBS:usblc6-2
 LIBS:swd
 LIBS:cga0402mlc-12g
+LIBS:MOTION_POSITION-MPU-9250_QFN24_
+LIBS:IMU-cache
 EELAYER 25 0
 EELAYER END
 $Descr A4 11693 8268
@@ -94,15 +95,17 @@ F1 "Power.sch" 60
 F2 "USB5V" I L 6850 2200 60 
 $EndSheet
 $Sheet
-S 6850 3050 1350 850 
+S 6850 3050 1400 1100
 U 56316E47
 F0 "IntertialSensors" 60
 F1 "InertialSensors.sch" 60
 F2 "SCLK" I L 6850 3150 60 
 F3 "MISO" I L 6850 3300 60 
 F4 "MOSI" I L 6850 3450 60 
-F5 "~SS" I L 6850 3600 60 
-F6 "IRQ" I L 6850 3800 60 
+F5 "~ADIS_SS" I L 6850 3600 60 
+F6 "ADIS_IRQ" I L 6850 3750 60 
+F7 "~MPU_SS" I L 6850 3900 60 
+F8 "MPU_IRQ" I L 6850 4050 60 
 $EndSheet
 $Sheet
 S 9050 3050 1450 650 
@@ -427,8 +430,6 @@ Text GLabel 4500 2400 2    60   Input ~ 0
 SDIO_CK
 Text GLabel 4500 2850 2    60   Input ~ 0
 SDIO_CMD
-Text GLabel 4500 1400 2    60   Input ~ 0
-SPI1_NSS
 Text GLabel 2700 4100 0    60   Input ~ 0
 SPI1_SCK
 Text GLabel 2700 4250 0    60   Input ~ 0
@@ -465,7 +466,6 @@ Text GLabel 2450 5000 0    60   Input ~ 0
 OTG_FS_DP
 NoConn ~ 2950 4450
 NoConn ~ 2950 3650
-NoConn ~ 2950 3750
 NoConn ~ 2950 5950
 NoConn ~ 2950 6050
 NoConn ~ 2950 6350
@@ -584,12 +584,10 @@ Text GLabel 6700 3450 0    60   Input ~ 0
 SPI1_MOSI
 Text GLabel 6700 3300 0    60   Input ~ 0
 SPI1_MISO
-Text GLabel 6700 3600 0    60   Input ~ 0
-SPI1_NSS
-Text Label 6150 3800 0    60   ~ 0
-SENSOR_IRQ
-Text Label 5050 1550 2    60   ~ 0
-SENSOR_IRQ
+Text Label 6150 3750 0    60   ~ 0
+ADIS_IRQ
+Text Label 5000 1550 2    60   ~ 0
+ADIS_IRQ
 Text GLabel 2200 2950 0    60   Output ~ 0
 ~RST
 $Comp
@@ -1017,17 +1015,17 @@ Wire Wire Line
 	2850 2650 2850 2750
 Connection ~ 2850 2750
 Wire Wire Line
-	2700 3800 2800 3800
+	2700 3800 2750 3800
 Wire Wire Line
-	2800 3800 2800 3950
+	2750 3800 2750 3950
 Wire Wire Line
-	2800 3950 2950 3950
+	2750 3950 2950 3950
 Wire Wire Line
-	2700 3650 2850 3650
+	2700 3650 2800 3650
 Wire Wire Line
-	2850 3650 2850 3850
+	2800 3650 2800 3850
 Wire Wire Line
-	2850 3850 2950 3850
+	2800 3850 2950 3850
 Wire Wire Line
 	2700 4100 2750 4100
 Wire Wire Line
@@ -1145,9 +1143,9 @@ Wire Wire Line
 Wire Wire Line
 	6700 3450 6850 3450
 Wire Wire Line
-	6850 3600 6700 3600
+	6850 3600 6150 3600
 Wire Wire Line
-	6150 3800 6850 3800
+	6150 3750 6850 3750
 Wire Wire Line
 	4250 5150 5000 5150
 Wire Wire Line
@@ -1307,7 +1305,7 @@ Wire Wire Line
 Wire Wire Line
 	2800 5650 2950 5650
 Wire Wire Line
-	4250 1550 5050 1550
+	4250 1550 5000 1550
 NoConn ~ 4250 4550
 NoConn ~ 4250 4650
 NoConn ~ 4250 4850
@@ -1356,6 +1354,33 @@ Wire Wire Line
 Wire Wire Line
 	4300 1450 4300 1400
 Wire Wire Line
-	4300 1400 4500 1400
-NoConn ~ 2950 4050
+	4300 1400 5000 1400
+Text Label 5000 1400 2    60   ~ 0
+ADIS_NSS
+Text Label 6150 3600 0    60   ~ 0
+ADIS_NSS
+Text Label 6150 3900 0    60   ~ 0
+MPU_NSS
+Text Label 6150 4050 0    60   ~ 0
+MPU_IRQ
+Wire Wire Line
+	6150 4050 6850 4050
+Wire Wire Line
+	6150 3900 6850 3900
+Text Label 2200 4000 0    60   ~ 0
+MPU_NSS
+Wire Wire Line
+	2200 4000 2750 4000
+Wire Wire Line
+	2750 4000 2750 4050
+Wire Wire Line
+	2750 4050 2950 4050
+Text Label 2200 3550 0    60   ~ 0
+MPU_IRQ
+Wire Wire Line
+	2200 3550 2850 3550
+Wire Wire Line
+	2850 3750 2950 3750
+Wire Wire Line
+	2850 3550 2850 3750
 $EndSCHEMATC
