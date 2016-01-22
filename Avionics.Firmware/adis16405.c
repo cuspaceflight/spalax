@@ -1,26 +1,15 @@
-/*
- * ADXL3x5 Driver (ADXL345, ADXL375)
- * M2FC
- * 2014 Adam Greig, Cambridge University Spaceflight
- */
 
 #include <stdlib.h>
 #include "ch.h"
 #include "chprintf.h"
 #include "adis16405.h"
+#include "badthinghandler.h"
 
 #define ADIS16405_SPID         SPID1
 #define ADIS16405_SPI_CS_PORT  GPIOC
 #define ADIS16405_SPI_CS_PIN   GPIOC_ACCEL_CS
 
-static uint16_t adis16405_read_u16(uint8_t addr_in);
-static void adis16405_write_u8(uint8_t addr_in, uint8_t val);
-static void adis16405_burst_read(uint16_t data_out[12]) ;
-static void adis16405_init(SPIDriver* SPID);
-void adis16405_wakeup(EXTDriver *extp, expchannel_t channel);
-msg_t adis16405_thread(void *arg);
-
-static BinarySemaphore sensor_semaphore;
+static BinarySemaphore adis16405_semaphore;
 
 static uint16_t adis16405_read_u16(uint8_t addr_in) {
     // All transfers are 16 bits
@@ -39,7 +28,7 @@ static uint16_t adis16405_read_u16(uint8_t addr_in) {
 
     spiSelect(&ADIS16405_SPID);
     spiSend(&ADIS16405_SPID, 1, (void*)&addr_out);
-    spiSend(&ADIS16405_SPID, 1, (void*)&data_out);
+    spiReceive(&ADIS16405_SPID, 1, (void*)&data_out);
     spiUnselect(&ADIS16405_SPID);
 
     return data_out;
@@ -94,8 +83,7 @@ static void adis16405_burst_read(uint16_t data_out[12]) {
     }
 }
 
-static void adis16405_init(SPIDriver* SPID) {
-    (void)SPID;
+static void adis16405_init(void) {
 
     // TODO: Initialize sensor - setting control register to appropriate values
     // TODO: Perform self test - possibly split out as separate method
@@ -117,13 +105,21 @@ static void adis16405_init(SPIDriver* SPID) {
     adis16405_write_u8(0xB5,0x04);
 
     // Self test - Checks if bit has been cleared
-    while ((adis16405_read_u16(0x34) & 0x0200))
+    while ((adis16405_read_u16(0x34) & 0x0200)) {
+        chThdSleepMilliseconds(500);
+    }
 
     // Self test - Checks if error found when test run
     if(!adis16405_read_u16(0x3C))
     {
         // TODO Check what happens when error
+        bthandler_set_error(ERROR_ADIS16405, true);
     }
+}
+
+static bool adis16405_id_check(void) {
+    uint16_t id = adis16405_read_u16(0x7E);
+    return id == 0x4068;
 }
 
 void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
@@ -131,7 +127,7 @@ void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
     (void)channel;
 
     chSysLockFromIsr();
-    chBSemSignalI(&sensor_semaphore);
+    chBSemSignalI(&adis16405_semaphore);
     chSysUnlockFromIsr();
 }
 
@@ -148,18 +144,28 @@ msg_t adis16405_thread(void *arg) {
         SPI_CR1_BR_2 | SPI_CR1_CPOL | SPI_CR1_CPHA | SPI_CR1_DFF
     };
 
-    chBSemInit(&sensor_semaphore, true);
+    chBSemInit(&adis16405_semaphore, true);
 
     chRegSetThreadName("ADIS16405");
 
     spiStart(&ADIS16405_SPID, &spi_cfg);
-    adis16405_init(&ADIS16405_SPID);
 
-    uint16_t raw_data[12], gyro[3],accel[3],magno[3], temp;
+    // Wait for startup
+    while (!adis16405_id_check()) {
+        bthandler_set_error(ERROR_ADIS16405, true);
+        chThdSleepMilliseconds(500);
+    }
+    bthandler_set_error(ERROR_ADIS16405, false);
+
+
+    adis16405_init();
+
+    uint16_t raw_data[12];
+    float gyro[3],accel[3],magno[3], temperature;
 
     while(TRUE) {
         chSysLock();
-        chBSemWaitTimeoutS(&sensor_semaphore, 100);
+        chBSemWaitTimeoutS(&adis16405_semaphore, 100);
         chSysUnlock();
 
         adis16405_burst_read(raw_data);
@@ -168,18 +174,18 @@ msg_t adis16405_thread(void *arg) {
         // Factor on data sheet 3.33mg
         // Factor of 0.0125 is for when operating with 75 degrees/sec
         for (int i = 0;i<3;i++)
-        gyro[i] = 0.0125*(uint16_t)(raw_data[i+1]);
+            gyro[i] = 0.0125f*(raw_data[i+1]);
 
         // Acceleration scale is 3.33,measured in mg
         for (int i = 0;i<3;i++)
-        accel[i] = 3.33*(uint16_t)(raw_data[i+4]);
+            accel[i] = 3.33f*(raw_data[i+4]);
 
         // Magno data in mgauss
         for (int i = 0;i<3;i++)
-        magno[i] = 0.5*(uint16_t)(raw_data[i+7]);
+            magno[i] = 0.5f*(raw_data[i+7]);
 
         // Temperature scale 0.14 degrees, temp is measured in degrees
-        temp = 0.14*raw_data[10];
+        temperature = 0.14f*raw_data[10];
 
         // TODO: Send off sensor data
     }

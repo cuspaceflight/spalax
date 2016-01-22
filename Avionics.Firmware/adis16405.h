@@ -1,8 +1,3 @@
-/*
- * ADXL3x5 Driver (ADXL345, ADXL375)
- * M2FC
- * 2014 Adam Greig, Cambridge University Spaceflight
- */
 
 #ifndef ADIS16405_H
 #define ADIS16405_H

@@ -6,16 +6,13 @@
 #include <stdbool.h>
 
 typedef enum {
-	ERROR_GYRO_MAGNO_ACCEL = 0,
-	ERROR_RADIO,
-	ERROR_GPS,
+	ERROR_ADIS16405 = 0,
+	ERROR_MPU9250,
 	ERROR_ALTIM,
 	ERROR_SD_CARD,
 	ERROR_CONFIG,
-	ERROR_MAX,
+	ERROR_MAX
 } bthandler_error_t;
-
-extern volatile bool error_states[ERROR_MAX];
 
 /* Set a specific error.
 * If `set` is true then the error is occurring.
