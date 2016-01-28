@@ -741,7 +741,7 @@ F 1 "SPI" H 8250 5500 50  0000 C CNN
 F 2 "Pin_Headers:Pin_Header_Straight_2x04" H 8250 4550 60  0001 C CNN
 F 3 "" H 8250 4550 60  0000 C CNN
 F 4 "Value" H 8250 5750 60  0001 C CNN "Digikey"
-F 5 "Value" H 8250 5750 60  0001 C CNN "Farnell"
+F 5 "1593441" H 8250 5750 60  0001 C CNN "Farnell"
 F 6 "Value" H 8250 5750 60  0001 C CNN "Fieldname"
 	1    8250 5750
 	1    0    0    -1  
@@ -758,6 +758,9 @@ F 0 "P7" H 6050 5150 50  0000 C CNN
 F 1 "CAN BUS" V 6150 4900 50  0000 C CNN
 F 2 "Pin_Headers:Pin_Header_Straight_1x04" H 6050 4900 60  0001 C CNN
 F 3 "" H 6050 4900 60  0000 C CNN
+F 4 "Value" H 6050 4900 60  0001 C CNN "Digikey"
+F 5 "1022250" H 6050 4900 60  0001 C CNN "Farnell"
+F 6 "Value" H 6050 4900 60  0001 C CNN "Fieldname"
 	1    6050 4900
 	1    0    0    -1  
 $EndComp
