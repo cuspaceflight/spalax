@@ -77,8 +77,6 @@ F 3 "" H 7000 4200 60  0000 C CNN
 	1    7000 4200
 	1    0    0    -1  
 $EndComp
-Text GLabel 5250 3850 0    60   Input ~ 0
-~RST
 Text HLabel 5250 3650 0    60   Input ~ 0
 SCLK
 Text HLabel 5250 3550 0    60   Input ~ 0
@@ -341,4 +339,6 @@ F 4 "1759102" H 2450 3400 60  0001 C CNN "Farnell"
 	1    2450 3400
 	1    0    0    -1  
 $EndComp
+Text HLabel 5250 3850 0    60   Input ~ 0
+~ADIS_RESET
 $EndSCHEMATC
