@@ -120,10 +120,6 @@ Text Label 2600 2550 2    60   ~ 0
 VBUS
 Text Label 3400 2850 2    60   ~ 0
 VBUS
-Text GLabel 3600 2750 2    60   Input ~ 0
-OTG_FS_DM
-Text GLabel 3600 2950 2    60   Input ~ 0
-OTG_FS_DP
 Wire Wire Line
 	2200 3100 2300 3100
 Wire Wire Line
@@ -141,4 +137,8 @@ F 4 "2426381" H 1900 2900 60  0001 C CNN "Farnell"
 	0    -1   1    0   
 $EndComp
 NoConn ~ 1800 3300
+Text HLabel 3600 2750 2    60   UnSpc ~ 0
+OTG_FS_DM
+Text HLabel 3600 2950 2    60   UnSpc ~ 0
+OTG_DS_DP
 $EndSCHEMATC

@@ -425,40 +425,6 @@ F 3 "" H 850 3850 60  0000 C CNN
 	1    850  3850
 	1    0    0    -1  
 $EndComp
-Text GLabel 2700 4100 0    60   Input ~ 0
-SPI1_SCK
-Text GLabel 2700 4250 0    60   Input ~ 0
-SPI1_MISO
-Text GLabel 2700 4400 0    60   Input ~ 0
-SPI1_MOSI
-Text GLabel 2700 6450 0    60   Input ~ 0
-SPI2_NSS
-Text GLabel 2700 6600 0    60   Input ~ 0
-SPI2_SCK
-Text GLabel 2700 6750 0    60   Input ~ 0
-SPI2_MISO
-Text GLabel 2700 6900 0    60   Input ~ 0
-SPI2_MOSI
-Text GLabel 2450 5450 0    60   Input ~ 0
-SPI3_NSS
-Text GLabel 2700 5900 0    60   Input ~ 0
-SPI3_SCK
-Text GLabel 2700 6050 0    60   Input ~ 0
-SPI3_MISO
-Text GLabel 2700 6200 0    60   Input ~ 0
-SPI3_MOSI
-Text GLabel 2450 4550 0    60   Input ~ 0
-USART1_TX
-Text GLabel 2450 4700 0    60   Input ~ 0
-USART1_RX
-Text GLabel 2700 3650 0    60   Input ~ 0
-USART2_TX
-Text GLabel 2700 3800 0    60   Input ~ 0
-USART2_RX
-Text GLabel 2450 4850 0    60   Input ~ 0
-OTG_FS_DM
-Text GLabel 2450 5000 0    60   Input ~ 0
-OTG_FS_DP
 NoConn ~ 2950 4450
 NoConn ~ 2950 3650
 NoConn ~ 2950 5950
@@ -489,20 +455,14 @@ NoConn ~ 4250 1350
 NoConn ~ 4250 1250
 NoConn ~ 4250 1150
 NoConn ~ 4250 1050
-Text GLabel 8950 3600 0    60   Input ~ 0
-SPI2_NSS
-Text GLabel 8950 3150 0    60   Input ~ 0
-SPI2_SCK
-Text GLabel 8950 3450 0    60   Input ~ 0
-SPI2_MISO
-Text GLabel 8950 3300 0    60   Input ~ 0
-SPI2_MOSI
 $Sheet
 S 9050 2100 1400 600 
 U 56316E4F
 F0 "USB" 60
 F1 "USB.sch" 60
 F2 "USB5V" O L 9050 2200 60 
+F3 "OTG_FS_DM" U L 9050 2350 60 
+F4 "OTG_DS_DP" U L 9050 2500 60 
 $EndSheet
 Text Label 8450 2200 0    60   ~ 0
 USB_VBUS
@@ -573,12 +533,6 @@ Text Label 5000 5150 2    60   ~ 0
 STAT_~SENSORS
 Text Label 5000 3050 2    60   ~ 0
 SD_DETECT
-Text GLabel 6700 3150 0    60   Input ~ 0
-SPI1_SCK
-Text GLabel 6700 3450 0    60   Input ~ 0
-SPI1_MOSI
-Text GLabel 6700 3300 0    60   Input ~ 0
-SPI1_MISO
 Text Label 6150 3750 0    60   ~ 0
 ADIS_IRQ
 Text Label 5000 1550 2    60   ~ 0
@@ -611,10 +565,6 @@ F 6 "Value" H 6550 7250 60  0001 C CNN "Fieldname"
 	1    6550 7250
 	1    0    0    -1  
 $EndComp
-Text GLabel 4450 7350 0    60   Input ~ 0
-USART1_TX
-Text GLabel 4450 7150 0    60   Input ~ 0
-USART1_RX
 $Comp
 L +3.3V #PWR09
 U 1 1 56496C13
@@ -637,10 +587,6 @@ F 3 "" H 4600 7450 60  0000 C CNN
 	1    4600 7450
 	1    0    0    -1  
 $EndComp
-Text GLabel 6100 7350 0    60   Input ~ 0
-USART2_TX
-Text GLabel 6100 7150 0    60   Input ~ 0
-USART2_RX
 $Comp
 L +3.3V #PWR011
 U 1 1 56497C14
@@ -663,14 +609,6 @@ F 3 "" H 6250 7450 60  0000 C CNN
 	1    6250 7450
 	1    0    0    -1  
 $EndComp
-Text GLabel 8700 5800 2    60   Input ~ 0
-SPI3_SCK
-Text GLabel 8700 5950 2    60   Input ~ 0
-SPI3_MISO
-Text GLabel 7850 5900 0    60   Input ~ 0
-SPI3_MOSI
-Text GLabel 8700 5650 2    60   Input ~ 0
-SPI3_NSS
 $Comp
 L +3.3V #PWR013
 U 1 1 5649972C
@@ -693,7 +631,7 @@ F 3 "" H 7250 5650 60  0000 C CNN
 	1    7250 5650
 	1    0    0    -1  
 $EndComp
-Text Label 7850 5800 2    60   ~ 0
+Text Label 7450 5800 0    60   ~ 0
 DATA_RDY
 Text Label 5000 4450 2    60   ~ 0
 DATA_RDY
@@ -978,9 +916,9 @@ Wire Wire Line
 Wire Wire Line
 	2950 3350 1750 3350
 Wire Wire Line
-	1750 3050 1750 3350
+	1750 3350 1750 3050
 Wire Wire Line
-	1350 3050 1750 3050
+	1750 3050 1350 3050
 Wire Wire Line
 	1400 3050 1400 3250
 Connection ~ 1400 3050
@@ -1008,53 +946,53 @@ Wire Wire Line
 	2850 2650 2850 2750
 Connection ~ 2850 2750
 Wire Wire Line
-	2700 3800 2750 3800
+	2200 3800 2750 3800
 Wire Wire Line
 	2750 3800 2750 3950
 Wire Wire Line
 	2750 3950 2950 3950
 Wire Wire Line
-	2700 3650 2800 3650
+	2200 3650 2800 3650
 Wire Wire Line
 	2800 3650 2800 3850
 Wire Wire Line
 	2800 3850 2950 3850
 Wire Wire Line
-	2700 4100 2750 4100
+	2200 4100 2750 4100
 Wire Wire Line
 	2750 4100 2750 4150
 Wire Wire Line
 	2750 4150 2950 4150
 Wire Wire Line
-	2700 4250 2950 4250
+	2200 4250 2950 4250
 Wire Wire Line
-	2700 4400 2750 4400
+	2200 4400 2750 4400
 Wire Wire Line
 	2750 4400 2750 4350
 Wire Wire Line
 	2750 4350 2950 4350
 Wire Wire Line
-	2450 4550 2950 4550
+	2200 4550 2950 4550
 Wire Wire Line
 	2500 4750 2950 4750
 Wire Wire Line
 	2550 4850 2950 4850
 Wire Wire Line
-	2700 6750 2950 6750
+	2000 6750 2950 6750
 Wire Wire Line
-	2700 6900 2750 6900
+	2000 6900 2750 6900
 Wire Wire Line
 	2750 6900 2750 6850
 Wire Wire Line
 	2750 6850 2950 6850
 Wire Wire Line
-	2700 6600 2750 6600
+	2000 6600 2750 6600
 Wire Wire Line
 	2750 6600 2750 6650
 Wire Wire Line
 	2750 6650 2950 6650
 Wire Wire Line
-	2700 6450 2800 6450
+	2000 6450 2800 6450
 Wire Wire Line
 	2800 6450 2800 6550
 Wire Wire Line
@@ -1088,13 +1026,13 @@ Wire Wire Line
 Wire Wire Line
 	4350 2400 4850 2400
 Wire Wire Line
-	8950 3600 9050 3600
+	8450 3600 9050 3600
 Wire Wire Line
-	9050 3450 8950 3450
+	9050 3450 8450 3450
 Wire Wire Line
-	8950 3300 9050 3300
+	8450 3300 9050 3300
 Wire Wire Line
-	9050 3150 8950 3150
+	9050 3150 8450 3150
 Wire Wire Line
 	9050 2200 8450 2200
 Wire Wire Line
@@ -1130,11 +1068,11 @@ Wire Wire Line
 Wire Wire Line
 	5000 3050 4250 3050
 Wire Wire Line
-	6700 3150 6850 3150
+	6150 3150 6850 3150
 Wire Wire Line
-	6850 3300 6700 3300
+	6850 3300 6150 3300
 Wire Wire Line
-	6700 3450 6850 3450
+	6150 3450 6850 3450
 Wire Wire Line
 	6850 3600 6150 3600
 Wire Wire Line
@@ -1150,13 +1088,13 @@ Wire Wire Line
 Wire Wire Line
 	4600 7400 4600 7450
 Wire Wire Line
-	4450 7150 4550 7150
+	3950 7150 4550 7150
 Wire Wire Line
 	4550 7350 4550 7300
 Wire Wire Line
 	4550 7300 4700 7300
 Wire Wire Line
-	4450 7350 4550 7350
+	3950 7350 4550 7350
 Wire Wire Line
 	4550 7150 4550 7200
 Wire Wire Line
@@ -1170,13 +1108,13 @@ Wire Wire Line
 Wire Wire Line
 	6250 7400 6250 7450
 Wire Wire Line
-	6100 7150 6200 7150
+	5600 7150 6200 7150
 Wire Wire Line
 	6200 7350 6200 7300
 Wire Wire Line
 	6200 7300 6350 7300
 Wire Wire Line
-	6100 7350 6200 7350
+	5600 7350 6200 7350
 Wire Wire Line
 	6200 7150 6200 7200
 Wire Wire Line
@@ -1251,15 +1189,15 @@ Wire Wire Line
 Wire Wire Line
 	2500 4750 2500 4850
 Wire Wire Line
-	2500 4850 2450 4850
+	2500 4850 1950 4850
 Wire Wire Line
-	2450 4700 2500 4700
+	2200 4700 2750 4700
 Wire Wire Line
-	2500 4700 2500 4650
+	2750 4700 2750 4650
 Wire Wire Line
-	2500 4650 2950 4650
+	2750 4650 2950 4650
 Wire Wire Line
-	2450 5000 2550 5000
+	1950 5000 2550 5000
 Wire Wire Line
 	2550 5000 2550 4850
 Wire Wire Line
@@ -1273,21 +1211,21 @@ Wire Wire Line
 Wire Wire Line
 	2700 5150 2700 5450
 Wire Wire Line
-	2700 5450 2450 5450
+	2700 5450 2000 5450
 Wire Wire Line
 	2950 5850 2900 5850
 Wire Wire Line
 	2900 5850 2900 6200
 Wire Wire Line
-	2900 6200 2700 6200
+	2900 6200 2000 6200
 Wire Wire Line
-	2700 6050 2850 6050
+	2000 6050 2850 6050
 Wire Wire Line
 	2850 6050 2850 5750
 Wire Wire Line
 	2850 5750 2950 5750
 Wire Wire Line
-	2700 5900 2800 5900
+	2000 5900 2800 5900
 Wire Wire Line
 	2800 5900 2800 5650
 Wire Wire Line
@@ -1299,27 +1237,21 @@ NoConn ~ 4250 4650
 NoConn ~ 4250 4850
 NoConn ~ 4250 4950
 Wire Wire Line
-	8500 5950 8700 5950
+	8950 5800 8500 5800
 Wire Wire Line
-	8700 5800 8500 5800
-Wire Wire Line
-	8500 5700 8700 5700
-Wire Wire Line
-	8700 5700 8700 5650
+	8500 5700 8950 5700
 Wire Wire Line
 	8500 5600 8550 5600
 Wire Wire Line
 	8550 5600 8550 5550
 Wire Wire Line
-	7850 5800 8000 5800
+	7450 5800 8000 5800
 Wire Wire Line
-	7850 5900 8000 5900
+	7450 5900 8000 5900
 Wire Wire Line
 	8000 5600 8000 5700
 Wire Wire Line
 	7250 5600 8000 5600
-Wire Wire Line
-	8500 5950 8500 5900
 Wire Wire Line
 	7250 5650 7250 5600
 Wire Wire Line
@@ -1422,4 +1354,78 @@ Text Label 4850 2400 2    60   ~ 0
 SDIO_CK
 Text Label 5000 2850 2    60   ~ 0
 SDIO_CMD
+Text Label 6150 3150 0    60   ~ 0
+SPI1_SCK
+Text Label 6150 3300 0    60   ~ 0
+SPI1_MISO
+Text Label 6150 3450 0    60   ~ 0
+SPI1_MOSI
+Text Label 8450 3600 0    60   ~ 0
+SPI2_NSS
+Text Label 8450 3450 0    60   ~ 0
+SPI2_MISO
+Text Label 8450 3300 0    60   ~ 0
+SPI2_MOSI
+Text Label 8450 3150 0    60   ~ 0
+SPI2_SCK
+Text Label 8950 5700 2    60   ~ 0
+SPI3_NSS
+Text Label 8950 5800 2    60   ~ 0
+SPI3_SCK
+Text Label 8950 5900 2    60   ~ 0
+SPI3_MISO
+Wire Wire Line
+	8500 5900 8950 5900
+Text Label 7450 5900 0    60   ~ 0
+SPI3_MOSI
+Text Label 5600 7150 0    60   ~ 0
+USART2_RX
+Text Label 5600 7350 0    60   ~ 0
+USART2_TX
+Text Label 3950 7150 0    60   ~ 0
+USART1_RX
+Text Label 3950 7350 0    60   ~ 0
+USART1_TX
+Text Label 2200 3650 0    60   ~ 0
+USART2_TX
+Text Label 2200 3800 0    60   ~ 0
+USART2_RX
+Text Label 2200 4100 0    60   ~ 0
+SPI1_SCK
+Text Label 2200 4250 0    60   ~ 0
+SPI1_MISO
+Text Label 2200 4400 0    60   ~ 0
+SPI1_MOSI
+Text Label 2200 4550 0    60   ~ 0
+USART1_TX
+Text Label 2200 4700 0    60   ~ 0
+USART1_RX
+Text Label 2000 5450 0    60   ~ 0
+SPI3_NSS
+Text Label 2000 5900 0    60   ~ 0
+SPI3_SCK
+Text Label 2000 6050 0    60   ~ 0
+SPI3_MISO
+Text Label 2000 6200 0    60   ~ 0
+SPI3_MOSI
+Text Label 2000 6450 0    60   ~ 0
+SPI2_NSS
+Text Label 2000 6600 0    60   ~ 0
+SPI2_SCK
+Text Label 2000 6750 0    60   ~ 0
+SPI2_MISO
+Text Label 2000 6900 0    60   ~ 0
+SPI2_MOSI
+Text Label 8450 2350 0    60   ~ 0
+OTG_FS_DM
+Text Label 8450 2500 0    60   ~ 0
+OTG_DS_DP
+Wire Wire Line
+	9050 2350 8450 2350
+Wire Wire Line
+	8450 2500 9050 2500
+Text Label 1950 4850 0    60   ~ 0
+OTG_FS_DM
+Text Label 1950 5000 0    60   ~ 0
+OTG_DS_DP
 $EndSCHEMATC
