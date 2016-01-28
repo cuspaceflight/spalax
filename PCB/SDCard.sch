@@ -209,14 +209,6 @@ Wire Wire Line
 Connection ~ 5400 2750
 Wire Wire Line
 	5650 2750 5650 2850
-Text GLabel 6150 3150 2    60   Input ~ 0
-SDIO_D0
-Text GLabel 6150 3300 2    60   Input ~ 0
-SDIO_D1
-Text GLabel 6150 3500 2    60   Input ~ 0
-SDIO_D2
-Text GLabel 6150 3650 2    60   Input ~ 0
-SDIO_D3
 Wire Wire Line
 	6100 3450 6100 3500
 Wire Wire Line
@@ -233,8 +225,36 @@ Wire Wire Line
 	6050 3550 6050 3650
 Wire Wire Line
 	6050 3650 6150 3650
-Text GLabel 2950 3250 0    60   Input ~ 0
+$Comp
+L R R15
+U 1 1 56AD8FED
+P 3250 3000
+F 0 "R15" V 3330 3000 50  0000 C CNN
+F 1 "47k" V 3250 3000 50  0000 C CNN
+F 2 "Resistors_SMD:R_0603" V 3180 3000 30  0001 C CNN
+F 3 "" H 3250 3000 30  0000 C CNN
+F 4 "Value" H 3250 3000 60  0001 C CNN "Digikey"
+F 5 "2332025" H 3250 3000 60  0001 C CNN "Farnell"
+F 6 "Value" H 3250 3000 60  0001 C CNN "Fieldname"
+	1    3250 3000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3250 3250 3250 3150
+Connection ~ 3250 3250
+Wire Wire Line
+	3250 2850 3250 2750
+Connection ~ 3250 2750
+Text HLabel 2950 3250 0    60   Input ~ 0
 SDIO_CMD
-Text GLabel 2950 3400 0    60   Input ~ 0
+Text HLabel 2950 3400 0    60   Input ~ 0
 SDIO_CK
+Text HLabel 6150 3150 2    60   Input ~ 0
+SDIO_D0
+Text HLabel 6150 3300 2    60   Input ~ 0
+SDIO_D1
+Text HLabel 6150 3500 2    60   Input ~ 0
+SDIO_D2
+Text HLabel 6150 3650 2    60   Input ~ 0
+SDIO_D3
 $EndSCHEMATC

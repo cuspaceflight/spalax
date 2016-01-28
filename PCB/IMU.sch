@@ -70,11 +70,17 @@ F 6 "Value" H 2950 950 60  0001 C CNN "Fieldname"
 	1    0    0    -1  
 $EndComp
 $Sheet
-S 6850 1100 1350 650 
+S 6850 1100 1400 1250
 U 56316C38
 F0 "SDCard" 60
 F1 "SDCard.sch" 60
 F2 "CARD_DETECT" I L 6850 1200 60 
+F3 "SDIO_CMD" I L 6850 1350 60 
+F4 "SDIO_CK" I L 6850 1500 60 
+F5 "SDIO_D0" I L 6850 1650 60 
+F6 "SDIO_D1" I L 6850 1800 60 
+F7 "SDIO_D2" I L 6850 1950 60 
+F8 "SDIO_D3" I L 6850 2100 60 
 $EndSheet
 $Sheet
 S 9050 1100 1400 800 
@@ -88,11 +94,11 @@ F5 "~Sensors" I L 9050 1800 60
 F6 "~IMU" I L 9050 1350 60 
 $EndSheet
 $Sheet
-S 6850 2100 1350 600 
+S 9050 3900 1400 600 
 U 56316D3B
 F0 "Power" 60
 F1 "Power.sch" 60
-F2 "USB5V" I L 6850 2200 60 
+F2 "USB5V" I L 9050 4000 60 
 $EndSheet
 $Sheet
 S 6850 3050 1400 1250
@@ -109,7 +115,7 @@ F8 "MPU_IRQ" I L 6850 4050 60
 F9 "~ADIS_RESET" I L 6850 4200 60 
 $EndSheet
 $Sheet
-S 9050 3050 1450 650 
+S 9050 3050 1400 650 
 U 56316E4B
 F0 "Altimeter" 60
 F1 "Altimeter.sch" 60
@@ -419,18 +425,6 @@ F 3 "" H 850 3850 60  0000 C CNN
 	1    850  3850
 	1    0    0    -1  
 $EndComp
-Text GLabel 4500 1800 2    60   Input ~ 0
-SDIO_D0
-Text GLabel 4500 1950 2    60   Input ~ 0
-SDIO_D1
-Text GLabel 4500 2100 2    60   Input ~ 0
-SDIO_D2
-Text GLabel 4500 2250 2    60   Input ~ 0
-SDIO_D3
-Text GLabel 4500 2400 2    60   Input ~ 0
-SDIO_CK
-Text GLabel 4500 2850 2    60   Input ~ 0
-SDIO_CMD
 Text GLabel 2700 4100 0    60   Input ~ 0
 SPI1_SCK
 Text GLabel 2700 4250 0    60   Input ~ 0
@@ -504,7 +498,7 @@ SPI2_MISO
 Text GLabel 8950 3300 0    60   Input ~ 0
 SPI2_MOSI
 $Sheet
-S 9050 2100 1350 600 
+S 9050 2100 1400 600 
 U 56316E4F
 F0 "USB" 60
 F1 "USB.sch" 60
@@ -512,9 +506,9 @@ F2 "USB5V" O L 9050 2200 60
 $EndSheet
 Text Label 8450 2200 0    60   ~ 0
 USB_VBUS
-Text Label 6250 2200 0    60   ~ 0
+Text Label 8450 4000 0    60   ~ 0
 USB_VBUS
-Text Label 2050 3150 0    60   ~ 0
+Text Label 2200 3150 0    60   ~ 0
 ~RST
 Text Label 1700 4700 2    60   ~ 0
 ~RST
@@ -589,8 +583,6 @@ Text Label 6150 3750 0    60   ~ 0
 ADIS_IRQ
 Text Label 5000 1550 2    60   ~ 0
 ADIS_IRQ
-Text GLabel 2200 2950 0    60   Output ~ 0
-~RST
 $Comp
 L CONN_01X04 P1
 U 1 1 56495CD8
@@ -986,9 +978,9 @@ Wire Wire Line
 Wire Wire Line
 	2950 3350 1750 3350
 Wire Wire Line
-	1750 3350 1750 3050
+	1750 3050 1750 3350
 Wire Wire Line
-	1750 3050 1350 3050
+	1350 3050 1750 3050
 Wire Wire Line
 	1400 3050 1400 3250
 Connection ~ 1400 3050
@@ -1070,31 +1062,31 @@ Wire Wire Line
 Wire Wire Line
 	4400 2950 4250 2950
 Wire Wire Line
-	4250 1950 4500 1950
+	4250 1950 4850 1950
 Wire Wire Line
 	4250 1850 4450 1850
 Wire Wire Line
 	4450 1850 4450 1800
 Wire Wire Line
-	4450 1800 4500 1800
+	4450 1800 4850 1800
 Wire Wire Line
 	4250 2050 4450 2050
 Wire Wire Line
 	4450 2050 4450 2100
 Wire Wire Line
-	4450 2100 4500 2100
+	4450 2100 4850 2100
 Wire Wire Line
 	4250 2150 4400 2150
 Wire Wire Line
 	4400 2150 4400 2250
 Wire Wire Line
-	4400 2250 4500 2250
+	4400 2250 4850 2250
 Wire Wire Line
 	4250 2250 4350 2250
 Wire Wire Line
 	4350 2250 4350 2400
 Wire Wire Line
-	4350 2400 4500 2400
+	4350 2400 4850 2400
 Wire Wire Line
 	8950 3600 9050 3600
 Wire Wire Line
@@ -1106,7 +1098,7 @@ Wire Wire Line
 Wire Wire Line
 	9050 2200 8450 2200
 Wire Wire Line
-	6850 2200 6250 2200
+	9050 4000 8450 4000
 Wire Wire Line
 	6250 1200 6850 1200
 Wire Wire Line
@@ -1118,7 +1110,7 @@ Wire Wire Line
 Wire Wire Line
 	8300 1800 9050 1800
 Wire Wire Line
-	2050 3150 2950 3150
+	2200 3150 2950 3150
 Wire Wire Line
 	950  5350 950  5400
 Wire Wire Line
@@ -1149,11 +1141,6 @@ Wire Wire Line
 	6150 3750 6850 3750
 Wire Wire Line
 	4250 5150 5000 5150
-Wire Wire Line
-	2200 2950 2300 2950
-Wire Wire Line
-	2300 2950 2300 3150
-Connection ~ 2300 3150
 Wire Wire Line
 	4600 7050 4600 7100
 Wire Wire Line
@@ -1236,7 +1223,7 @@ Connection ~ 1200 6150
 Wire Wire Line
 	4400 2950 4400 2850
 Wire Wire Line
-	4400 2850 4500 2850
+	4400 2850 5000 2850
 Wire Wire Line
 	4250 2850 4350 2850
 Wire Wire Line
@@ -1399,4 +1386,40 @@ Wire Wire Line
 	2900 5500 2900 5350
 Wire Wire Line
 	2900 5350 2950 5350
+Text Label 6250 1350 0    60   ~ 0
+SDIO_CMD
+Text Label 6250 1500 0    60   ~ 0
+SDIO_CK
+Text Label 6250 1650 0    60   ~ 0
+SDIO_D0
+Text Label 6250 1800 0    60   ~ 0
+SDIO_D1
+Text Label 6250 1950 0    60   ~ 0
+SDIO_D2
+Text Label 6250 2100 0    60   ~ 0
+SDIO_D3
+Wire Wire Line
+	6250 1350 6850 1350
+Wire Wire Line
+	6250 1500 6850 1500
+Wire Wire Line
+	6250 1650 6850 1650
+Wire Wire Line
+	6250 1800 6850 1800
+Wire Wire Line
+	6250 1950 6850 1950
+Wire Wire Line
+	6250 2100 6850 2100
+Text Label 4850 1800 2    60   ~ 0
+SDIO_D0
+Text Label 4850 1950 2    60   ~ 0
+SDIO_D1
+Text Label 4850 2100 2    60   ~ 0
+SDIO_D2
+Text Label 4850 2250 2    60   ~ 0
+SDIO_D3
+Text Label 4850 2400 2    60   ~ 0
+SDIO_CK
+Text Label 5000 2850 2    60   ~ 0
+SDIO_CMD
 $EndSCHEMATC
