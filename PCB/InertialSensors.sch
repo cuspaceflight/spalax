@@ -79,13 +79,13 @@ F 3 "" H 7000 4200 60  0000 C CNN
 $EndComp
 Text HLabel 5250 3650 0    60   Input ~ 0
 SCLK
-Text HLabel 5250 3550 0    60   Input ~ 0
+Text HLabel 5250 3550 0    60   Output ~ 0
 MISO
 Text HLabel 5250 3450 0    60   Input ~ 0
 MOSI
 Text HLabel 5250 3350 0    60   Input ~ 0
 ~ADIS_SS
-Text HLabel 5250 2850 0    60   Input ~ 0
+Text HLabel 5250 2850 0    60   Output ~ 0
 ADIS_IRQ
 NoConn ~ 5450 3050
 NoConn ~ 5450 3150
@@ -235,7 +235,6 @@ F 4 "9406140" H 2000 3750 60  0001 C CNN "Farnell"
 $EndComp
 Wire Wire Line
 	2150 3850 2650 3850
-NoConn ~ 3250 4300
 $Comp
 L +3.3V #PWR050
 U 1 1 5693EA6D
@@ -278,7 +277,7 @@ $EndComp
 Wire Wire Line
 	3950 4400 3950 4450
 NoConn ~ 3800 3250
-Text HLabel 2550 3750 0    60   Input ~ 0
+Text HLabel 2550 3750 0    60   Output ~ 0
 MISO
 Text HLabel 3950 2950 2    60   Input ~ 0
 MOSI
@@ -292,7 +291,7 @@ Text HLabel 3950 3150 2    60   Input ~ 0
 ~MPU_SS
 Wire Wire Line
 	3800 3150 3950 3150
-Text HLabel 2550 4050 0    60   Input ~ 0
+Text HLabel 2550 4050 0    60   Output ~ 0
 MPU_IRQ
 Wire Wire Line
 	2250 3650 2650 3650

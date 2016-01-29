@@ -107,7 +107,7 @@ Text HLabel 3000 1800 2    60   Input ~ 0
 ALT_SCLK
 Text HLabel 3000 1900 2    60   Input ~ 0
 ALT_SDI
-Text HLabel 3000 2000 2    60   Input ~ 0
+Text HLabel 3000 2000 2    60   Output ~ 0
 ALT_SDO
 Text HLabel 3000 2100 2    60   Input ~ 0
 ALT_CSB

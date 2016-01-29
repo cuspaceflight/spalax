@@ -123,7 +123,7 @@ F 6 "Value" H 5650 3000 60  0001 C CNN "Fieldname"
 	1    5650 3000
 	1    0    0    -1  
 $EndComp
-Text HLabel 2950 3550 0    60   Input ~ 0
+Text HLabel 2950 3550 0    60   Output ~ 0
 CARD_DETECT
 $Comp
 L C C16
