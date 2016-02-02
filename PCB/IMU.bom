@@ -1,72 +1,229 @@
-Farnell quickpaste format:
+Bill Of Materials
+=================
 
-2331975,1,1x 10 R_0603
+Source file: IMU.xml
+Date: 2016-02-02T00:30:12.584164
+
+Parts Missing Footprints
+------------------------
+
+
+Parts Missing Order Codes
+-------------------------
+TP1    BOOT0           Measurement_Points:Measurement_Point_Round-SMD-Pad_Big
+TP3    5V              Measurement_Points:Measurement_Point_Round-SMD-Pad_Big
+TP2    3V3             Measurement_Points:Measurement_Point_Round-SMD-Pad_Big
+
+Inconsistent Order Codes
+------------------------
+  Digikey
+  ~~~~~~~
+    Value: 
+      IC1    STM32F405VGT    IMU:LQFP100
+      C1     10µ             Capacitors_SMD:C_0603
+      C2     100n            Capacitors_SMD:C_0603
+      C12    2µ2             Capacitors_SMD:C_0603
+      C9     10n             Capacitors_SMD:C_0603
+      C7     1µ              Capacitors_SMD:C_0603
+      C3     15p             Capacitors_SMD:C_0603
+      Y1     8M              IMU:XTAL50x32
+      C4     15p             Capacitors_SMD:C_0603
+      R2     100             Resistors_SMD:R_0603
+      C6     100n            Capacitors_SMD:C_0603
+      C8     100n            Capacitors_SMD:C_0603
+      C10    100n            Capacitors_SMD:C_0603
+      C11    100n            Capacitors_SMD:C_0603
+      C13    100n            Capacitors_SMD:C_0603
+      C15    100n            Capacitors_SMD:C_0603
+      C14    2µ2             Capacitors_SMD:C_0603
+      SW1    SW_PUSH         Buttons_Switches_SMD:SW_SPST_EVQPE1
+      C5     100n            Capacitors_SMD:C_0603
+      P1     UART1           IMU:S04B-PASK-2
+      P3     UART2           IMU:S04B-PASK-2
+      R1     10K             Resistors_SMD:R_0603
+      P2     SWD             IMU:FTSH-105-01-F-D-K
+      P4     SPI             Pin_Headers:Pin_Header_Straight_2x04
+      P7     CAN BUS         Pin_Headers:Pin_Header_Straight_1x04
+      R3     47k             Resistors_SMD:R_0603
+      R4     47k             Resistors_SMD:R_0603
+      R5     47k             Resistors_SMD:R_0603
+      R6     47k             Resistors_SMD:R_0603
+      R15    47k             Resistors_SMD:R_0603
+      SP1    SPEAKER         IMU:ABI-042-RC
+      D4     LED_RED         LEDs:LED-0603
+      D3     LED_GREEN       LEDs:LED-0603
+      D5     LED_GREEN       LEDs:LED-0603
+      D6     LED_RED         LEDs:LED-0603
+      D2     LED_GREEN       LEDs:LED-0603
+      D1     LED_GREEN       LEDs:LED-0603
+      R7     1k              Resistors_SMD:R_0603
+      R8     510             Resistors_SMD:R_0603
+      R9     510             Resistors_SMD:R_0603
+      R11    510             Resistors_SMD:R_0603
+      R10    510             Resistors_SMD:R_0603
+      R12    510             Resistors_SMD:R_0603
+      R13    100             Resistors_SMD:R_0603
+      R14    10              Resistors_SMD:R_0603
+      Q1     Q_NMOS_GSD_PSV  Housings_SOT-23_SOT-143_TSOT-6:SOT-23
+      C17    1n              Capacitors_SMD:C_0603
+      C21    1n              Capacitors_SMD:C_0603
+      C24    100n            Capacitors_SMD:C_0603
+  Fieldname
+  ~~~~~~~~~
+    Value: 
+      IC1    STM32F405VGT    IMU:LQFP100
+      C1     10µ             Capacitors_SMD:C_0603
+      C2     100n            Capacitors_SMD:C_0603
+      C12    2µ2             Capacitors_SMD:C_0603
+      C9     10n             Capacitors_SMD:C_0603
+      C7     1µ              Capacitors_SMD:C_0603
+      C3     15p             Capacitors_SMD:C_0603
+      Y1     8M              IMU:XTAL50x32
+      C4     15p             Capacitors_SMD:C_0603
+      R2     100             Resistors_SMD:R_0603
+      C6     100n            Capacitors_SMD:C_0603
+      C8     100n            Capacitors_SMD:C_0603
+      C10    100n            Capacitors_SMD:C_0603
+      C11    100n            Capacitors_SMD:C_0603
+      C13    100n            Capacitors_SMD:C_0603
+      C15    100n            Capacitors_SMD:C_0603
+      C14    2µ2             Capacitors_SMD:C_0603
+      SW1    SW_PUSH         Buttons_Switches_SMD:SW_SPST_EVQPE1
+      C5     100n            Capacitors_SMD:C_0603
+      P1     UART1           IMU:S04B-PASK-2
+      P3     UART2           IMU:S04B-PASK-2
+      R1     10K             Resistors_SMD:R_0603
+      P2     SWD             IMU:FTSH-105-01-F-D-K
+      P4     SPI             Pin_Headers:Pin_Header_Straight_2x04
+      P7     CAN BUS         Pin_Headers:Pin_Header_Straight_1x04
+      R3     47k             Resistors_SMD:R_0603
+      R4     47k             Resistors_SMD:R_0603
+      R5     47k             Resistors_SMD:R_0603
+      R6     47k             Resistors_SMD:R_0603
+      R15    47k             Resistors_SMD:R_0603
+      SP1    SPEAKER         IMU:ABI-042-RC
+      D4     LED_RED         LEDs:LED-0603
+      D3     LED_GREEN       LEDs:LED-0603
+      D5     LED_GREEN       LEDs:LED-0603
+      D6     LED_RED         LEDs:LED-0603
+      D2     LED_GREEN       LEDs:LED-0603
+      D1     LED_GREEN       LEDs:LED-0603
+      R7     1k              Resistors_SMD:R_0603
+      R8     510             Resistors_SMD:R_0603
+      R9     510             Resistors_SMD:R_0603
+      R11    510             Resistors_SMD:R_0603
+      R10    510             Resistors_SMD:R_0603
+      R12    510             Resistors_SMD:R_0603
+      R13    100             Resistors_SMD:R_0603
+      R14    10              Resistors_SMD:R_0603
+      Q1     Q_NMOS_GSD_PSV  Housings_SOT-23_SOT-143_TSOT-6:SOT-23
+      C17    1n              Capacitors_SMD:C_0603
+      C21    1n              Capacitors_SMD:C_0603
+      C24    100n            Capacitors_SMD:C_0603
+  Farnell
+  ~~~~~~~
+    1830749: 
+      P1     UART1           IMU:S04B-PASK-2
+      P3     UART2           IMU:S04B-PASK-2
+
+Vendor Specific BOMs
+--------------------
+  Digikey
+  ~~~~~~~
+49,Value,49x 510 UART1 SW_PUSH STM32F405VGT SPI 10µ Q_NMOS_GSD_PSV 8M SWD LED_GREEN 1k 1n UART2 2µ2 100n 10n 100 47k LED_RED 1µ 15p SPEAKER 10K CAN BUS 10 SW_SPST_EVQPE1 S04B-PASK-2 ABI-042-RC Pin_Header_Straight_1x04 XTAL50x32 C_0603 Pin_Header_Straight_2x04 SOT-23 LQFP100 FTSH-105-01-F-D-K R_0603 LED-0603 IC1 C1 C2 C12 C9 C7 C3 Y1 C4 R2 C6 C8 C10 C11 C13 C15 C14 SW1 C5 P1 P3 R1 P2 P4 P7 R3 R4 R5 R6 R15 SP1 D4 D3 D5 D6 D2 D1 R7 R8 R9 R11 R10 R12 R13 R14 Q1 C17 C21 C24
+1,1428-1019-1-ND,1x MOTION/POSITION-MPU-9250(QFN24) QFN24G-0.4-3X3MM U3
+
+
+  DigiKey
+  ~~~~~~~
+1,FTMH-112-03-L-DV,1x ADIS16405BMLZ ADIS16405BMLZ U2
+
+
+  Fieldname
+  ~~~~~~~~~
+Value,49,49x IC1 C1 C2 C12 C9 C7 C3 Y1 C4 R2 C6 C8 C10 C11 C13 C15 C14 SW1 C5 P1 P3 R1 P2 P4 P7 R3 R4 R5 R6 R15 SP1 D4 D3 D5 D6 D2 D1 R7 R8 R9 R11 R10 R12 R13 R14 Q1 C17 C21 C24 SW_SPST_EVQPE1,S04B-PASK-2,ABI-042-RC,Pin_Header_Straight_1x04,XTAL50x32,C_0603,Pin_Header_Straight_2x04,SOT-23,LQFP100,FTSH-105-01-F-D-K,R_0603,LED-0603
+
+
+  Farnell
+  ~~~~~~~
 2067775,1,1x ADP3335ARMZ-3.3 MSOP8
+2362662,1,1x MS5611-01BA03 MS5611-01BA
+2426381,1,1x USB_OTG USB_Mini-B
+2443092,1,1x MICROSD_HOLDER MEM2051
+RS 512-8462,1,1x BATTERY S02B-PASK-2
 1849515,1,1x ADIS16405BMLZ ADIS16405BMLZ
-2211185,2,2x 2µ2 C_0603
-1800751,1,1x 500mA MC33191
-2309028,3,3x 10µ C_0603
-2333549,2,2x 150 R_0603
+2332025,5,5x 47k R_0603
+1295310,1,1x USBLC6-2 SOT-23-6
+2290328,4,4x LED_GREEN LED-0603
+1759102,2,2x 10n C_0603
+2074873,1,1x ADP3335ARMZ-5 MSOP8
+9406140,12,12x 100n C_0603
+2368169,1,1x CGA0402MLC-12G R0402
+2303192,1,1x 10K R_0603
+2331975,1,1x 10 R_0603
+1865285,1,1x SWD FTSH-105-01-F-D-K
+2290329,2,2x LED_RED LED-0603
+1510761,1,1x Q_NMOS_GSD_PSV SOT-23
+2464619,2,2x 15p C_0603
 2101329,1,1x 8M XTAL50x32
-1469777,1,1x 200 R_0603
+2331989,1,1x 100 R_0603
+1593441,1,1x SPI Pin_Header_Straight_2x0
+1469826,5,5x 510 R_0603
+1830749,2,2x UART1 UART2 S04B-PASK-2
+2079522,1,1x SW_PUSH SW_SPST_EVQPE1
+1022250,1,1x CAN BUS Pin_Header_Straight
+1827949,1,1x SPEAKER ABI-042-RC
+2211185,2,2x 2µ2 C_0603
+2116678,1,1x 1k R_0603
+2211179,4,4x 1µ C_0603
+2309028,3,3x 10µ C_0603
+2215224,1,1x STM32F405VGT LQFP100
 2333587,1,1x 100 R_0603
 1414608,2,2x 1n C_0603
-2141288,3,3x 130 R_0603
+1800751,1,1x 500mA MC33191
 9843868,1,1x S1A SMA_Standard
-2074873,1,1x ADP3335ARMZ-5 MSOP8
-2464619,2,2x 15p C_0603
-2211179,4,4x 1µ C_0603
-1510761,1,1x Q_NMOS_GSD_PSV SOT-23
-2368169,1,1x CGA0402MLC-12G R0402
-1295310,1,1x USBLC6-2 SOT-23-6
-Value,2,2x STM32F405VGT LQFP100
-9406140,8,8x 100n C_0603
-RS 512-8462,1,1x BATTERY S02B-PASK-2
-2426381,1,1x USB_OTG USB_Mini-B
-2362662,1,1x MS5611-01BA03 MS5611-01BA
-1827949,1,1x SPEAKER ABI-042-RC
-2331989,1,1x 100 R_0603
-1759102,1,1x 10n C_0603
-2290328,4,4x LED_GREEN LED-0603
-2443092,1,1x MICROSD_HOLDER MEM2051
-2290329,2,2x LED_RED LED-0603
 
 
+Assembly BOM
+------------
+Value                49  510,UART1,SW_PUSH,STM32F405VGT,SPI,10µ,Q_NMOS_GSD_PSV,8M,SWD,LED_GREEN,1k,1n,UART2,2µ2,100n,10n,100,47k,LED_RED,1µ,15p,SPEAKER,10K,CAN BUS,10 SW_SPST_EVQPE1,S04B-PASK-2,ABI-042-RC,Pin_Header_Straight_1x04,XTAL50x32,C_0603,Pin_Header_Straight_2x04,SOT-23,LQFP100,FTSH-105-01-F-D-K,R_0603,LED-0603 C1 C10 C11 C12 C13 C14 C15 C17 C2 C21 C24 C3 C4 C5 C6 C7 C8 C9 D1 D2 D3 D4 D5 D6 IC1 P1 P2 P3 P4 P7 Q1 R1 R10 R11 R12 R13 R14 R15 R2 R3 R4 R5 R6 R7 R8 R9 SP1 SW1 Y1
+1428-1019-1-ND       1   MOTION/POSITION-MPU-9250(QFN24) QFN24G-0.4-3X3MM U3
+FTMH-112-03-L-DV     1   ADIS16405BMLZ   ADIS16405BMLZ   U2
+Value                49  510,UART1,SW_PUSH,STM32F405VGT,SPI,10µ,Q_NMOS_GSD_PSV,8M,SWD,LED_GREEN,1k,1n,UART2,2µ2,100n,10n,100,47k,LED_RED,1µ,15p,SPEAKER,10K,CAN BUS,10 SW_SPST_EVQPE1,S04B-PASK-2,ABI-042-RC,Pin_Header_Straight_1x04,XTAL50x32,C_0603,Pin_Header_Straight_2x04,SOT-23,LQFP100,FTSH-105-01-F-D-K,R_0603,LED-0603 C1 C10 C11 C12 C13 C14 C15 C17 C2 C21 C24 C3 C4 C5 C6 C7 C8 C9 D1 D2 D3 D4 D5 D6 IC1 P1 P2 P3 P4 P7 Q1 R1 R10 R11 R12 R13 R14 R15 R2 R3 R4 R5 R6 R7 R8 R9 SP1 SW1 Y1
+2067775              1   ADP3335ARMZ-3.3 MSOP8           IC2
+2362662              1   MS5611-01BA03   MS5611-01BA     IC4
+2426381              1   USB_OTG         USB_Mini-B      P6
+2443092              1   MICROSD_HOLDER  MEM2051         U1
+RS 512-8462          1   BATTERY         S02B-PASK-2     P5
+1849515              1   ADIS16405BMLZ   ADIS16405BMLZ   U2
+2332025              5   47k             R_0603          R15 R3 R4 R5 R6
+1295310              1   USBLC6-2        SOT-23-6        D8
+2290328              4   LED_GREEN       LED-0603        D1 D2 D3 D5
+1759102              2   10n             C_0603          C26 C9
+2074873              1   ADP3335ARMZ-5   MSOP8           IC3
+9406140              12  100n            C_0603          C10 C11 C13 C15 C16 C2 C24 C25 C27 C5 C6 C8
+2368169              1   CGA0402MLC-12G  R0402           D9
+2303192              1   10K             R_0603          R1
+2331975              1   10              R_0603          R14
+1865285              1   SWD             FTSH-105-01-F-D-K P2
+2290329              2   LED_RED         LED-0603        D4 D6
+1510761              1   Q_NMOS_GSD_PSV  SOT-23          Q1
+2464619              2   15p             C_0603          C3 C4
+2101329              1   8M              XTAL50x32       Y1
+2331989              1   100             R_0603          R13
+1593441              1   SPI             Pin_Header_Straight_2x04 P4
+1469826              5   510             R_0603          R10 R11 R12 R8 R9
+1830749              2   UART1,UART2     S04B-PASK-2     P1 P3
+2079522              1   SW_PUSH         SW_SPST_EVQPE1  SW1
+1022250              1   CAN BUS         Pin_Header_Straight_1x04 P7
+1827949              1   SPEAKER         ABI-042-RC      SP1
+2211185              2   2µ2             C_0603          C12 C14
+2116678              1   1k              R_0603          R7
+2211179              4   1µ              C_0603          C18 C20 C22 C7
+2309028              3   10µ             C_0603          C1 C19 C23
+2215224              1   STM32F405VGT    LQFP100         IC1
+2333587              1   100             R_0603          R2
+1414608              2   1n              C_0603          C17 C21
+1800751              1   500mA           MC33191         F1
+9843868              1   S1A             SMA_Standard    D7
 
-With component refs:
-
-2331975, 1, 10 R_0603  R14
-2067775, 1, ADP3335ARMZ-3.3 MSOP8  IC2
-1849515, 1, ADIS16405BMLZ ADIS16405BMLZ  U2
-2211185, 2, 2µ2 C_0603  C12 C14
-1800751, 1, 500mA MC33191  F1
-2309028, 3, 10µ C_0603  C1 C23 C19
-2333549, 2, 150 R_0603  R10 R12
-2101329, 1, 8M XTAL50x32  Y1
-1469777, 1, 200 R_0603  R7
-2333587, 1, 100 R_0603  R2
-1414608, 2, 1n C_0603  C17 C21
-2141288, 3, 130 R_0603  R8 R9 R11
-9843868, 1, S1A SMA_Standard  D7
-2074873, 1, ADP3335ARMZ-5 MSOP8  IC3
-2464619, 2, 15p C_0603  C3 C4
-2211179, 4, 1µ C_0603  C7 C20 C22 C18
-1510761, 1, Q_NMOS_GSD_PSV SOT-23  Q1
-2368169, 1, CGA0402MLC-12G R0402  D9
-1295310, 1, USBLC6-2 SOT-23-6  D8
-Value, 2, STM32F405VGT LQFP100 ERROR Different parts specify same order number.
-9406140, 8, 100n C_0603  C2 C6 C8 C10 C11 C13 C15 C5
-RS 512-8462, 1, BATTERY S02B-PASK-2  P5
-2426381, 1, USB_OTG USB_Mini-B  P6
-2362662, 1, MS5611-01BA03 MS5611-01BA  IC4
-1827949, 1, SPEAKER ABI-042-RC  SP1
-2331989, 1, 100 R_0603  R13
-1759102, 1, 10n C_0603  C9
-2290328, 4, LED_GREEN LED-0603  D3 D5 D2 D1
-2443092, 1, MICROSD_HOLDER MEM2051  U1
-2290329, 2, LED_RED LED-0603  D4 D6
-
-
-
-No Farnell codes:
-SW1, P1, P3, P4, R1, P2, R3, R4, R5, R6, C16
