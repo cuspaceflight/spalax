@@ -15,7 +15,7 @@ DMA2, stream 6
 
 # SPI1
 
-DMA2, stream 0
+DMA2, stream 0 & 3
 
 * 29/PA4/SPI1_NSS
 * 30/PA5/SPI1_SCK
