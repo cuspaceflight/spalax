@@ -5,8 +5,8 @@
 #include "badthinghandler.h"
 
 #define MPU9250_SPID         SPID1
-#define MPU9250_SPI_CS_PORT  GPIOC
-#define MPU9250_SPI_CS_PIN   GPIOC_ACCEL_CS
+#define MPU9250_SPI_CS_PORT  GPIOA
+#define MPU9250_SPI_CS_PIN   GPIOA_MPU_NSS
 
 static BinarySemaphore mpu9250_semaphore;
 

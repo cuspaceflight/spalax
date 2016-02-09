@@ -7,7 +7,7 @@
 
 #define ADIS16405_SPID         SPID1
 #define ADIS16405_SPI_CS_PORT  GPIOC
-#define ADIS16405_SPI_CS_PIN   GPIOC_ACCEL_CS
+#define ADIS16405_SPI_CS_PIN   GPIOC_ADIS_NSS
 
 static BinarySemaphore adis16405_semaphore;
 
