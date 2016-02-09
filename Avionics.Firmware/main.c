@@ -48,15 +48,15 @@ int main(void) {
     linktest.pos[1] = 2;
     linktest.pos[2] = 3;
     print_state_estimate(&linktest);
-    
+
     //chThdCreateStatic(waMission, sizeof(waMission), NORMALPRIO, mission_thread, NULL);
 
     extStart(&EXTD1, &extcfg);
 
     while (TRUE) {
-        palSetPad(GPIOD, GPIOD_IMU_GRN);
+        palSetPad(GPIOE, GPIOE_STAT_IMU);
         chThdSleepMilliseconds(500);
-        palClearPad(GPIOD, GPIOD_IMU_GRN);
+        palClearPad(GPIOE, GPIOE_STAT_IMU);
         chThdSleepMilliseconds(500);
     }
 }
