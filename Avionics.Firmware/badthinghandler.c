@@ -2,7 +2,7 @@
 #include "hal.h"
 #include "badthinghandler.h"
 
-#define NO_BEEPING false
+#define NO_BEEPING true
 
 volatile bool error_states[ERROR_MAX];
 
@@ -18,10 +18,14 @@ static void setSensorOk(bool ok) {
 	if (ok) {
 		// Set GPIOB_STAT_SENSORS
 		// Turn off GPIOE_STAT_NSENSORS
+        palSetPad(GPIOB, GPIOB_STAT_SENSORS);
+        palClearPad(GPIOE, GPIOE_STAT_NSENSORS);
 	}
 	else {
 		// SET GPIOE_STAT_NSENSORS
 		// Turn off GPIOB_STAT_SENSORS
+        palClearPad(GPIOB, GPIOB_STAT_SENSORS);
+        palSetPad(GPIOE, GPIOE_STAT_NSENSORS);
 	}
 }
 
@@ -41,32 +45,31 @@ static void beeper(int n, int ontime, int offtime)
 
 }
 
+void bthandler_reset(void) {
+    for (int i = 0; i < ERROR_MAX; i++) {
+		error_states[i] = false;
+	}
+}
+
 msg_t bthandler_thread(void* arg) {
 	(void)arg;
     chRegSetThreadName("BadThingHandler");
-	int i;
-	for (i = 0; i < ERROR_MAX; i++) {
-		error_states[i] = false;
-	}
-
-    bool no_bad_thing = true;
-
 	while (true) {
-		for (i = 0; i < ERROR_MAX; i++) {
+        bool no_bad_thing = true;
+		for (int i = 0; i < ERROR_MAX; i++) {
 			if (error_states[i]) {
 				no_bad_thing = false;
 			}
 		}
 
 		setIMUOk(no_bad_thing);
-		setSensorOk(error_states[ERROR_ADIS16405] || error_states[ERROR_MPU9250] || error_states[ERROR_ALTIM]);
+		setSensorOk(!(error_states[ERROR_ADIS16405] || error_states[ERROR_MPU9250] || error_states[ERROR_ALTIM]));
 
 		if (no_bad_thing) {
 			beeper(1, 10, 990);
 		}
 		else {
-			beeper(20, 600, 100);
-			chThdSleepMilliseconds(1000);
+			beeper(1, 800, 200);
 		}
 	}
 

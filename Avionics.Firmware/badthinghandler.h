@@ -17,6 +17,7 @@ typedef enum {
 /* Set a specific error.
 * If `set` is true then the error is occurring.
 */
+void bthandler_reset(void);
 void bthandler_set_error(bthandler_error_t err, bool set);
 msg_t bthandler_thread(void* arg);
 

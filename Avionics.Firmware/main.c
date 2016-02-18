@@ -1,9 +1,15 @@
 #include "ch.h"
 #include "hal.h"
 #include "state_estimate.h"
+#include "mpu9250.h"
+#include "ms5611.h"
+#include "badthinghandler.h"
 
 //static WORKING_AREA(waMission, 1024);
 
+static WORKING_AREA(waMPU, 2048);
+static WORKING_AREA(waBadThing, 1024);
+//static WORKING_AREA(waMS5611, 768);
 
 /*
  * Set up pin change interrupts for the various sensors that react to them.
@@ -39,18 +45,22 @@ int main(void) {
     chSysInit();
     chRegSetThreadName("Main");
 
+    bthandler_reset();
+
     // Temporary - here to make sure linker configured correctly
-    state_estimate_t linktest;
+    /*state_estimate_t linktest;
 
 
     reset_state_estimate(&linktest);
     linktest.pos[0] = 1;
     linktest.pos[1] = 2;
     linktest.pos[2] = 3;
-    print_state_estimate(&linktest);
+    print_state_estimate(&linktest);*/
 
     //chThdCreateStatic(waMission, sizeof(waMission), NORMALPRIO, mission_thread, NULL);
-
+    chThdCreateStatic(waBadThing, sizeof(waBadThing), NORMALPRIO, bthandler_thread, NULL);
+    chThdCreateStatic(waMPU, sizeof(waMPU), NORMALPRIO, mpu9250_thread, NULL);
+    //chThdCreateStatic(waMS5611, sizeof(waMS5611), NORMALPRIO, ms5611_thread, NULL);
     extStart(&EXTD1, &extcfg);
 
     while (TRUE) {

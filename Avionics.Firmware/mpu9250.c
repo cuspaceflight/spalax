@@ -81,7 +81,7 @@ static void mpu9250_burst_read(uint16_t data_out[10]) {
 
 static bool mpu9250_id_check(void) {
     // Read WHOAMI Register
-    uint8_t whoami = mpu9250_read_u8(0x68);
+    uint8_t whoami = mpu9250_read_u8(0x75);
     return whoami == 0x71;
 }
 
@@ -114,7 +114,7 @@ msg_t mpu9250_thread(void *arg) {
         // Clock rate should be <= 1 MHz for burst mode
         // I believe this sets it to 168000000 / 4 / 64 ~= 1MHz
         // TODO: Verify this
-        SPI_CR1_BR_2 | SPI_CR1_CPOL | SPI_CR1_CPHA
+        SPI_CR1_BR_1 | SPI_CR1_BR_0 | SPI_CR1_CPOL | SPI_CR1_CPHA
     };
 
     chBSemInit(&mpu9250_semaphore, true);
