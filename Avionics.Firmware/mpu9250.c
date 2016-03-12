@@ -11,6 +11,33 @@
 
 static BinarySemaphore mpu9250_semaphore;
 
+// MPU9250 registers
+enum {
+    MPU9250_REG_WHOAMI = 117,
+};
+
+// MPU9250 constants
+#define MPU9250_WHOAMI_DEFAULT_VALUE 0x71
+
+//// LOW-LEVEL COMMUNICATION ////
+
+// mpu9250_read_u8 reads a single byte value from an 8-bit MPU9250 register
+static uint8_t mpu9250_read_u8(uint8_t addr);
+
+// mpu9250_read_multiple reads a multi-byte register from the MPU9250 into a
+// memory buffer. The buffer pointed to by buf should have at least num bytes
+// available.
+static void mpu9250_read_multiple(uint8_t addr, uint8_t* buf, int num);
+
+// mpu9250_write_u8 writes a single byte into an 8-bit MPU9250 register.
+static void mpu9250_write_u8(uint8_t addr, uint8_t val);
+
+//// HIGH-LEVEL OPERATIONS ////
+
+// mpu9250_id_check performs a simple sanity check on MPU9250 communication by
+// checking that the WHOAMI register of the MPU9250 has an expected value.
+static bool mpu9250_id_check(void);
+
 static uint8_t mpu9250_read_u8(uint8_t addr) {
     // Set the read bit
     addr |= (1 << 7);
@@ -82,8 +109,8 @@ static void mpu9250_burst_read(uint16_t data_out[10]) {
 
 static bool mpu9250_id_check(void) {
     // Read WHOAMI Register
-    uint8_t whoami = mpu9250_read_u8(0x75);
-    return whoami == 0x71;
+    uint8_t whoami = mpu9250_read_u8(MPU9250_REG_WHOAMI);
+    return whoami == MPU9250_WHOAMI_DEFAULT_VALUE;
 }
 
 static void mpu9250_init(void) {
