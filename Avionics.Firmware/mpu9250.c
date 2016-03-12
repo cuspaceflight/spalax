@@ -3,6 +3,7 @@
 #include "chprintf.h"
 #include "mpu9250.h"
 #include "badthinghandler.h"
+#include "compilermacros.h"
 
 #define MPU9250_SPID         SPID1
 #define MPU9250_SPI_CS_PORT  GPIOA
@@ -104,8 +105,7 @@ void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
     chSysUnlockFromIsr();
 }
 
-msg_t mpu9250_thread(void *arg) {
-    (void)arg;
+msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
     const SPIConfig spi_cfg = {
         NULL,
         MPU9250_SPI_CS_PORT,
