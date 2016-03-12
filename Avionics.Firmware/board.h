@@ -216,7 +216,7 @@
                                      PIN_MODE_INPUT(GPIOA_MPU_IRQ)        |\
 									 PIN_MODE_ALTERNATE(GPIOA_USART2_TX) | \
 									 PIN_MODE_ALTERNATE(GPIOA_USART2_RX) | \
-									 PIN_MODE_INPUT(GPIOA_MPU_NSS) | \
+									 PIN_MODE_OUTPUT(GPIOA_MPU_NSS) | \
 									 PIN_MODE_ALTERNATE(GPIOA_IMU_SCK) | \
 									 PIN_MODE_ALTERNATE(GPIOA_IMU_MISO) | \
 									 PIN_MODE_ALTERNATE(GPIOA_IMU_MOSI) | \

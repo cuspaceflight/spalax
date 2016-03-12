@@ -126,7 +126,7 @@ msg_t mpu9250_thread(void *arg) {
     // Wait for startup
     while (!mpu9250_id_check()) {
         bthandler_set_error(ERROR_MPU9250, true);
-        chThdSleepMilliseconds(500);
+        chThdSleepMilliseconds(50);
     }
     bthandler_set_error(ERROR_MPU9250, false);
 
