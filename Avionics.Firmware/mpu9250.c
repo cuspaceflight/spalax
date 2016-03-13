@@ -4,20 +4,13 @@
 #include "mpu9250.h"
 #include "badthinghandler.h"
 #include "compilermacros.h"
+#include "mpu9250-reg.h"
 
 #define MPU9250_SPID         SPID1
 #define MPU9250_SPI_CS_PORT  GPIOA
 #define MPU9250_SPI_CS_PIN   GPIOA_MPU_NSS
 
 static BinarySemaphore mpu9250_semaphore;
-
-// MPU9250 registers
-enum {
-    MPU9250_REG_WHOAMI = 117,
-};
-
-// MPU9250 constants
-#define MPU9250_WHOAMI_DEFAULT_VALUE 0x71
 
 //// LOW-LEVEL COMMUNICATION ////
 
@@ -35,7 +28,7 @@ static void mpu9250_write_u8(uint8_t addr, uint8_t val);
 //// HIGH-LEVEL OPERATIONS ////
 
 // mpu9250_id_check performs a simple sanity check on MPU9250 communication by
-// checking that the WHOAMI register of the MPU9250 has an expected value.
+// checking that the WHO_AM_I register of the MPU9250 has an expected value.
 static bool mpu9250_id_check(void);
 
 static uint8_t mpu9250_read_u8(uint8_t addr) {
@@ -108,9 +101,9 @@ static void mpu9250_burst_read(uint16_t data_out[10]) {
 }
 
 static bool mpu9250_id_check(void) {
-    // Read WHOAMI Register
-    uint8_t whoami = mpu9250_read_u8(MPU9250_REG_WHOAMI);
-    return whoami == MPU9250_WHOAMI_DEFAULT_VALUE;
+    // Read WHO_AM_I Register
+    uint8_t whoami = mpu9250_read_u8(MPU9250_REG_WHO_AM_I);
+    return whoami == MPU9250_WHO_AM_I_RESET_VALUE;
 }
 
 static void mpu9250_init(void) {
