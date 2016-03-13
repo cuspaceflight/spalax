@@ -303,9 +303,11 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
     mpu9250_init();
 
     // Perform a self-test of the MPU9250
-    if(!mpu9250_self_test()) {
+    while(!mpu9250_self_test()) {
         bthandler_set_error(ERROR_MPU9250, true);
+        chThdSleepMilliseconds(50);
     }
+    bthandler_set_error(ERROR_MPU9250, false);
 
     uint16_t raw_data[10];
     while(TRUE) {
