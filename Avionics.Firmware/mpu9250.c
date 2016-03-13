@@ -212,7 +212,7 @@ static void mpu9250_init(void) {
         { MPU9250_REG_PWR_MGMT_1, 0x80 }, // Reset
         { MPU9250_REG_PWR_MGMT_1, 0x00 }, // Select internal 20MHz source
         { MPU9250_REG_PWR_MGMT_2, 0x00 }, // Enable gyro & accel
-        { MPU9250_REG_USER_CTRL, 0x10 }, // SPI only, sidable FIFO
+        { MPU9250_REG_USER_CTRL, 0x10 }, // SPI only, disable FIFO
     };
 
     // Perform initial reset
