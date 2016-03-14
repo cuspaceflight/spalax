@@ -1,4 +1,5 @@
 #include "ch.h"
+#include "chprintf.h"
 #include "hal.h"
 #include "shell.h"
 
@@ -6,16 +7,50 @@
 #include "serialconsole.h"
 #include "compilermacros.h"
 
+static void cmd_threads(BaseSequentialStream *chp,
+                        int argc, COMPILER_UNUSED_ARG(char *argv[]))
+{
+    static const char *states[] = {THD_STATE_NAMES};
+    uint64_t busy = 0, total = 0;
+    Thread *tp;
+
+    if (argc > 0) {
+        chprintf(chp, "Usage: threads\r\n");
+        return;
+    }
+
+    chprintf(chp,
+        "name        |addr    |stack   |free|prio|refs|state    |time\r\n");
+    chprintf(chp,
+        "------------|--------|--------|----|----|----|---------|--------\r\n");
+    tp = chRegFirstThread();
+    do {
+        chprintf(chp, "%12s|%.8lx|%.8lx|%4lu|%4lu|%4lu|%9s|%lu\r\n",
+                 chRegGetThreadName(tp),
+                 (uint32_t)tp, (uint32_t)tp->p_ctx.r13,
+                 (uint32_t)tp->p_ctx.r13 - (uint32_t)tp->p_stklimit,
+                 (uint32_t)tp->p_prio, (uint32_t)(tp->p_refs - 1),
+                 states[tp->p_state], (uint32_t)tp->p_time);
+        if(tp->p_prio != 1) {
+            busy += tp->p_time;
+        }
+        total += tp->p_time;
+        tp = chRegNextThread(tp);
+    } while (tp != NULL);
+    chprintf(chp, "CPU Usage: %ld%%\r\n", busy*100/total);
+}
+
 /* Virtual serial port over USB.*/
 SerialUSBDriver SDU1;
 
 static const ShellCommand commands[] = {
-  {NULL, NULL}
+    {"threads", cmd_threads},
+    {NULL, NULL}
 };
 
 static const ShellConfig shell_cfg1 = {
-  (BaseSequentialStream *)&SDU1,
-  commands
+    (BaseSequentialStream *)&SDU1,
+    commands
 };
 
 #define SHELL_WA_SIZE   THD_WA_SIZE(2048)
