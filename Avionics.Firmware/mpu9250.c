@@ -62,16 +62,8 @@ static inline uint16_t mpu9250_self_test_to_factory_trim(uint8_t st_val) {
 }
 
 static uint8_t mpu9250_read_u8(uint8_t addr) {
-    // Set the read bit
-    addr |= (1 << 7);
-
     uint8_t read_val;
-
-    spiSelect(&MPU9250_SPID);
-    spiSend(&MPU9250_SPID, 1, (void*)&addr);
-    spiReceive(&MPU9250_SPID, 1, (void*)&read_val);
-    spiUnselect(&MPU9250_SPID);
-
+    mpu9250_read_multiple(addr, &read_val, 1);
     return read_val;
 }
 
