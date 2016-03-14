@@ -4,11 +4,13 @@
 #include "mpu9250.h"
 #include "ms5611.h"
 #include "badthinghandler.h"
+#include "serialconsole.h"
 
 //static WORKING_AREA(waMission, 1024);
 
 static WORKING_AREA(waMPU, 2048);
 static WORKING_AREA(waBadThing, 1024);
+static WORKING_AREA(waSerialConsole, 512);
 //static WORKING_AREA(waMS5611, 768);
 
 /*
@@ -61,6 +63,8 @@ int main(void) {
     chThdCreateStatic(waBadThing, sizeof(waBadThing), NORMALPRIO, bthandler_thread, NULL);
     chThdCreateStatic(waMPU, sizeof(waMPU), NORMALPRIO, mpu9250_thread, NULL);
     //chThdCreateStatic(waMS5611, sizeof(waMS5611), NORMALPRIO, ms5611_thread, NULL);
+    chThdCreateStatic(waSerialConsole, sizeof(waSerialConsole), NORMALPRIO,
+                      serial_console_thread, NULL);
     extStart(&EXTD1, &extcfg);
 
     while (TRUE) {
