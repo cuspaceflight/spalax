@@ -100,4 +100,7 @@ enum {
 #define bytes_to_int16(high, low) \
     ( (((int16_t)(high)) << 8) | ((int16_t)(low)) )
 
+// The I2C address of the AK8963 embedded within the MPU9250.
+#define MPU9250_AK893_I2C_ADDR 0x0c
+
 #endif // MPU9250_REG_H
