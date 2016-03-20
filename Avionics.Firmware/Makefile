@@ -69,7 +69,7 @@ PROJECT = IMU
 
 # Imported source files and paths
 CHIBIOS = ../ChibiOS-RT
-include board.mk
+include config/board.mk
 include $(CHIBIOS)/os/hal/platforms/STM32F4xx/platform.mk
 include $(CHIBIOS)/os/hal/hal.mk
 include $(CHIBIOS)/os/ports/GCC/ARMCMx/STM32F4xx/port.mk
@@ -77,7 +77,7 @@ include $(CHIBIOS)/os/kernel/kernel.mk
 include $(CHIBIOS)/test/test.mk
 
 # Define linker script file here
-LDSCRIPT= STM32F407xG_CCM.ld
+LDSCRIPT= config/STM32F407xG_CCM.ld
 
 # Override fatfs.mk to use local (in-repository) fatfs source
 FATFSSRC = ${CHIBIOS}/os/various/fatfs_bindings/fatfs_diskio.c \
@@ -99,7 +99,7 @@ CSRC = $(PORTSRC) \
        $(CHIBIOS)/os/various/syscalls.c \
        $(CHIBIOS)/os/various/shell.c \
        main.c adis16405.c platform_firmware.c badthinghandler.c mpu9250.c ms5611.c messaging.c \
-       usbcfg.c serialconsole.c
+       config/usbcfg.c serialconsole.c usb_telemetry.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -130,7 +130,7 @@ ASMSRC = $(PORTASM)
 
 INCDIR = $(PORTINC) $(KERNINC) $(TESTINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) \
-         $(CHIBIOS)/os/various $(FATFSINC) $(AVIONICS_INCLUDES)
+         $(CHIBIOS)/os/various $(FATFSINC) config $(AVIONICS_INCLUDES)
 
 #
 # Project, sources and paths

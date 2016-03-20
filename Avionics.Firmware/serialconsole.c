@@ -41,7 +41,7 @@ static void cmd_threads(BaseSequentialStream *chp,
 }
 
 /* Virtual serial port over USB.*/
-SerialUSBDriver SDU1;
+extern SerialUSBDriver SDU1;
 
 static const ShellCommand commands[] = {
     {"threads", cmd_threads},

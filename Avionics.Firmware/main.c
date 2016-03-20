@@ -6,12 +6,15 @@
 #include "badthinghandler.h"
 #include "serialconsole.h"
 #include "messaging.h"
+#include "usb_telemetry.h"
+
+#define USE_USB_TELEMETRY
 
 //static WORKING_AREA(waMission, 1024);
 
 static WORKING_AREA(waMPU, 2048);
 static WORKING_AREA(waBadThing, 1024);
-static WORKING_AREA(waSerialConsole, 512);
+static WORKING_AREA(waUSB, 1024);
 //static WORKING_AREA(waMS5611, 768);
 
 /*
@@ -55,8 +58,12 @@ int main(void) {
     chThdCreateStatic(waBadThing, sizeof(waBadThing), NORMALPRIO, bthandler_thread, NULL);
     chThdCreateStatic(waMPU, sizeof(waMPU), NORMALPRIO, mpu9250_thread, NULL);
     //chThdCreateStatic(waMS5611, sizeof(waMS5611), NORMALPRIO, ms5611_thread, NULL);
-    chThdCreateStatic(waSerialConsole, sizeof(waSerialConsole), NORMALPRIO,
-                      serial_console_thread, NULL);
+
+#ifdef USE_USB_TELEMETRY
+    chThdCreateStatic(waUSB, sizeof(waUSB), NORMALPRIO, usb_telemetry_thread, NULL);
+#else
+    chThdCreateStatic(waUSB, sizeof(waUSB), NORMALPRIO, serial_console_thread, NULL);
+#endif
     extStart(&EXTD1, &extcfg);
 
     while (true) {
