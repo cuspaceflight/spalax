@@ -35,6 +35,11 @@
 #define STM32F40_41xxx
 
 /*
+ * Disable MCU's VBUS sensing. (Otherwise VBUS would have to be wired to PA9.)
+ */
+#define BOARD_OTG_NOVBUSSENS
+
+/*
  * IO pins assignments.
  */
 #define GPIOA_PIN0                  0
