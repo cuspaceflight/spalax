@@ -58,4 +58,8 @@ int main(void) {
     chThdCreateStatic(waSerialConsole, sizeof(waSerialConsole), NORMALPRIO,
                       serial_console_thread, NULL);
     extStart(&EXTD1, &extcfg);
+
+    while (true) {
+        chThdSleepMilliseconds(TIME_INFINITE);
+    }
 }
