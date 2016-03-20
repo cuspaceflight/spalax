@@ -98,7 +98,8 @@ CSRC = $(PORTSRC) \
        $(CHIBIOS)/os/various/chprintf.c \
        $(CHIBIOS)/os/various/syscalls.c \
        $(CHIBIOS)/os/various/shell.c \
-       main.c adis16405.c platform_firmware.c badthinghandler.c mpu9250.c ms5611.c
+       main.c adis16405.c platform_firmware.c badthinghandler.c mpu9250.c \
+       ms5611.c usbcfg.c serialconsole.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
