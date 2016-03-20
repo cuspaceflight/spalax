@@ -2,11 +2,32 @@
 #define TELEMETRY_H
 #include <stdint.h>
 
-typedef struct telemetry_t{
-	uint32_t timestamp_;
+typedef enum {
+    telemetry_mode_string = 0,
+    telemetry_mode_int64 = 1,
+    telemetry_mode_uint64 = 2,
+    telemetry_mode_int32 = 3,
+    telemetry_mode_uint32 = 4,
+    telemetry_mode_int16 = 5,
+    telemetry_mode_uint16 = 6,
+    telemetry_mode_int8 = 7,
+    telemetry_mode_uint8 = 8,
+    telemetry_mode_float = 9,
+    telemetry_mode_double = 10,
+} telemetry_mode_t;
 
+typedef enum {
+    telemetry_source_system = 0,
+    telemetry_source_calibration = 1,
+    telemetry_source_imu = 2,
+    telemetry_source_state_estimation = 5,
+    telemetry_source_wildcard = 15
+} telemetry_source_t;
+
+typedef struct telemetry_t {
+	uint32_t timestamp_;
 	uint8_t metadata_;
-	uint8_t channel_;
+    uint8_t channel_;
 	uint16_t check_sum_;
 
 	union {
@@ -24,22 +45,23 @@ typedef struct telemetry_t{
 	};
 } telemetry_t;
 
-#define MODE_STRING 0
-#define MODE_INT64 1
-#define MODE_UINT64 2
-#define MODE_INT32 3
-#define MODE_UINT32 4
-#define MODE_INT16 5
-#define MODE_UINT16 6
-#define MODE_INT8 7
-#define MODE_UINT8 8
-#define MODE_FLOAT 9
-#define MODE_DOUBLE 10
-
 #define PACKET_ACCEL_RAW 0x20
 #define PACKET_MAG_RAW 0x23
 #define PACKET_GYRO_RAW 0x24
 #define PACKET_PRESSURE_RAW 0x22
 
+static telemetry_mode_t getMode(const telemetry_t* data) {
+    return data->metadata_ & 0xF;
+}
+
+static telemetry_source_t getSource(const telemetry_t* data) {
+    return (data->channel_ & 0xF0) >> 4;
+}
+
+static uint8_t getPacketID(const telemetry_t* data) {
+    return data->channel_ & 0xF;
+}
+
 void print_telemetry_data(const telemetry_t* data);
+
 #endif /* TELEMETRY_H */

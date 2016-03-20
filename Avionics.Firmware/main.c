@@ -46,27 +46,12 @@ int main(void) {
     chRegSetThreadName("Main");
 
     bthandler_reset();
-
-    // Temporary - here to make sure linker configured correctly
-    /*state_estimate_t linktest;
-
-
-    reset_state_estimate(&linktest);
-    linktest.pos[0] = 1;
-    linktest.pos[1] = 2;
-    linktest.pos[2] = 3;
-    print_state_estimate(&linktest);*/
+    messaging_init();
 
     //chThdCreateStatic(waMission, sizeof(waMission), NORMALPRIO, mission_thread, NULL);
     chThdCreateStatic(waBadThing, sizeof(waBadThing), NORMALPRIO, bthandler_thread, NULL);
     chThdCreateStatic(waMPU, sizeof(waMPU), NORMALPRIO, mpu9250_thread, NULL);
     //chThdCreateStatic(waMS5611, sizeof(waMS5611), NORMALPRIO, ms5611_thread, NULL);
-    extStart(&EXTD1, &extcfg);
 
-    while (TRUE) {
-        palSetPad(GPIOE, GPIOE_STAT_IMU);
-        chThdSleepMilliseconds(500);
-        palClearPad(GPIOE, GPIOE_STAT_IMU);
-        chThdSleepMilliseconds(500);
-    }
+    extStart(&EXTD1, &extcfg);
 }

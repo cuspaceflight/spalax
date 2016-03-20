@@ -2,17 +2,9 @@
 #include "hal.h"
 #include "badthinghandler.h"
 
-#define NO_BEEPING true
+#define NO_BEEPING
 
 volatile bool error_states[ERROR_MAX];
-
-static void setIMUOk(bool ok) {
-	// If it is OK we don't set GPIOE_STAT_IMU as the main method will be blinking it
-	if (!ok) {
-		// SET GPIOE_STAT_NIMU
-
-	}
-}
 
 static void setSensorOk(bool ok) {
 	if (ok) {
@@ -27,22 +19,6 @@ static void setSensorOk(bool ok) {
         palClearPad(GPIOB, GPIOB_STAT_SENSORS);
         palSetPad(GPIOE, GPIOE_STAT_NSENSORS);
 	}
-}
-
-static void beeper(int n, int ontime, int offtime)
-{
-#if (NO_BEEPING == 0 ? 1:0)
-	int i;
-	for (i = 0; i<n; i++) {
-		palSetPad(GPIOE, GPIOE_STAT_BUZZER);
-		chThdSleepMilliseconds(ontime);
-		palClearPad(GPIOE, GPIOE_STAT_BUZZER);
-		chThdSleepMilliseconds(offtime);
-	}
-#else
-	chThdSleepMilliseconds(n*(offtime + ontime));
-#endif
-
 }
 
 void bthandler_reset(void) {
@@ -62,14 +38,34 @@ msg_t bthandler_thread(void* arg) {
 			}
 		}
 
-		setIMUOk(no_bad_thing);
 		setSensorOk(!(error_states[ERROR_ADIS16405] || error_states[ERROR_MPU9250] || error_states[ERROR_ALTIM]));
 
 		if (no_bad_thing) {
-			beeper(1, 10, 990);
+            palSetPad(GPIOE, GPIOE_STAT_IMU);
+            palClearPad(GPIOE, GPIOE_STAT_NIMU);
+#ifndef NO_BEEPING
+            palSetPad(GPIOE, GPIOE_STAT_BUZZER);
+#endif
+            chThdSleepMilliseconds(20);
+#ifndef NO_BEEPING
+            palClearPad(GPIOE, GPIOE_STAT_BUZZER);
+#endif
+            chThdSleepMilliseconds(480);
+            palClearPad(GPIOE, GPIOE_STAT_IMU);
+            chThdSleepMilliseconds(500);
 		}
 		else {
-			beeper(1, 800, 200);
+            palSetPad(GPIOE, GPIOE_STAT_IMU);
+            palClearPad(GPIOE, GPIOE_STAT_NIMU);
+#ifndef NO_BEEPING
+            palSetPad(GPIOE, GPIOE_STAT_BUZZER);
+#endif
+            chThdSleepMilliseconds(500);
+#ifndef NO_BEEPING
+            palClearPad(GPIOE, GPIOE_STAT_BUZZER);
+#endif
+            chThdSleepMilliseconds(500);
+            palClearPad(GPIOE, GPIOE_STAT_NIMU);
 		}
 	}
 
