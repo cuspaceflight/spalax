@@ -57,34 +57,34 @@ void reset_state_estimate(state_estimate_t* estimate) {
 }
 
 void print_state_estimate(const state_estimate_t* estimate) {
-	PRINT("State estimate { Position: [");
-	for (int i = 0; i < 3; ++i)
-		PRINT(" %f", estimate->pos[i]);
-	PRINT(" ] Velocity: [");
-	for (int i = 0; i < 3; ++i)
-		PRINT(" %f", estimate->vel[i]);
-	PRINT(" ] Acceleration: [");
-	for (int i = 0; i < 3; ++i)
-		PRINT(" %f", estimate->accel[i]);
-	PRINT(" ]}\n");
+    PRINT("State estimate { Position: [");
+    for (int i = 0; i < 3; ++i)
+        PRINT(" %f", estimate->pos[i]);
+    PRINT(" ] Velocity: [");
+    for (int i = 0; i < 3; ++i)
+        PRINT(" %f", estimate->vel[i]);
+    PRINT(" ] Acceleration: [");
+    for (int i = 0; i < 3; ++i)
+        PRINT(" %f", estimate->accel[i]);
+    PRINT(" ]}\n");
 }
 
 void calibrate() {
-	float mag_reference[3];
+    float mag_reference[3];
 
-	accel_bias[0] = calibration_accel_sum[0] / (float)calibration_accel_count;
-	accel_bias[1] = calibration_accel_sum[1] / (float)calibration_accel_count;
-	accel_bias[2] = calibration_accel_sum[2] / (float)calibration_accel_count;
+    accel_bias[0] = calibration_accel_sum[0] / (float)calibration_accel_count;
+    accel_bias[1] = calibration_accel_sum[1] / (float)calibration_accel_count;
+    accel_bias[2] = calibration_accel_sum[2] / (float)calibration_accel_count;
 
-	
+    
 
-	mag_reference[0] = calibration_mag_sum[0] / (float)calibration_mag_count;
-	mag_reference[1] = calibration_mag_sum[1] / (float)calibration_mag_count;
-	mag_reference[2] = calibration_mag_sum[2] / (float)calibration_mag_count;
+    mag_reference[0] = calibration_mag_sum[0] / (float)calibration_mag_count;
+    mag_reference[1] = calibration_mag_sum[1] / (float)calibration_mag_count;
+    mag_reference[2] = calibration_mag_sum[2] / (float)calibration_mag_count;
 
-	gyro_bias[0] = calibration_gyro_sum[0] / (float)calibration_gyro_count;
-	gyro_bias[1] = calibration_gyro_sum[1] / (float)calibration_gyro_count;
-	gyro_bias[2] = calibration_gyro_sum[2] / (float)calibration_gyro_count;
+    gyro_bias[0] = calibration_gyro_sum[0] / (float)calibration_gyro_count;
+    gyro_bias[1] = calibration_gyro_sum[1] / (float)calibration_gyro_count;
+    gyro_bias[2] = calibration_gyro_sum[2] / (float)calibration_gyro_count;
 
     
     PRINT("Accel Reference (%f,%f,%f)\n", accel_bias[0], accel_bias[1], accel_bias[2]);
@@ -95,8 +95,8 @@ void calibrate() {
 
     last_prediction_time = get_64bit_time();
     
-	is_calibrated = true;
-	PRINT("Calibrated!\n");
+    is_calibrated = true;
+    PRINT("Calibrated!\n");
 }
 
 void do_prediction_step() {
@@ -118,75 +118,75 @@ void do_prediction_step() {
 void state_estimate_new_accel_raw(const int16_t raw_accel[3]) {
     float accel_calibrated[3];
 
-	calibrate_accel(raw_accel, accel_calibrated);
+    calibrate_accel(raw_accel, accel_calibrated);
     //PRINT("Accel (%f, %f, %f)\n", accel_calibrated[0], accel_calibrated[1], accel_calibrated[2]);
 
-	if (is_calibrated) {
+    if (is_calibrated) {
         do_prediction_step();
         kalman_new_accel(accel_calibrated);
-	} else {
-		calibration_accel_sum[0] += accel_calibrated[0];
-		calibration_accel_sum[1] += accel_calibrated[1];
-		calibration_accel_sum[2] += accel_calibrated[2];
-		calibration_accel_count++;
+    } else {
+        calibration_accel_sum[0] += accel_calibrated[0];
+        calibration_accel_sum[1] += accel_calibrated[1];
+        calibration_accel_sum[2] += accel_calibrated[2];
+        calibration_accel_count++;
 
-		if (calibration_mag_count > CALIBRATION_COUNT && calibration_accel_count > CALIBRATION_COUNT && calibration_gyro_count > CALIBRATION_COUNT)
-			calibrate();
-	}
-	
+        if (calibration_mag_count > CALIBRATION_COUNT && calibration_accel_count > CALIBRATION_COUNT && calibration_gyro_count > CALIBRATION_COUNT)
+            calibrate();
+    }
+    
 }
 
 void state_estimate_new_magnetometer_raw(const int16_t raw_mag[3]) {
-	float mag[3];
-	//calibrate_mag(raw_mag, mag);
+    float mag[3];
+    //calibrate_mag(raw_mag, mag);
 
-	mag[0] = raw_mag[0];
-	mag[1] = raw_mag[1];
-	mag[2] = raw_mag[2];
+    mag[0] = raw_mag[0];
+    mag[1] = raw_mag[1];
+    mag[2] = raw_mag[2];
 
     //PRINT("Mag (%f, %f, %f)\n", mag[0], mag[1], mag[2]);
 
-	if (is_calibrated) {
+    if (is_calibrated) {
         do_prediction_step();
         kalman_new_mag(mag);
-	} else {
-		calibration_mag_sum[0] += mag[0];
-		calibration_mag_sum[1] += mag[1];
-		calibration_mag_sum[2] += mag[2];
-		calibration_mag_count++;
+    } else {
+        calibration_mag_sum[0] += mag[0];
+        calibration_mag_sum[1] += mag[1];
+        calibration_mag_sum[2] += mag[2];
+        calibration_mag_count++;
 
-		if (calibration_mag_count > CALIBRATION_COUNT && calibration_accel_count > CALIBRATION_COUNT && calibration_gyro_count > CALIBRATION_COUNT)
-			calibrate();
-	}
+        if (calibration_mag_count > CALIBRATION_COUNT && calibration_accel_count > CALIBRATION_COUNT && calibration_gyro_count > CALIBRATION_COUNT)
+            calibrate();
+    }
 }
 
 void state_estimate_new_pressure_raw(int pressure) {
-	if (!is_calibrated)
-		return;
+    if (!is_calibrated)
+        return;
     // TODO rotate this using the previous orientation estimate
-	// translation_kalman_new_pressure_raw((float)pressure);
+    // translation_kalman_new_pressure_raw((float)pressure);
 }
 
 void state_estimate_new_gyro_raw(const int16_t gyro_raw[3]) {
-	float gyro[3];
+    float gyro[3];
 
-	calibrate_gyro(gyro_raw, gyro);
+    calibrate_gyro(gyro_raw, gyro);
     
     
     if (is_calibrated) {
-		//PRINT("Gyro: %f %f %f\n", gyro[0], gyro[1], gyro[2]);
+        //PRINT("Gyro: %f %f %f\n", gyro[0], gyro[1], gyro[2]);
         do_prediction_step();
         kalman_new_gyro(gyro);
-		
-	} else {
-		calibration_gyro_sum[0] += gyro[0];
-		calibration_gyro_sum[1] += gyro[1];
-		calibration_gyro_sum[2] += gyro[2];
-		calibration_gyro_count++;
+        
+    } else {
+        calibration_gyro_sum[0] += gyro[0];
+        calibration_gyro_sum[1] += gyro[1];
+        calibration_gyro_sum[2] += gyro[2];
+        calibration_gyro_count++;
 
-		if (calibration_mag_count > CALIBRATION_COUNT && calibration_accel_count > CALIBRATION_COUNT && calibration_gyro_count > CALIBRATION_COUNT)
-			calibrate();
-	}
+        if (calibration_mag_count > CALIBRATION_COUNT && calibration_accel_count > CALIBRATION_COUNT && calibration_gyro_count > CALIBRATION_COUNT)
+            calibrate();
+    }
 }
 
 void get_state_estimate(state_estimate_t* estimate) {
