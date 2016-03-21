@@ -227,7 +227,7 @@ include $(RULESPATH)/rules.mk
 # Black Magic Probe flashing via GDB
 #
 flash: build/$(PROJECT).elf
-    arm-none-eabi-gdb --batch \
+	arm-none-eabi-gdb --batch \
                       -ex 'target extended-remote /dev/ttyACM0' \
                       -ex 'monitor version' \
                       -ex 'monitor swdp_scan' \
@@ -235,21 +235,21 @@ flash: build/$(PROJECT).elf
                       -ex 'load' build/$(PROJECT).elf \
 
 debug: build/$(PROJECT).elf
-    arm-none-eabi-gdb -ex 'target extended-remote /dev/ttyACM0' \
+	arm-none-eabi-gdb -ex 'target extended-remote /dev/ttyACM0' \
                       -ex 'monitor swdp_scan' \
                       -ex 'attach 1' \
                       -ex "file build/$(PROJECT).elf"
 power:
-    arm-none-eabi-gdb --batch \
+	arm-none-eabi-gdb --batch \
                       -ex 'target extended-remote /dev/ttyACM0' \
                       -ex 'monitor tpwr enable'
 unpower:
-    arm-none-eabi-gdb --batch \
+	arm-none-eabi-gdb --batch \
                       -ex 'target extended-remote /dev/ttyACM0' \
                       -ex 'monitor tpwr disable'
 
 run:
-    arm-none-eabi-gdb --batch \
+	arm-none-eabi-gdb --batch \
                       -ex 'target extended-remote /dev/ttyACM0' \
                       -ex 'monitor swdp_scan' \
                       -ex 'attach 1' \
