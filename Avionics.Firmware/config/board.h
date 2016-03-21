@@ -80,7 +80,7 @@
 #define GPIOC_PIN1                  1
 #define GPIOC_PIN2                  2
 #define GPIOC_PIN3                  3
-#define GPIOC_ADIS_NSS			    4
+#define GPIOC_ADIS_NSS                4
 #define GPIOC_ADIS_IRQ              5
 #define GPIOC_PIN6                  6
 #define GPIOC_PIN7                  7
@@ -219,100 +219,100 @@
 
 #define VAL_GPIOA_MODER             (PIN_MODE_INPUT(GPIOA_PIN0)        |\
                                      PIN_MODE_INPUT(GPIOA_MPU_IRQ)        |\
-									 PIN_MODE_ALTERNATE(GPIOA_USART2_TX) | \
-									 PIN_MODE_ALTERNATE(GPIOA_USART2_RX) | \
-									 PIN_MODE_OUTPUT(GPIOA_MPU_NSS) | \
-									 PIN_MODE_ALTERNATE(GPIOA_IMU_SCK) | \
-									 PIN_MODE_ALTERNATE(GPIOA_IMU_MISO) | \
-									 PIN_MODE_ALTERNATE(GPIOA_IMU_MOSI) | \
-									 PIN_MODE_INPUT(GPIOA_PIN8) | \
-									 PIN_MODE_ALTERNATE(GPIOA_USART1_TX) | \
-									 PIN_MODE_ALTERNATE(GPIOA_USART1_RX) | \
-									 PIN_MODE_ALTERNATE(GPIOA_OTG_FS_DM) | \
-									 PIN_MODE_ALTERNATE(GPIOA_OTG_DS_DP) | \
-									 PIN_MODE_ALTERNATE(GPIOA_SWDIO) | \
-									 PIN_MODE_ALTERNATE(GPIOA_SWCLK) | \
+                                     PIN_MODE_ALTERNATE(GPIOA_USART2_TX) | \
+                                     PIN_MODE_ALTERNATE(GPIOA_USART2_RX) | \
+                                     PIN_MODE_OUTPUT(GPIOA_MPU_NSS) | \
+                                     PIN_MODE_ALTERNATE(GPIOA_IMU_SCK) | \
+                                     PIN_MODE_ALTERNATE(GPIOA_IMU_MISO) | \
+                                     PIN_MODE_ALTERNATE(GPIOA_IMU_MOSI) | \
+                                     PIN_MODE_INPUT(GPIOA_PIN8) | \
+                                     PIN_MODE_ALTERNATE(GPIOA_USART1_TX) | \
+                                     PIN_MODE_ALTERNATE(GPIOA_USART1_RX) | \
+                                     PIN_MODE_ALTERNATE(GPIOA_OTG_FS_DM) | \
+                                     PIN_MODE_ALTERNATE(GPIOA_OTG_DS_DP) | \
+                                     PIN_MODE_ALTERNATE(GPIOA_SWDIO) | \
+                                     PIN_MODE_ALTERNATE(GPIOA_SWCLK) | \
                                      PIN_MODE_INPUT(GPIOA_ESPI_NSS))
 #define VAL_GPIOA_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOA_PIN0)     |\
                                      PIN_OTYPE_PUSHPULL(GPIOA_MPU_IRQ)     |\
-									 PIN_OTYPE_PUSHPULL(GPIOA_USART2_TX) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_USART2_RX) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_MPU_NSS) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_IMU_SCK) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_IMU_MISO) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_IMU_MOSI) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_PIN8) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_USART1_TX) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_USART1_RX) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_OTG_FS_DM) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_OTG_DS_DP) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_SWDIO) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_SWCLK) | \
-									 PIN_OTYPE_PUSHPULL(GPIOA_ESPI_NSS))
+                                     PIN_OTYPE_PUSHPULL(GPIOA_USART2_TX) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_USART2_RX) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_MPU_NSS) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_IMU_SCK) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_IMU_MISO) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_IMU_MOSI) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_PIN8) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_USART1_TX) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_USART1_RX) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_OTG_FS_DM) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_OTG_DS_DP) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_SWDIO) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_SWCLK) | \
+                                     PIN_OTYPE_PUSHPULL(GPIOA_ESPI_NSS))
 #define VAL_GPIOA_OSPEEDR           (PIN_OSPEED_2M(GPIOA_PIN0)          |\
                                      PIN_OSPEED_2M(GPIOA_MPU_IRQ)          |\
-									 PIN_OSPEED_2M(GPIOA_USART2_TX) | \
-									 PIN_OSPEED_2M(GPIOA_USART2_RX) | \
-									 PIN_OSPEED_2M(GPIOA_MPU_NSS) | \
-									 PIN_OSPEED_100M(GPIOA_IMU_SCK) | \
-									 PIN_OSPEED_100M(GPIOA_IMU_MISO) | \
-									 PIN_OSPEED_100M(GPIOA_IMU_MOSI) | \
-									 PIN_OSPEED_2M(GPIOA_PIN8) | \
-									 PIN_OSPEED_100M(GPIOA_USART1_TX) | \
-									 PIN_OSPEED_100M(GPIOA_USART1_RX) | \
-									 PIN_OSPEED_100M(GPIOA_OTG_FS_DM) | \
-									 PIN_OSPEED_100M(GPIOA_OTG_DS_DP) | \
-									 PIN_OSPEED_2M(GPIOA_SWDIO) | \
-									 PIN_OSPEED_2M(GPIOA_SWCLK) | \
-									 PIN_OSPEED_2M(GPIOA_ESPI_NSS))
+                                     PIN_OSPEED_2M(GPIOA_USART2_TX) | \
+                                     PIN_OSPEED_2M(GPIOA_USART2_RX) | \
+                                     PIN_OSPEED_2M(GPIOA_MPU_NSS) | \
+                                     PIN_OSPEED_100M(GPIOA_IMU_SCK) | \
+                                     PIN_OSPEED_100M(GPIOA_IMU_MISO) | \
+                                     PIN_OSPEED_100M(GPIOA_IMU_MOSI) | \
+                                     PIN_OSPEED_2M(GPIOA_PIN8) | \
+                                     PIN_OSPEED_100M(GPIOA_USART1_TX) | \
+                                     PIN_OSPEED_100M(GPIOA_USART1_RX) | \
+                                     PIN_OSPEED_100M(GPIOA_OTG_FS_DM) | \
+                                     PIN_OSPEED_100M(GPIOA_OTG_DS_DP) | \
+                                     PIN_OSPEED_2M(GPIOA_SWDIO) | \
+                                     PIN_OSPEED_2M(GPIOA_SWCLK) | \
+                                     PIN_OSPEED_2M(GPIOA_ESPI_NSS))
 #define VAL_GPIOA_PUPDR             (PIN_PUPDR_FLOATING(GPIOA_PIN0)     |\
                                      PIN_PUPDR_FLOATING(GPIOA_MPU_IRQ)     |\
-									 PIN_PUPDR_FLOATING(GPIOA_USART2_TX) | \
-									 PIN_PUPDR_FLOATING(GPIOA_USART2_RX) | \
-									 PIN_PUPDR_FLOATING(GPIOA_MPU_NSS) | \
-									 PIN_PUPDR_FLOATING(GPIOA_IMU_SCK) | \
-									 PIN_PUPDR_FLOATING(GPIOA_IMU_MISO) | \
-									 PIN_PUPDR_FLOATING(GPIOA_IMU_MOSI) | \
-									 PIN_PUPDR_FLOATING(GPIOA_PIN8) | \
-									 PIN_PUPDR_FLOATING(GPIOA_USART1_TX) | \
-									 PIN_PUPDR_FLOATING(GPIOA_USART1_RX) | \
-									 PIN_PUPDR_FLOATING(GPIOA_OTG_FS_DM) | \
-									 PIN_PUPDR_FLOATING(GPIOA_OTG_DS_DP) | \
-									 PIN_PUPDR_FLOATING(GPIOA_SWDIO) | \
-									 PIN_PUPDR_FLOATING(GPIOA_SWCLK) | \
-									 PIN_PUPDR_FLOATING(GPIOA_ESPI_NSS))
+                                     PIN_PUPDR_FLOATING(GPIOA_USART2_TX) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_USART2_RX) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_MPU_NSS) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_IMU_SCK) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_IMU_MISO) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_IMU_MOSI) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_PIN8) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_USART1_TX) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_USART1_RX) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_OTG_FS_DM) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_OTG_DS_DP) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_SWDIO) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_SWCLK) | \
+                                     PIN_PUPDR_FLOATING(GPIOA_ESPI_NSS))
 #define VAL_GPIOA_ODR               (PIN_ODR_LOW(GPIOA_PIN0)           |\
                                      PIN_ODR_LOW(GPIOA_MPU_IRQ)           |\
-									 PIN_ODR_HIGH(GPIOA_USART2_TX) | \
-									 PIN_ODR_HIGH(GPIOA_USART2_RX) | \
-									 PIN_ODR_LOW(GPIOA_MPU_NSS) | \
-									 PIN_ODR_LOW(GPIOA_IMU_SCK) | \
-									 PIN_ODR_LOW(GPIOA_IMU_MISO) | \
-									 PIN_ODR_LOW(GPIOA_IMU_MOSI) | \
-									 PIN_ODR_LOW(GPIOA_PIN8) | \
-									 PIN_ODR_HIGH(GPIOA_USART1_TX) | \
-									 PIN_ODR_HIGH(GPIOA_USART1_RX) | \
-									 PIN_ODR_HIGH(GPIOA_OTG_FS_DM) | \
-									 PIN_ODR_HIGH(GPIOA_OTG_DS_DP) | \
-									 PIN_ODR_LOW(GPIOA_SWDIO) | \
-									 PIN_ODR_LOW(GPIOA_SWCLK) | \
-									 PIN_ODR_LOW(GPIOA_ESPI_NSS))
+                                     PIN_ODR_HIGH(GPIOA_USART2_TX) | \
+                                     PIN_ODR_HIGH(GPIOA_USART2_RX) | \
+                                     PIN_ODR_LOW(GPIOA_MPU_NSS) | \
+                                     PIN_ODR_LOW(GPIOA_IMU_SCK) | \
+                                     PIN_ODR_LOW(GPIOA_IMU_MISO) | \
+                                     PIN_ODR_LOW(GPIOA_IMU_MOSI) | \
+                                     PIN_ODR_LOW(GPIOA_PIN8) | \
+                                     PIN_ODR_HIGH(GPIOA_USART1_TX) | \
+                                     PIN_ODR_HIGH(GPIOA_USART1_RX) | \
+                                     PIN_ODR_HIGH(GPIOA_OTG_FS_DM) | \
+                                     PIN_ODR_HIGH(GPIOA_OTG_DS_DP) | \
+                                     PIN_ODR_LOW(GPIOA_SWDIO) | \
+                                     PIN_ODR_LOW(GPIOA_SWCLK) | \
+                                     PIN_ODR_LOW(GPIOA_ESPI_NSS))
 #define VAL_GPIOA_AFRL              (PIN_AFIO_AF(GPIOA_PIN0, 0)         |\
                                      PIN_AFIO_AF(GPIOA_MPU_IRQ, 0)         |\
-									 PIN_AFIO_AF(GPIOA_USART2_TX, 7) | \
-									 PIN_AFIO_AF(GPIOA_USART2_RX, 7) | \
-									 PIN_AFIO_AF(GPIOA_MPU_NSS, 0) | \
-									 PIN_AFIO_AF(GPIOA_IMU_SCK, 5) | \
-									 PIN_AFIO_AF(GPIOA_IMU_MISO, 5) | \
-									 PIN_AFIO_AF(GPIOA_IMU_MOSI, 5))
+                                     PIN_AFIO_AF(GPIOA_USART2_TX, 7) | \
+                                     PIN_AFIO_AF(GPIOA_USART2_RX, 7) | \
+                                     PIN_AFIO_AF(GPIOA_MPU_NSS, 0) | \
+                                     PIN_AFIO_AF(GPIOA_IMU_SCK, 5) | \
+                                     PIN_AFIO_AF(GPIOA_IMU_MISO, 5) | \
+                                     PIN_AFIO_AF(GPIOA_IMU_MOSI, 5))
 #define VAL_GPIOA_AFRH              (PIN_AFIO_AF(GPIOA_PIN8, 0)  |\
                                      PIN_AFIO_AF(GPIOA_USART1_TX, 7)  |\
-									 PIN_AFIO_AF(GPIOA_USART1_RX, 7) |\
-									 PIN_AFIO_AF(GPIOA_OTG_FS_DM, 10) |\
-									 PIN_AFIO_AF(GPIOA_OTG_DS_DP, 10) |\
-									 PIN_AFIO_AF(GPIOA_SWDIO, 0) |\
-									 PIN_AFIO_AF(GPIOA_SWCLK, 0) |\
-									 PIN_AFIO_AF(GPIOA_ESPI_NSS, 0))
+                                     PIN_AFIO_AF(GPIOA_USART1_RX, 7) |\
+                                     PIN_AFIO_AF(GPIOA_OTG_FS_DM, 10) |\
+                                     PIN_AFIO_AF(GPIOA_OTG_DS_DP, 10) |\
+                                     PIN_AFIO_AF(GPIOA_SWDIO, 0) |\
+                                     PIN_AFIO_AF(GPIOA_SWCLK, 0) |\
+                                     PIN_AFIO_AF(GPIOA_ESPI_NSS, 0))
 
 #define VAL_GPIOB_MODER             (PIN_MODE_INPUT(GPIOB_ADIS_NRESET)             |\
                                      PIN_MODE_INPUT(GPIOB_PIN1)             |\

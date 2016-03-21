@@ -16,11 +16,11 @@ typedef enum {
 } telemetry_mode_t;
 
 typedef enum {
-    telemetry_source_system = 0,
-    telemetry_source_calibration = 1,
-    telemetry_source_imu = 2,
-    telemetry_source_state_estimation = 5,
-    telemetry_source_wildcard = 15
+    telemetry_source_system = 0x0000,
+    telemetry_source_calibration = 0x0001,
+    telemetry_source_imu = 0x0002,
+    telemetry_source_state_estimation = 0x0005,
+    telemetry_source_wildcard = 0xFFFF,
 } telemetry_source_t;
 
 #endif /* TELEMETRY_DEFS_H */

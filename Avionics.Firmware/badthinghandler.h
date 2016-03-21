@@ -6,12 +6,12 @@
 #include <stdbool.h>
 
 typedef enum {
-	ERROR_ADIS16405 = 0,
-	ERROR_MPU9250,
-	ERROR_ALTIM,
-	ERROR_SD_CARD,
-	ERROR_CONFIG,
-	ERROR_MAX
+    ERROR_ADIS16405 = 0,
+    ERROR_MPU9250,
+    ERROR_ALTIM,
+    ERROR_SD_CARD,
+    ERROR_CONFIG,
+    ERROR_MAX
 } bthandler_error_t;
 
 /* Set a specific error.

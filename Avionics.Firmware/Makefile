@@ -81,8 +81,8 @@ LDSCRIPT= config/STM32F407xG_CCM.ld
 
 # Override fatfs.mk to use local (in-repository) fatfs source
 FATFSSRC = ${CHIBIOS}/os/various/fatfs_bindings/fatfs_diskio.c \
-		   ${CHIBIOS}/os/various/fatfs_bindings/fatfs_syscall.c \
-		   fatfs/src/ff.c fatfs/src/option/ccsbcs.c
+           ${CHIBIOS}/os/various/fatfs_bindings/fatfs_syscall.c \
+           fatfs/src/ff.c fatfs/src/option/ccsbcs.c
 FATFSINC = fatfs/src
 
 # C sources that can be compiled in ARM or THUMB mode depending on the global
@@ -94,7 +94,7 @@ CSRC = $(PORTSRC) \
        $(PLATFORMSRC) \
        $(BOARDSRC) \
        $(FATFSSRC) \
-	   $(CHIBIOS)/os/various/memstreams.c \
+       $(CHIBIOS)/os/various/memstreams.c \
        $(CHIBIOS)/os/various/chprintf.c \
        $(CHIBIOS)/os/various/syscalls.c \
        $(CHIBIOS)/os/various/shell.c \
@@ -227,33 +227,33 @@ include $(RULESPATH)/rules.mk
 # Black Magic Probe flashing via GDB
 #
 flash: build/$(PROJECT).elf
-	arm-none-eabi-gdb --batch \
-		              -ex 'target extended-remote /dev/ttyACM0' \
-					  -ex 'monitor version' \
-					  -ex 'monitor swdp_scan' \
-					  -ex 'attach 1' \
-					  -ex 'load' build/$(PROJECT).elf \
+    arm-none-eabi-gdb --batch \
+                      -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'monitor version' \
+                      -ex 'monitor swdp_scan' \
+                      -ex 'attach 1' \
+                      -ex 'load' build/$(PROJECT).elf \
 
 debug: build/$(PROJECT).elf
-	arm-none-eabi-gdb -ex 'target extended-remote /dev/ttyACM0' \
-		              -ex 'monitor swdp_scan' \
-					  -ex 'attach 1' \
-					  -ex "file build/$(PROJECT).elf"
+    arm-none-eabi-gdb -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'monitor swdp_scan' \
+                      -ex 'attach 1' \
+                      -ex "file build/$(PROJECT).elf"
 power:
-	arm-none-eabi-gdb --batch \
-	                  -ex 'target extended-remote /dev/ttyACM0' \
-		              -ex 'monitor tpwr enable'
+    arm-none-eabi-gdb --batch \
+                      -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'monitor tpwr enable'
 unpower:
-	arm-none-eabi-gdb --batch \
-		              -ex 'target extended-remote /dev/ttyACM0' \
-		              -ex 'monitor tpwr disable'
+    arm-none-eabi-gdb --batch \
+                      -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'monitor tpwr disable'
 
 run:
-	arm-none-eabi-gdb --batch \
-	                  -ex 'target extended-remote /dev/ttyACM0' \
-		              -ex 'monitor swdp_scan' \
-					  -ex 'attach 1' \
-					  -ex 'run'
+    arm-none-eabi-gdb --batch \
+                      -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'monitor swdp_scan' \
+                      -ex 'attach 1' \
+                      -ex 'run'
 
 #
 # End BMP flashing

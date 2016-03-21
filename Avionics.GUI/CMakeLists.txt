@@ -29,5 +29,5 @@ ADD_EXECUTABLE(Avionics.GUI.Launcher Source/main.cpp Source/platform_gui.cpp Sou
 TARGET_LINK_LIBRARIES(Avionics.GUI.Launcher 
     Avionics
     Avionics.GUI
-	${FRONTIER_ENGINE_LIBS}
+    ${FRONTIER_ENGINE_LIBS}
 )
