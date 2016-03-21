@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include <Rendering/Scene/FTScene.h>
+#include <Rendering/FTScene.h>
 
 extern "C" {
 #include <state_estimate.h>

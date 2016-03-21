@@ -2,7 +2,6 @@
 #define MESSAGING_H
 #include "telemetry.h"
 #include <stdbool.h>
-#include "chtypes.h"
 
 typedef uint8_t message_delegate_id;
 typedef void(*messaging_delegate_func)(telemetry_t*);
@@ -22,8 +21,8 @@ void messaging_send_message(telemetry_t* message);
 
 // Get the next message
 // Returns true if there was a message
-// Will wait for the specified timeout
+// Will block waiting for messages if blocking is true
 // If silent is true will not invoke the delegate function
-bool messaging_process_message(message_delegate_id* delegate, systime_t timeout, bool silent);
+bool messaging_process_message(message_delegate_id* delegate, bool blocking, bool silent);
 
 #endif /* MESSAGING_H */

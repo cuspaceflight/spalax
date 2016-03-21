@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include <Rendering/Scene/FTView.h>
+#include <Rendering/FTView.h>
 
 class FTLabel;
 struct state_estimate_t;

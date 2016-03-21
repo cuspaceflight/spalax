@@ -2,7 +2,8 @@
 #include <Rendering/Shader/FTShaderCache.h>
 
 RocketPathRenderer::RocketPathRenderer() {
-    FTMesh<FTVertexShaderProgram, FTVertex<glm::vec3>>::loadEmptyMesh(100);
+    setShaderProgram<FTVertexShaderProgram>();
+    loadEmptyMesh(100);
 	setPrimitiveType(GL_LINE_STRIP);
 
 	addVertex(FTVertex<glm::vec3>());

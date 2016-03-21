@@ -4,7 +4,7 @@
 #include <Rendering/FTDirector.h>
 #include <sstream>
 #include <Util/FTStringUtils.h>
-#include <Rendering/Scene/FTWindowSizeNode.h>
+#include <Rendering/FTWindowSizeNode.h>
 
 extern "C" {
 #include <state_estimate.h>

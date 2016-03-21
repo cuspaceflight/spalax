@@ -24,14 +24,10 @@ target_include_directories ( Avionics.GUI PUBLIC
     ${FRONTIER_ENGINE_INCLUDES}
 )
 
-ADD_EXECUTABLE(Avionics.GUI.Launcher Source/main.cpp Source/platform_gui.c)
+ADD_EXECUTABLE(Avionics.GUI.Launcher Source/main.cpp Source/platform_gui.cpp Source/messaging_impl.cpp)
 
 TARGET_LINK_LIBRARIES(Avionics.GUI.Launcher 
     Avionics
     Avionics.GUI
 	${FRONTIER_ENGINE_LIBS}
 )
-
-add_custom_command(TARGET Avionics.GUI.Launcher POST_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${CMAKE_CURRENT_SOURCE_DIR}/Resources ${CMAKE_CURRENT_BINARY_DIR}/Resources)

@@ -1,12 +1,11 @@
 ﻿#pragma once
 #include <Rendering/Mesh/FTMesh.h>
-#include <Rendering/Scene/Transform/FTTransformUtil.h>
 
 extern "C" {
 #include <state_estimate.h>
 }
 
-class RocketPathRenderer : public FTMesh<FTVertexShaderProgram, FTVertex<glm::vec3>> {
+class RocketPathRenderer : public FTMesh<FTVertex<glm::vec3>> {
 public:
 	RocketPathRenderer();
 	~RocketPathRenderer();

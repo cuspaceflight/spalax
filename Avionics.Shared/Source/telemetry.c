@@ -1,7 +1,7 @@
 #include <telemetry.h>
 #include <logging.h>
 
-void print_telemetry_data(const telemetry_t* data) {
+void telemetry_print_data(const telemetry_t* data) {
     telemetry_mode_t mode = data->metadata_ & 0xF;
 
 	PRINT("Packet from origin: %i on channel: 0x%X with timestamp: %i and ", mode, data->channel_, data->timestamp_);
@@ -59,4 +59,16 @@ void print_telemetry_data(const telemetry_t* data) {
 		PRINT("Unrecognised Packet Mode %i", mode);
 	}
 	PRINT("\n");
+}
+
+telemetry_mode_t telemetry_get_mode(const telemetry_t* data) {
+    return data->metadata_ & 0xF;
+}
+
+telemetry_source_t telemetry_get_source(const telemetry_t* data) {
+    return (data->channel_ & 0xF0) >> 4;
+}
+
+uint8_t telemetry_get_packet_id(const telemetry_t* data) {
+    return data->channel_ & 0xF;
 }

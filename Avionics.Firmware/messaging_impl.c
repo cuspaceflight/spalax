@@ -95,17 +95,16 @@ bool messaging_register_delegate(message_delegate_id* delegate_id, messaging_del
     chPoolInit(&(delegate->memory_pool), sizeof(telemetry_t), NULL);
     chPoolLoadArray(&(delegate->memory_pool), (void*)&(delegate_mempool_buffer[delegate_pool_reserved_buffer_index*sizeof(telemetry_t)]), buffer_size);
 
-
-
     delegate_pool_reserved_buffer_index += buffer_size;
 
+    chMtxUnlock(); // messaging_register_mutex
 
     chMtxLock(&messaging_delegates_locks[source]);
     delegate->next = messaging_delegates[source];
     messaging_delegates[source] = delegate;
     chMtxUnlock(); // messaging_delegates_locks[source]
 
-    chMtxUnlock(); // messaging_register_mutex
+
     return true;
 }
 
@@ -142,25 +141,23 @@ static void messaging_send_message_to_source(telemetry_t* message, telemetry_sou
 }
 
 void messaging_send_message(telemetry_t* message) {
-    telemetry_source_t source = getSource(message);
+    telemetry_source_t source = telemetry_get_source(message);
     messaging_send_message_to_source(message, source);
     messaging_send_message_to_source(message, telemetry_source_wildcard);
 }
 
-bool messaging_process_message(message_delegate_id* delegate_id, systime_t timeout, bool silent) {
+bool messaging_process_message(message_delegate_id* delegate_id, bool blocking, bool silent) {
     if (*delegate_id >= MAX_NUM_DELEGATES)
         return false;
 
     intptr_t data_msg;
     messaging_delegate_t* delegate = &(messaging_delegates_pool[*delegate_id]);
-    msg_t mailbox_ret = chMBFetch(&(delegate->mailbox), (msg_t*)&data_msg, timeout);
+    msg_t mailbox_ret = chMBFetch(&(delegate->mailbox), (msg_t*)&data_msg, blocking ? TIME_INFINITE : TIME_IMMEDIATE);
     if (mailbox_ret != RDY_OK || data_msg == 0)
         return false;
 
     if (!silent) {
-        telemetry_t message;
-        memcpy((void*)&message, (void*)data_msg, sizeof(telemetry_t));
-        delegate->delegate_func(&message);
+        delegate->delegate_func((telemetry_t*)data_msg);
     }
 
     chMtxLock(&delegate->memory_pool_mutex);

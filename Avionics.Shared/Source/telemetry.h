@@ -50,18 +50,12 @@ typedef struct telemetry_t {
 #define PACKET_GYRO_RAW 0x24
 #define PACKET_PRESSURE_RAW 0x22
 
-static telemetry_mode_t getMode(const telemetry_t* data) {
-    return data->metadata_ & 0xF;
-}
+telemetry_mode_t telemetry_get_mode(const telemetry_t* data);
 
-static telemetry_source_t getSource(const telemetry_t* data) {
-    return (data->channel_ & 0xF0) >> 4;
-}
+telemetry_source_t telemetry_get_source(const telemetry_t* data);
 
-static uint8_t getPacketID(const telemetry_t* data) {
-    return data->channel_ & 0xF;
-}
+uint8_t telemetry_get_packet_id(const telemetry_t* data);
 
-void print_telemetry_data(const telemetry_t* data);
+void telemetry_print_data(const telemetry_t* data);
 
 #endif /* TELEMETRY_H */
