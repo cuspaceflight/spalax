@@ -141,8 +141,7 @@ static void messaging_send_message_to_source(telemetry_t* message, telemetry_sou
 }
 
 void messaging_send_message(telemetry_t* message) {
-    telemetry_source_t source = telemetry_get_source(message);
-    messaging_send_message_to_source(message, source);
+    messaging_send_message_to_source(message, (telemetry_source_t)message->source);
     messaging_send_message_to_source(message, telemetry_source_wildcard);
 }
 

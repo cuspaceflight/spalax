@@ -14,6 +14,7 @@ uint32_t last_time_32 = 0;
 uint64_t timestep_correction = 0;
 
 uint64_t get_64bit_time() {
+    // TODO: Make this thead-safe
     uint32_t time_32 = platform_get_counter_value();
     if (time_32 < last_time_32) {
         PRINT("uint32_t clock rollover\n");

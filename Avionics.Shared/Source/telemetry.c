@@ -2,73 +2,65 @@
 #include <logging.h>
 
 void telemetry_print_data(const telemetry_t* data) {
-    telemetry_mode_t mode = data->metadata_ & 0xF;
-
-	PRINT("Packet from origin: %i on channel: 0x%X with timestamp: %i and ", mode, data->channel_, data->timestamp_);
-	switch (mode) {
+    PRINT("Telemetry Packet - Origin: %i, Source: %i, Tag: %i, Timestamp: %i and ", data->origin, data->source, data->tag, data->timestamp);
+	switch (data->mode) {
 	case telemetry_mode_string:
 		PRINT("String Data: ");
 		for (int i = 0; i < 8; ++i)
-			PRINT("%c", data->string_data_[i]);
+			PRINT("%c", data->string_data[i]);
 		break;
 	case telemetry_mode_int64:
-		PRINT("Int64 Data: %ld", data->int64_data_);
+        PRINT("Int64 Data:");
+        for (int i = 0; i < 2; ++i)
+            PRINT(" %ld", data->uint64_data[i]);
 		break;
 	case telemetry_mode_uint64:
-		PRINT("UInt64 Data: %ul", data->uint64_data_);
+        PRINT("UInt64 Data:");
+        for (int i = 0; i < 2; ++i)
+            PRINT(" %ul", data->uint64_data[i]);
 		break;
 	case telemetry_mode_int32:
 		PRINT("Int32 Data:");
-		for (int i = 0; i < 2; ++i)
-			PRINT(" %i", data->int32_data_[i]);
+		for (int i = 0; i < 4; ++i)
+			PRINT(" %i", data->int32_data[i]);
 		break;
 	case telemetry_mode_uint32:
 		PRINT("UInt32 Data:");
-		for (int i = 0; i < 2; ++i)
-			PRINT(" %i", data->uint32_data_[i]);
+		for (int i = 0; i < 4; ++i)
+			PRINT(" %i", data->uint32_data[i]);
 		break;
 	case telemetry_mode_int16:
 		PRINT("Int16 Data:");
-		for (int i = 0; i < 4; ++i)
-			PRINT(" %i", data->int16_data_[i]);
+		for (int i = 0; i < 8; ++i)
+			PRINT(" %i", data->int16_data[i]);
 		break;
 	case telemetry_mode_uint16:
 		PRINT("UInt16 Data:");
-		for (int i = 0; i < 4; ++i)
-			PRINT(" %i", data->uint16_data_[i]);
+		for (int i = 0; i < 8; ++i)
+			PRINT(" %i", data->uint16_data[i]);
 		break;
 	case telemetry_mode_int8:
 		PRINT("Int8 Data:");
-		for (int i = 0; i < 8; ++i)
-			PRINT(" %i", data->int8_data_[i]);
+		for (int i = 0; i < 16; ++i)
+			PRINT(" %i", data->int8_data[i]);
 		break;
 	case telemetry_mode_uint8:
 		PRINT("UInt8 Data:");
-		for (int i = 0; i < 8; ++i)
-			PRINT(" %i", data->uint8_data_[i]);
+		for (int i = 0; i < 16; ++i)
+			PRINT(" %i", data->uint8_data[i]);
 		break;
 	case telemetry_mode_float:
 		PRINT("Float Data:");
-		for (int i = 0; i < 2; ++i)
-			PRINT(" %i", data->float_data_[i]);
+		for (int i = 0; i < 4; ++i)
+			PRINT(" %f", data->float_data[i]);
 		break;
 	case telemetry_mode_double:
-		PRINT("Double Data: %f", data->double_data_);
+        PRINT("Double Data:");
+        for (int i = 0; i < 2; ++i)
+            PRINT(" %f", data->double_data[i]);
 		break;
 	default:
-		PRINT("Unrecognised Packet Mode %i", mode);
+		PRINT("Unrecognised Packet Mode %i", data->mode);
 	}
 	PRINT("\n");
-}
-
-telemetry_mode_t telemetry_get_mode(const telemetry_t* data) {
-    return data->metadata_ & 0xF;
-}
-
-telemetry_source_t telemetry_get_source(const telemetry_t* data) {
-    return (data->channel_ & 0xF0) >> 4;
-}
-
-uint8_t telemetry_get_packet_id(const telemetry_t* data) {
-    return data->channel_ & 0xF;
 }

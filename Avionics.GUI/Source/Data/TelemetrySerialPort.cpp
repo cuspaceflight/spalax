@@ -44,7 +44,7 @@ bool TelemetrySerialPort::poll() {
 			if (message_buffer_index_ == sizeof(telemetry_t)) {
 				message_buffer_index_ = -2;
 				// TODO check checksum of packet
-				if (message_read_buffer_.check_sum_ == 0)
+				if (message_read_buffer_.check_sum == 0)
 					message_cache_.push(message_read_buffer_);
 				else
 					FTLOG("Packet failed Checksum");

@@ -76,7 +76,7 @@ void FileDataSource::loadFromBinaryFile(const char* file) {
 		simulation_index_ = 0;
 		// Skip forward to the configuration values (as all prior data is meaningless)
 		while (simulation_index_ != num_samples_) {
-			if (data_input_[simulation_index_].channel_ == 0x11)
+			if (data_input_[simulation_index_].source == 0x1 && data_input_[simulation_index_].tag == 0x1)
 				break;
 			++simulation_index_;
 		}
@@ -90,14 +90,14 @@ void FileDataSource::loadFromBinaryFile(const char* file) {
 
 				FTLOG("%f %f %f", cal[0], cal[1], cal[2]);
 
-			} else*/ if (data_input_[simulation_index_].channel_ == 0x40 && data_input_[simulation_index_].int32_data_[1] == 1) {
+			} else*/ if (data_input_[simulation_index_].source == 0x4 && data_input_[simulation_index_].tag == 0 && data_input_[simulation_index_].int32_data[1] == 1) {
 				break;
 			}
 			++simulation_index_;
 		}
 		FTAssert(simulation_index_ != num_samples_, "No ignition state found!");
 
-		setStartOffset(data_input_[simulation_index_].timestamp_);
+		setStartOffset(data_input_[simulation_index_].timestamp);
 		//simulation_time_ = data_input_[simulation_index_].timestamp_;
 		//last_packet_time_ = data_input_[simulation_index_].timestamp_;
 	}

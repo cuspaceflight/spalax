@@ -21,4 +21,5 @@ set (HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/math_utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/kalman.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platform.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/telemetry_defs.h
     PARENT_SCOPE)

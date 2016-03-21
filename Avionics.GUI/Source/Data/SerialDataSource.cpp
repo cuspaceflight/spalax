@@ -5,7 +5,7 @@ SerialDataSource::SerialDataSource(const char* port_name, int baud) : serial_por
 	serial_port_->sync();
 	serial_port_->getNext();
 	FTAssert(packet_waiting_, "No Packet waiting");
-	setStartOffset(waiting_packet_.timestamp_);
+	setStartOffset(waiting_packet_.timestamp);
 }
 
 
