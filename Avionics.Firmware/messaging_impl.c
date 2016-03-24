@@ -180,8 +180,8 @@ messaging_send_return_codes messaging_producer_send(message_producer_t* producer
 	// We create a local copy as it frees up the compiler
 	// If a consumer register during this call it isn't a massive deal that
 	// we won't pass it the packet
-	uint32_t num_producers = cur_producer_pool_index;
-	for (uint32_t i = 0; i < num_producers; ++i) {
+	uint32_t num_consumers = cur_consumer_pool_index;
+	for (uint32_t i = 0; i < num_consumers; ++i) {
 		message_consumer_t* consumer = consumer_pool[i].parent;
 		if ((consumer->packet_source_mask & packet->header.id) == consumer->packet_source
 		    && !messaging_consumer_enqueue_packet(consumer, ref)) {

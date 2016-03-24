@@ -47,16 +47,50 @@ static const EXTConfig extcfg = {{
     {EXT_CH_MODE_DISABLED, NULL}  /* Pin 22*/
 }};
 
-MESSAGING_PRODUCER(prod1, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, 1024);
-
 void test_receive(telemetry_t* packet) {
     (void)packet;
 }
 
+MESSAGING_PRODUCER(prod1, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, 1024);
+
+MESSAGING_PRODUCER(prod2, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, 1024);
+
 MESSAGING_CONSUMER(consum1, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, test_receive, 20);
 
+MESSAGING_CONSUMER(consum2, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, test_receive, 20);
+
+WORKING_AREA(waTest1, 1024);
+WORKING_AREA(waTest2, 1024);
+WORKING_AREA(waTest3, 1024);
+WORKING_AREA(waTest4, 1024);
 
 
+
+msg_t dispatchThread(void* producer) {
+    if (!messaging_producer_init(producer)) {
+        bthandler_set_error(ERROR_CONFIG, true);
+        return 1;
+    }
+
+    while (true) {
+        chThdSleepMilliseconds(50);
+        const char* test = "Hello World";
+        //message_producer_t* producer, uint16_t tag, uint8_t* data, uint16_t length
+        messaging_producer_send(&prod1, telemetry_id_state_estimators_quaternion, (const uint8_t*)test, 12);
+    }
+}
+
+msg_t receiveThread(void* consumer) {
+    if (!messaging_consumer_init(consumer)) {
+        bthandler_set_error(ERROR_CONFIG, true);
+        return 1;
+    }
+
+    while (true) {
+        while (messaging_consumer_receive(consumer, true, false) == messaging_receive_ok);
+        chThdSleepMilliseconds(20);
+    }
+}
 
 
 int main(void) {
@@ -68,30 +102,22 @@ int main(void) {
     init_telemetry_allocators();
     init_messaging();
 
-    if (!messaging_producer_init(&prod1)) {
-        bthandler_set_error(ERROR_CONFIG, true);
-    }
+    chThdCreateStatic(waTest1, sizeof(waTest1), NORMALPRIO, dispatchThread, &prod1);
+    chThdCreateStatic(waTest2, sizeof(waTest2), NORMALPRIO, dispatchThread, &prod2);
 
-    if (!messaging_consumer_init(&consum1)) {
-        bthandler_set_error(ERROR_CONFIG, true);
-    }
-
-    const char* test = "Hello World";
-    //message_producer_t* producer, uint16_t tag, uint8_t* data, uint16_t length
-    messaging_producer_send(&prod1, telemetry_id_state_estimators_quaternion, (const uint8_t*)test, 12);
-
-    messaging_consumer_receive(&consum1, true, false);
+    chThdCreateStatic(waTest3, sizeof(waTest3), NORMALPRIO, receiveThread, &consum1);
+    chThdCreateStatic(waTest4, sizeof(waTest4), NORMALPRIO, receiveThread, &consum2);
 
     //chThdCreateStatic(waMission, sizeof(waMission), NORMALPRIO, mission_thread, NULL);
     chThdCreateStatic(waBadThing, sizeof(waBadThing), NORMALPRIO, bthandler_thread, NULL);
     chThdCreateStatic(waMPU, sizeof(waMPU), NORMALPRIO, mpu9250_thread, NULL);
     //chThdCreateStatic(waMS5611, sizeof(waMS5611), NORMALPRIO, ms5611_thread, NULL);
 
-#ifdef USE_USB_TELEMETRY
-    chThdCreateStatic(waUSB, sizeof(waUSB), NORMALPRIO, usb_telemetry_thread, NULL);
-#else
-    chThdCreateStatic(waUSB, sizeof(waUSB), NORMALPRIO, serial_console_thread, NULL);
-#endif
+// #ifdef USE_USB_TELEMETRY
+//     chThdCreateStatic(waUSB, sizeof(waUSB), NORMALPRIO, usb_telemetry_thread, NULL);
+// #else
+//     chThdCreateStatic(waUSB, sizeof(waUSB), NORMALPRIO, serial_console_thread, NULL);
+// #endif
     extStart(&EXTD1, &extcfg);
 
     while (true) {
