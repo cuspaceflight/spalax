@@ -5,7 +5,6 @@ set (SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/logging.c
     ${CMAKE_CURRENT_SOURCE_DIR}/mission.c
     ${CMAKE_CURRENT_SOURCE_DIR}/state_estimate.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/telemetry.c
     ${CMAKE_CURRENT_SOURCE_DIR}/kalman.c
     ${CMAKE_CURRENT_SOURCE_DIR}/time_utils.c
 
@@ -22,4 +21,7 @@ set (HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/kalman.h
     ${CMAKE_CURRENT_SOURCE_DIR}/platform.h
     ${CMAKE_CURRENT_SOURCE_DIR}/telemetry_defs.h
-    PARENT_SCOPE)
+    ${CMAKE_CURRENT_SOURCE_DIR}/compilermacros.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/messaging.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/messaging_defs.h
+   PARENT_SCOPE)

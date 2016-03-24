@@ -20,4 +20,11 @@
 #   define COMPILER_UNUSED_ARG(arg) arg
 #endif
 
+// Ugly but effective compile time assertion from http://stackoverflow.com/questions/3385515/static-assert-in-c
+#define CTASTR2(pre,post) pre ## post
+#define CTASTR(pre,post) CTASTR2(pre,post)
+#define STATIC_ASSERT(cond,msg) \
+    typedef struct { int CTASTR(static_assertion_failed_,msg) : !!(cond); } \
+        CTASTR(static_assertion_failed_,__COUNTER__)
+
 #endif // COMPILER_MACROS_H

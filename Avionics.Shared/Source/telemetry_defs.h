@@ -1,26 +1,34 @@
 #ifndef TELEMETRY_DEFS_H
 #define TELEMETRY_DEFS_H
 
-typedef enum {
-    telemetry_mode_string = 0,
-    telemetry_mode_int64 = 1,
-    telemetry_mode_uint64 = 2,
-    telemetry_mode_int32 = 3,
-    telemetry_mode_uint32 = 4,
-    telemetry_mode_int16 = 5,
-    telemetry_mode_uint16 = 6,
-    telemetry_mode_int8 = 7,
-    telemetry_mode_uint8 = 8,
-    telemetry_mode_float = 9,
-    telemetry_mode_double = 10,
-} telemetry_mode_t;
+// Simple macros to make code more readable and perform validity checking
+#define TELEMETRY_SOURCE_MASK(tag_length) 0b11111111111 - ((1 << tag_length)-1)
+#define TELEMETRY_SOURCE(source, tag_length) (source << tag_length)
+#define TELEMETRY_ID(source, tag, tag_length) (((source) << tag_length) & 0b11111111111) | (tag & ((1 << tag_length)-1))
+
 
 typedef enum {
-    telemetry_source_system = 0x0000,
-    telemetry_source_calibration = 0x0001,
-    telemetry_source_imu = 0x0002,
-    telemetry_source_state_estimation = 0x0005,
-    telemetry_source_wildcard = 0xFFFF,
+    telemetry_source_mask_state_estimators = TELEMETRY_SOURCE_MASK(2),
+} telemetry_source_mask_t;
+
+typedef enum {
+    telemetry_source_state_estimators = TELEMETRY_SOURCE(0b000000,2),
 } telemetry_source_t;
+
+typedef enum {
+    telemetry_id_state_estimators_quaternion = TELEMETRY_ID(0b000000, 0b11, 2),
+} telemetry_id_t;
+
+
+typedef enum {
+    telemetry_origin_imu = 0,
+    telemetry_origin_avionics_gui = 1
+} telemetry_origin_t;
+
+#ifdef WIN32
+#define TELEMETRY_ORIGIN telemetry_origin_avionics_gui
+#else
+#define TELEMETRY_ORIGIN telemetry_origin_imu
+#endif
 
 #endif /* TELEMETRY_DEFS_H */

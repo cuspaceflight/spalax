@@ -2,35 +2,24 @@
 #define TELEMETRY_H
 #include <stdint.h>
 #include "telemetry_defs.h"
+#include "compilermacros.h"
+
+typedef struct telemetry_header_t {
+    struct {
+        unsigned int id : 11;
+        unsigned int length : 12;
+        unsigned int reserved : 1;
+        telemetry_origin_t origin : 8;
+    };
+    uint32_t timestamp;
+} telemetry_header_t;
 
 typedef struct telemetry_t {
-    union {
-        char string_data[16];
-        int64_t int64_data[2];
-        uint64_t uint64_data[2];
-        int32_t int32_data[4];
-        uint32_t uint32_data[4];
-        int16_t int16_data[8];
-        uint16_t uint16_data[8];
-        int8_t int8_data[16];
-        uint8_t uint8_data[16];
-        float float_data[4];
-        double double_data[2];
-    };
-    uint64_t timestamp;
-    uint16_t origin; // The device that produced this packet
-    uint16_t source; // The software component that produced this packet
-    uint8_t tag; // The type of packet for the given source
-    uint8_t mode; // The type of data
-    uint16_t check_sum;
+    struct telemetry_header_t header;
+    uint8_t* payload;
 } telemetry_t;
 
-
-#define PACKET_ACCEL_RAW 0x20
-#define PACKET_MAG_RAW 0x23
-#define PACKET_GYRO_RAW 0x24
-#define PACKET_PRESSURE_RAW 0x22
-
-void telemetry_print_data(const telemetry_t* data);
+// Make sure compiler isn't inserting padding
+STATIC_ASSERT(sizeof(telemetry_header_t) == 8, telemetry_header_padded_by_compiler);
 
 #endif /* TELEMETRY_H */

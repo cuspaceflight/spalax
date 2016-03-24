@@ -7,6 +7,7 @@
 #include "serialconsole.h"
 #include "messaging.h"
 #include "usb_telemetry.h"
+#include "telemetry_allocator.h"
 
 #define USE_USB_TELEMETRY
 
@@ -46,13 +47,40 @@ static const EXTConfig extcfg = {{
     {EXT_CH_MODE_DISABLED, NULL}  /* Pin 22*/
 }};
 
+MESSAGING_PRODUCER(prod1, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, 1024);
+
+void test_receive(telemetry_t* packet) {
+    (void)packet;
+}
+
+MESSAGING_CONSUMER(consum1, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, test_receive, 20);
+
+
+
+
+
 int main(void) {
     halInit();
     chSysInit();
     chRegSetThreadName("Main");
 
     bthandler_reset();
-    messaging_init();
+    init_telemetry_allocators();
+    init_messaging();
+
+    if (!messaging_producer_init(&prod1)) {
+        bthandler_set_error(ERROR_CONFIG, true);
+    }
+
+    if (!messaging_consumer_init(&consum1)) {
+        bthandler_set_error(ERROR_CONFIG, true);
+    }
+
+    const char* test = "Hello World";
+    //message_producer_t* producer, uint16_t tag, uint8_t* data, uint16_t length
+    messaging_producer_send(&prod1, telemetry_id_state_estimators_quaternion, (const uint8_t*)test, 12);
+
+    messaging_consumer_receive(&consum1, true, false);
 
     //chThdCreateStatic(waMission, sizeof(waMission), NORMALPRIO, mission_thread, NULL);
     chThdCreateStatic(waBadThing, sizeof(waBadThing), NORMALPRIO, bthandler_thread, NULL);

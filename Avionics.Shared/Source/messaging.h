@@ -2,27 +2,23 @@
 #define MESSAGING_H
 #include "telemetry.h"
 #include <stdbool.h>
+#include "telemetry_allocator.h"
+#include "messaging_defs.h"
 
-typedef uint8_t message_delegate_id;
-typedef void(*messaging_delegate_func)(telemetry_t*);
+void init_messaging(void);
 
-void messaging_init(void);
+// Initialise a producer - returns false on error
+bool messaging_producer_init(message_producer_t* producer);
 
-// Specify a function to invoke with messages
-// A source to get messages for
-// And a buffer size in units of telemetry_t
-// Once this buffer fills up no further messages will be enqueued for this delegate
-// Until some messages are removed
-// If succesful will return true and set message_delegate_id to a valid value
-// Otherwise will return false
-bool messaging_register_delegate(message_delegate_id* delegate_id, messaging_delegate_func func, telemetry_source_t source, uint32_t buffer_size);
+// Initialise a consumer - returns false on error
+bool messaging_consumer_init(message_consumer_t* consumer);
 
-void messaging_send_message(telemetry_t* message);
+// Send a mesage from the specified producer
+// A copy of the data will be made, so you can freely modify/release the data after this call
+messaging_send_return_codes messaging_producer_send(message_producer_t* producer, uint16_t tag, const uint8_t* data, uint16_t length);
 
-// Get the next message
-// Returns true if there was a message
-// Will block waiting for messages if blocking is true
-// If silent is true will not invoke the delegate function
-bool messaging_process_message(message_delegate_id* delegate, bool blocking, bool silent);
+// Consume the next packet in the consumer's buffer
+// If silent is specified will not invoke the callback function
+messaging_receive_return_codes messaging_consumer_receive(message_consumer_t* consumer_id, bool blocking, bool silent);
 
 #endif /* MESSAGING_H */
