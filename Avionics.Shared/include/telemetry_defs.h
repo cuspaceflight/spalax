@@ -1,6 +1,10 @@
 #ifndef TELEMETRY_DEFS_H
 #define TELEMETRY_DEFS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Simple macros to make code more readable and perform validity checking
 #define TELEMETRY_SOURCE_MASK(tag_length) 0b11111111111 - ((1 << tag_length)-1)
 #define TELEMETRY_SOURCE(source, tag_length) (source << tag_length)
@@ -29,6 +33,10 @@ typedef enum {
 #define TELEMETRY_ORIGIN telemetry_origin_avionics_gui
 #else
 #define TELEMETRY_ORIGIN telemetry_origin_imu
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* TELEMETRY_DEFS_H */

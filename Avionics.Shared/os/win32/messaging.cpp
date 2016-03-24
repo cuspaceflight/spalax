@@ -1,8 +1,4 @@
-
-extern "C" {
-    #include "messaging.h"
-}
-
+#include "messaging.h"
 #include <string.h>
 #include "platform.h"
 #include <TQueue.h>

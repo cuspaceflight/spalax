@@ -5,6 +5,10 @@
 #include "telemetry_allocator.h"
 #include "messaging_defs.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void init_messaging(void);
 
 // Initialise a producer - returns false on error
@@ -20,5 +24,9 @@ messaging_send_return_codes messaging_producer_send(message_producer_t* producer
 // Consume the next packet in the consumer's buffer
 // If silent is specified will not invoke the callback function
 messaging_receive_return_codes messaging_consumer_receive(message_consumer_t* consumer_id, bool blocking, bool silent);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* MESSAGING_H */

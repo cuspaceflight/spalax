@@ -2,6 +2,10 @@
 #define PLATFORM_H
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef WIN32
 #define MEMORY_BUFFER_ATTRIBUTES
 #else
@@ -14,5 +18,9 @@ uint32_t platform_get_counter_value(void);
 void platform_set_counter_value(uint32_t value);
 
 uint32_t platform_get_counter_frequency(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /*PLATFORM_H*/

@@ -4,6 +4,10 @@
 #include "telemetry_defs.h"
 #include "compilermacros.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct telemetry_header_t {
     struct {
         unsigned int id : 11;
@@ -21,5 +25,9 @@ typedef struct telemetry_t {
 
 // Make sure compiler isn't inserting padding
 STATIC_ASSERT(sizeof(telemetry_header_t) == 8, telemetry_header_padded_by_compiler);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TELEMETRY_H */

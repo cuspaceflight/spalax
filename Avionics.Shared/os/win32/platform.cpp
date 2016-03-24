@@ -1,7 +1,4 @@
-extern "C" {
-    #include "platform.h"
-}
-
+#include "platform.h"
 
 uint32_t counter_value = 0;
 

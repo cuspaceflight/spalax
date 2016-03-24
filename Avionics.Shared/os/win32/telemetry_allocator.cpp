@@ -1,8 +1,5 @@
-extern "C" {
-    #include "telemetry_allocator.h"
-}
+#include "telemetry_allocator.h"
 #include <new>
-
 
 // TODO: Enforce heap limits
 

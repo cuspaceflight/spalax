@@ -15,5 +15,4 @@ set (HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/RocketRenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/State3DRenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/StateDetailView.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/TQueue.h
     PARENT_SCOPE)

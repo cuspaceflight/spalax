@@ -1,4 +1,15 @@
-add_subdirectory(Source)
+add_subdirectory(include)
+add_subdirectory(src)
+
+if (NOT DEFINED AVIONICS_OS)
+	message(FATAL_ERROR "AVIONICS_OS not defined")
+elseif (${AVIONICS_OS} STREQUAL win32)
+    add_subdirectory(os/win32)
+elseif (${AVIONICS_OS} STREQUAL chibios)
+    add_subdirectory(os/chibios)
+else (NOT DEFINED AVIONICS_OS)
+    message(FATAL_ERROR "Unrecognised AVIONICS_OS")
+endif (NOT DEFINED AVIONICS_OS)
 
 # We can use GLOB here as in order for a CMakeList to be used a pre-existing one
 # must have been modified and therefore the build system will know to rebuild
@@ -19,12 +30,12 @@ add_library(Avionics ${HEADERS} ${SOURCES} ${CMAKELISTS})
 set_property(TARGET Avionics PROPERTY C_STANDARD 11)
 
 SET (AVIONICS_INCLUDES 
-    ${CMAKE_CURRENT_SOURCE_DIR}/Source
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 SET (AVIONICS_INCLUDES ${AVIONICS_INCLUDES} PARENT_SCOPE)
 
 target_include_directories ( Avionics PUBLIC
     ${AVIONICS_INCLUDES}
-    ${FRONTIER_ENGINE_INCLUDES}
+	${OS_INCLUDES}
 )

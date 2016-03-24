@@ -2,6 +2,10 @@
 #define MESSAGING_DEFS_H
 #include "telemetry_allocator.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef uint32_t messaging_consumer_id;
 typedef uint32_t messaging_producer_id;
 typedef void(*messaging_consumer_func)(telemetry_t*);
@@ -53,5 +57,10 @@ typedef enum {
     messaging_receive_buffer_empty, // No packets in buffer to process
     messaging_receive_invalid_consumer, // The consumer is invalid
 } messaging_receive_return_codes;
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* MESSAGING_DEFS_H */

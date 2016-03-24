@@ -5,6 +5,10 @@
 #include "telemetry.h"
 #include "platform.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Implementation specific type
 typedef struct telemetry_allocator_impl_t telemetry_allocator_impl_t;
 
@@ -41,5 +45,9 @@ telemetry_t* telemetry_allocator_alloc(telemetry_allocator_t* allocator, uint32_
 
 // Frees an allocated packet
 void telemetry_allocator_free(telemetry_t* packet);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* TELEMETRY_ALLOCATOR_H */
