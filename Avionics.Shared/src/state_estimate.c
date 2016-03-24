@@ -69,7 +69,7 @@ void print_state_estimate(const state_estimate_t* estimate) {
     PRINT(" ]}\n");
 }
 
-void calibrate() {
+void calibrate(void) {
     float mag_reference[3];
 
     accel_bias[0] = calibration_accel_sum[0] / (float)calibration_accel_count;
@@ -99,7 +99,7 @@ void calibrate() {
     PRINT("Calibrated!\n");
 }
 
-void do_prediction_step() {
+void do_prediction_step(void) {
     uint64_t current_time = get_64bit_time();
 
     if (current_time <= last_prediction_time)
