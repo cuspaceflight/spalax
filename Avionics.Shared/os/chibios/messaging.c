@@ -12,6 +12,7 @@
 
 typedef struct telemetry_ref_t {
 	telemetry_t* packet;
+    message_metadata_t flags;
 	volatile uint32_t reference_count;
 } telemetry_ref_t;
 
@@ -73,6 +74,7 @@ static telemetry_ref_t* telemetry_reference_create(void) {
 	if (ref == NULL)
 		return NULL;
 	ref->packet = 0;
+    ref->flags = 0;
 	ref->reference_count = 1;
 	return ref;
 }
@@ -151,7 +153,7 @@ static bool messaging_consumer_enqueue_packet(message_consumer_t* consumer, tele
 
 // Send a mesage from the specified producer
 // A copy of the data will be made, so you can freely modify/release the data after this call
-messaging_send_return_codes messaging_producer_send(message_producer_t* producer, uint16_t tag, const uint8_t* data, uint16_t length) {
+messaging_send_return_codes messaging_producer_send(message_producer_t* producer, uint16_t tag, message_metadata_t flags, const uint8_t* data, uint16_t length) {
 	if (producer->impl == NULL)
 		return messaging_send_invalid_producer;
 	if ((tag & producer->packet_source_mask) != 0)
@@ -164,6 +166,7 @@ messaging_send_return_codes messaging_producer_send(message_producer_t* producer
 
 	telemetry_t* packet = telemetry_allocator_alloc(producer->telemetry_allocator, length);
 	ref->packet = packet;
+    ref->flags = flags;
 	if (packet == NULL) {
 		telemetry_reference_release(ref);
 		return messaging_send_producer_heap_full;
@@ -174,7 +177,7 @@ messaging_send_return_codes messaging_producer_send(message_producer_t* producer
     packet->header.id = tag | producer->packet_source;
     packet->header.length = length;
     packet->header.timestamp = platform_get_counter_value();
-    packet->header.origin = TELEMETRY_ORIGIN;
+    packet->header.origin = local_config.origin;
 
 	bool enqueue_successful = true;
 	// We create a local copy as it frees up the compiler
@@ -184,6 +187,7 @@ messaging_send_return_codes messaging_producer_send(message_producer_t* producer
 	for (uint32_t i = 0; i < num_consumers; ++i) {
 		message_consumer_t* consumer = consumer_pool[i].parent;
 		if ((consumer->packet_source_mask & packet->header.id) == consumer->packet_source
+            && (consumer->message_metadata_mask & flags) == consumer->message_metadata
 		    && !messaging_consumer_enqueue_packet(consumer, ref)) {
 			enqueue_successful = false;
         }
@@ -206,7 +210,7 @@ messaging_receive_return_codes messaging_consumer_receive(message_consumer_t* co
 
     telemetry_ref_t* ref = (telemetry_ref_t*)data_msg;
     if (!silent)
-        consumer->consumer_func(ref->packet);
+        consumer->consumer_func(ref->packet, ref->flags);
 
     telemetry_reference_release(ref);
     return messaging_receive_ok;

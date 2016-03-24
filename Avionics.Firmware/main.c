@@ -15,7 +15,7 @@
 
 static WORKING_AREA(waMPU, 2048);
 static WORKING_AREA(waBadThing, 1024);
-static WORKING_AREA(waUSB, 1024);
+//static WORKING_AREA(waUSB, 1024);
 //static WORKING_AREA(waMS5611, 768);
 
 /*
@@ -47,17 +47,20 @@ static const EXTConfig extcfg = {{
     {EXT_CH_MODE_DISABLED, NULL}  /* Pin 22*/
 }};
 
-void test_receive(telemetry_t* packet) {
+const avionics_config_t local_config = {telemetry_origin_imu};
+
+void test_receive(telemetry_t* packet, message_metadata_t flags) {
     (void)packet;
+    (void)flags;
 }
 
 MESSAGING_PRODUCER(prod1, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, 1024);
 
 MESSAGING_PRODUCER(prod2, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, 1024);
 
-MESSAGING_CONSUMER(consum1, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, test_receive, 20);
+MESSAGING_CONSUMER(consum1, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, 0, 0, test_receive, 20);
 
-MESSAGING_CONSUMER(consum2, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, test_receive, 20);
+MESSAGING_CONSUMER(consum2, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, 0, message_flags_dont_send_over_can, test_receive, 20);
 
 WORKING_AREA(waTest1, 1024);
 WORKING_AREA(waTest2, 1024);
@@ -73,10 +76,10 @@ msg_t dispatchThread(void* producer) {
     }
 
     while (true) {
-        chThdSleepMilliseconds(50);
+        chThdSleepMilliseconds(2000);
         const char* test = "Hello World";
         //message_producer_t* producer, uint16_t tag, uint8_t* data, uint16_t length
-        messaging_producer_send(&prod1, telemetry_id_state_estimators_quaternion, (const uint8_t*)test, 12);
+        messaging_producer_send(producer, telemetry_id_state_estimators_quaternion, message_flags_dont_send_over_can, (const uint8_t*)test, 12);
     }
 }
 

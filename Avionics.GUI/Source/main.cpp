@@ -8,13 +8,11 @@
 #include <crtdbg.h>
 #endif
 
-struct Tester {
-    float test[4];
-};
+const avionics_config_t local_config = {telemetry_origin_avionics_gui};
 
 int main() {
     int ret = -1;
-    
+
     if (FTEngine::setup()) {
         FTEngine::getFileManager()->addSearchPath("Resources");
 

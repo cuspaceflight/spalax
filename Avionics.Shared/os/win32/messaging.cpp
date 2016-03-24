@@ -11,9 +11,9 @@
 
 struct TelemetryRef {
     telemetry_t* packet;
+    message_metadata_t flags;
 
-    TelemetryRef() {
-        packet = nullptr;
+    TelemetryRef(telemetry_t* packet, message_metadata_t flags) : packet(packet), flags(flags) {
     }
 
     ~TelemetryRef() {
@@ -96,15 +96,16 @@ static bool messaging_consumer_enqueue_packet(message_consumer_t* consumer, cons
 
 // Send a mesage from the specified producer
 // A copy of the data will be made, so you can freely modify/release the data after this call
-extern "C" messaging_send_return_codes messaging_producer_send(message_producer_t* producer, uint16_t tag, const uint8_t* data, uint16_t length) {
+extern "C" messaging_send_return_codes messaging_producer_send(message_producer_t* producer, uint16_t tag, message_metadata_t flags, const uint8_t* data, uint16_t length) {
     if (producer->impl == NULL)
         return messaging_send_invalid_producer;
     if ((tag & producer->packet_source_mask) != 0)
         return messaging_send_invalid_tag;
 
-    auto ref = std::make_shared<TelemetryRef>();
+
 
     telemetry_t* packet = telemetry_allocator_alloc(producer->telemetry_allocator, length);
+    auto ref = std::make_shared<TelemetryRef>(packet, flags);
     ref->packet = packet;
     if (packet == nullptr) {
         return messaging_send_producer_heap_full;
@@ -115,7 +116,7 @@ extern "C" messaging_send_return_codes messaging_producer_send(message_producer_
     packet->header.id = tag | producer->packet_source;
     packet->header.length = length;
     packet->header.timestamp = platform_get_counter_value();
-    packet->header.origin = TELEMETRY_ORIGIN;
+    packet->header.origin = local_config.origin;
 
     bool enqueue_successful = true;
     // We create a local copy as it frees up the compiler
@@ -125,6 +126,7 @@ extern "C" messaging_send_return_codes messaging_producer_send(message_producer_
     for (uint32_t i = 0; i < num_consumers; ++i) {
         message_consumer_t* consumer = consumer_pool[i].parent;
         if ((consumer->packet_source_mask & packet->header.id) == consumer->packet_source
+            && (consumer->message_metadata_mask & flags) == consumer->message_metadata
             && !messaging_consumer_enqueue_packet(consumer, ref)) {
             enqueue_successful = false;
         }
@@ -144,7 +146,7 @@ extern "C" messaging_receive_return_codes messaging_consumer_receive(message_con
 
     auto ref = consumer->impl->mailbox.dequeue();
     if (!silent)
-        consumer->consumer_func(ref->packet);
+        consumer->consumer_func(ref->packet, ref->flags);
 
     return messaging_receive_ok;
 }

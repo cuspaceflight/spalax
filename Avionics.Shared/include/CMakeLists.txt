@@ -9,11 +9,10 @@ set (HEADERS ${HEADERS}
 	${CMAKE_CURRENT_SOURCE_DIR}/math_utils.h
 	${CMAKE_CURRENT_SOURCE_DIR}/messaging.h
 	${CMAKE_CURRENT_SOURCE_DIR}/messaging_defs.h
-	${CMAKE_CURRENT_SOURCE_DIR}/mission.h
 	${CMAKE_CURRENT_SOURCE_DIR}/platform.h
 	${CMAKE_CURRENT_SOURCE_DIR}/state_estimate.h
 	${CMAKE_CURRENT_SOURCE_DIR}/telemetry.h
 	${CMAKE_CURRENT_SOURCE_DIR}/telemetry_allocator.h
-	${CMAKE_CURRENT_SOURCE_DIR}/telemetry_defs.h
 	${CMAKE_CURRENT_SOURCE_DIR}/time_utils.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/avionics_config.h
     PARENT_SCOPE)
