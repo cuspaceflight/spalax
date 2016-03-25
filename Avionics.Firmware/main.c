@@ -13,7 +13,7 @@
 
 //static WORKING_AREA(waMission, 1024);
 
-static WORKING_AREA(waMPU, 2048);
+static WORKING_AREA(waMPU, 1024);
 static WORKING_AREA(waBadThing, 1024);
 //static WORKING_AREA(waUSB, 1024);
 //static WORKING_AREA(waMS5611, 768);
@@ -49,67 +49,16 @@ static const EXTConfig extcfg = {{
 
 const avionics_config_t local_config = {telemetry_origin_imu, NULL};
 
-void test_receive(telemetry_t* packet, message_metadata_t flags) {
-    (void)packet;
-    (void)flags;
-}
-
-MESSAGING_PRODUCER(prod1, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, 1024);
-
-MESSAGING_PRODUCER(prod2, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, 1024);
-
-MESSAGING_CONSUMER(consum1, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, 0, 0, test_receive, 20);
-
-MESSAGING_CONSUMER(consum2, telemetry_source_state_estimators, telemetry_source_mask_state_estimators, 0, message_flags_dont_send_over_can, test_receive, 20);
-
-WORKING_AREA(waTest1, 1024);
-WORKING_AREA(waTest2, 1024);
-WORKING_AREA(waTest3, 1024);
-WORKING_AREA(waTest4, 1024);
-
-
-
-msg_t dispatchThread(void* producer) {
-    if (!messaging_producer_init(producer)) {
-        bthandler_set_error(ERROR_CONFIG, true);
-        return 1;
-    }
-
-    while (true) {
-        chThdSleepMilliseconds(2000);
-        const char* test = "Hello World";
-        //message_producer_t* producer, uint16_t tag, uint8_t* data, uint16_t length
-        messaging_producer_send(producer, telemetry_id_state_estimators_quaternion, message_flags_dont_send_over_can, (const uint8_t*)test, 12);
-    }
-}
-
-msg_t receiveThread(void* consumer) {
-    if (!messaging_consumer_init(consumer)) {
-        bthandler_set_error(ERROR_CONFIG, true);
-        return 1;
-    }
-
-    while (true) {
-        while (messaging_consumer_receive(consumer, true, false) == messaging_receive_ok);
-        chThdSleepMilliseconds(20);
-    }
-}
-
-
 int main(void) {
     halInit();
     chSysInit();
     chRegSetThreadName("Main");
 
-    bthandler_reset();
-    init_telemetry_allocators();
-    init_messaging();
+    component_state_start();
+    telemetry_allocator_start();
+    messaging_start();
 
-    chThdCreateStatic(waTest1, sizeof(waTest1), NORMALPRIO, dispatchThread, &prod1);
-    chThdCreateStatic(waTest2, sizeof(waTest2), NORMALPRIO, dispatchThread, &prod2);
 
-    chThdCreateStatic(waTest3, sizeof(waTest3), NORMALPRIO, receiveThread, &consum1);
-    chThdCreateStatic(waTest4, sizeof(waTest4), NORMALPRIO, receiveThread, &consum2);
 
     //chThdCreateStatic(waMission, sizeof(waMission), NORMALPRIO, mission_thread, NULL);
     chThdCreateStatic(waBadThing, sizeof(waBadThing), NORMALPRIO, bthandler_thread, NULL);

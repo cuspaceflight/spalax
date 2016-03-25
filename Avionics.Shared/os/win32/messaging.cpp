@@ -44,8 +44,19 @@ static message_producer_impl_t producer_pool[MAX_NUM_PRODUCERS];
 
 static std::mutex producer_register_mutex;
 
-void init_messaging(void) {
+static std::atomic<bool> is_started = false;
+
+// Defined in component_state.c
+extern "C" void component_state_register_with_messaging(void);
+
+void messaging_start(void) {
+    is_started.store(true, std::memory_order_release);
+    component_state_register_with_messaging();
     COMPONENT_STATE_UPDATE(avionics_component_messaging, state_ok);
+}
+
+bool messaging_started(void) {
+    return is_started.load(std::memory_order_acquire);
 }
 
 // Initialise a producer - returns false on error
@@ -64,12 +75,7 @@ extern "C" bool messaging_producer_init(message_producer_t* producer) {
     producer->impl->parent = producer;
     telemetry_allocator_init(producer->telemetry_allocator);
 
-    // Ensure all initialization has been completed before we increment the index
-    std::atomic_thread_fence(std::memory_order_release);
-
-    // We don't need the thread safe version
-    // As stores are atomic and we only modify within this lock zone
-    ++cur_producer_pool_index; // NB: this must be done after all initialization
+    cur_producer_pool_index.fetch_add(1, std::memory_order_release);
     return true;
 }
 
@@ -88,12 +94,7 @@ extern "C" bool messaging_consumer_init(message_consumer_t* consumer) {
 
     // Perform any initialisation
 
-    // Ensure all initialization has been completed before we increment the index
-    std::atomic_thread_fence(std::memory_order_release);
-
-    // We don't need the thread safe version
-    // As stores are atomic and we only modify within this lock zone
-    ++cur_consumer_pool_index; // NB: this must be done after all initialization
+    cur_consumer_pool_index.fetch_add(1, std::memory_order_release);
     return true;
 }
 
@@ -136,7 +137,8 @@ extern "C" messaging_send_return_codes messaging_producer_send(message_producer_
     // We create a local copy as it frees up the compiler
     // If a consumer registers during this call it isn't a massive deal that
     // we won't pass it the packet.
-    uint32_t num_consumers = cur_consumer_pool_index;
+    uint32_t num_consumers = cur_consumer_pool_index.load(std::memory_order_acquire);
+
     for (uint32_t i = 0; i < num_consumers; ++i) {
         message_consumer_t* consumer = consumer_pool[i].parent;
         if ((consumer->packet_source_mask & packet->header.id) == consumer->packet_source

@@ -1,11 +1,20 @@
 #include "telemetry_allocator.h"
 #include <new>
 #include "component_state.h"
+#include <atomic>
 
 // TODO: Enforce heap limits
 
-void init_telemetry_allocators(void) {
+static std::atomic<bool> is_started = false;
+
+extern "C" void telemetry_allocator_start(void) {
+    is_started.store(true, std::memory_order_release);
+
     COMPONENT_STATE_UPDATE(avionics_component_telemetry_allocator, state_ok);
+}
+
+extern "C" bool telemetry_allocator_started(void) {
+    return is_started.load(std::memory_order_acquire);
 }
 
 extern "C" bool telemetry_allocator_init(telemetry_allocator_t* allocator) {

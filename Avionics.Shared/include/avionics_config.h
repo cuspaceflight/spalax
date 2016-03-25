@@ -56,6 +56,10 @@ typedef enum {
 typedef enum {
     avionics_component_messaging = 0,
     avionics_component_telemetry_allocator,
+    avionics_component_adis16405,
+    avionics_component_mpu9250,
+    avionics_component_ms5611,
+    avionics_component_config,
     avionics_component_max // This must be last
 } avionics_component_t;
 

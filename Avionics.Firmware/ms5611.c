@@ -204,8 +204,7 @@ static void ms5611_read(MS5611CalData* cal_data,
     //m2status_set_baro(*pressure, *temperature);
 
     if(*pressure < 1000 || *pressure > 120000)
-        bthandler_set_error(ERROR_ALTIM, true);
-        //m2status_baro_status(STATUS_ERR_SELFTEST_FAIL);
+        COMPONENT_STATE_UPDATE(avionics_component_ms5611, state_error);
 }
 
 /*
@@ -220,13 +219,12 @@ msg_t ms5611_thread(void *arg)
     static MS5611CalData cal_data;
     int32_t temperature, pressure;
 
-    //bthandler_set_error(ERROR_ALTIM, true);
+    COMPONENT_STATE_UPDATE(avionics_component_ms5611, state_initializing);
     chRegSetThreadName("MS5611");
     ms5611_init(&cal_data);
-    //bthandler_set_error(ERROR_ALTIM, false);
+    COMPONENT_STATE_UPDATE(avionics_component_ms5611, state_ok);
 
     while (TRUE) {
         ms5611_read(&cal_data, &temperature, &pressure);
-
     }
 }

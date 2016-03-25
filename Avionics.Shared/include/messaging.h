@@ -8,7 +8,9 @@
 extern "C" {
 #endif
 
-void init_messaging(void);
+void messaging_start(void);
+
+bool messaging_started(void);
 
 // Initialise a producer - returns false on error
 bool messaging_producer_init(message_producer_t* producer);

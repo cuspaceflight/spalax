@@ -21,10 +21,23 @@ static telemetry_allocator_impl_t allocator_pool[MAX_NUM_ALLOCATORS];
 // This could be made more fine-grained but I see no major reason to
 static Mutex register_mutex;
 
-void init_telemetry_allocators(void) {
+static volatile bool is_started = false;
+
+void telemetry_allocator_start(void) {
     chMtxInit(&register_mutex);
     cur_allocator_pool_index = 0;
+
+    memory_barrier_release();
+
+    is_started = true;
+
     COMPONENT_STATE_UPDATE(avionics_component_telemetry_allocator, state_ok);
+}
+
+bool telemetry_allocator_started(void) {
+    bool is_started_local = is_started;
+    memory_barrier_acquire();
+    return is_started_local;
 }
 
 // Creates a telemetry allocator

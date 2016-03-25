@@ -264,25 +264,31 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
 
     spiStart(&MPU9250_SPID, &spi_cfg);
 
+    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
+
     // Wait for startup
     while (!mpu9250_id_check()) {
-        bthandler_set_error(ERROR_MPU9250, true);
         chThdSleepMilliseconds(50);
     }
-    bthandler_set_error(ERROR_MPU9250, false);
+
+    // Log that we have passed the id check
+    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
 
     mpu9250_init();
 
     // Perform a self-test of the MPU9250
     while(!mpu9250_self_test_gyro()) {
-        bthandler_set_error(ERROR_MPU9250, true);
         chThdSleepMilliseconds(50);
     }
+
+    // Log that we have passed the gyro self test
+    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
+
     while(!mpu9250_self_test_accel()) {
-        bthandler_set_error(ERROR_MPU9250, true);
         chThdSleepMilliseconds(50);
     }
-    bthandler_set_error(ERROR_MPU9250, false);
+
+    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_ok);
 
     uint16_t raw_data[10];
     while(TRUE) {

@@ -29,8 +29,10 @@ typedef struct telemetry_allocator_t {
     static telemetry_allocator_t name = {heap_size, name##_buffer, NULL};
 #endif
 
-// Initialises the telemetry allocation component
-void init_telemetry_allocators(void);
+
+void telemetry_allocator_start(void);
+
+bool telemetry_allocator_started(void);
 
 // Creates a telemetry allocator
 // This is guaranteed to have at least 'heap_size' memory available for it to use

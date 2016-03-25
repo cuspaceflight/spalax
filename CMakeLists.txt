@@ -32,18 +32,18 @@ endif (${BUILD_GUI} AND ${BUILD_FIRMWARE})
 if (${BUILD_GUI})
     # These are needed by Avionics.Shared
 	set (AVIONICS_OS win32)
-	
+
     add_subdirectory(Frontier.Engine)
 	add_subdirectory(Avionics.Shared)
     add_subdirectory(Avionics.GUI)
-    
+
     set_target_properties(glfw PROPERTIES FOLDER Frontier.Engine//ThirdParty//glfw)
-    
+
 elseif (${BUILD_FIRMWARE})
     set (AVIONICS_OS chibios)
 	set (CHIBIOS_LOCATION ${CMAKE_SOURCE_DIR}/ChibiOS-RT)
 	set (CHIBIOS_CONFIG_LOCATION ${CMAKE_SOURCE_DIR}/Avionics.Firmware/config)
-	set (CHIBIOS_PLATFORM_INCLUDES 
+	set (CHIBIOS_PLATFORM_INCLUDES
 		${CHIBIOS_LOCATION}/os/ports/common/ARMCMx/CMSIS/include
 		${CHIBIOS_LOCATION}/os/ports/common/ARMCMx
 		${CHIBIOS_LOCATION}/os/ports/GCC/ARMCMx
@@ -58,14 +58,12 @@ elseif (${BUILD_FIRMWARE})
         ${CHIBIOS_LOCATION}/os/hal/platforms/STM32/TIMv1
         ${CHIBIOS_LOCATION}/os/hal/platforms/STM32/USARTv1
 	)
-	
+
 	# This should be the same as the target we are linking against
-	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mcpu=cortex-m4 -fomit-frame-pointer -falign-functions=16 -std=gnu99 -ffunction-sections -fdata-sections -fno-common -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -mno-thumb-interwork -mthumb -Wall -Wextra -Wstrict-prototypes -DCORTEX_USE_FPU=TRUE -DTHUMB_PRESENT -DTHUMB_NO_INTERWORKING -MD -MP -MF -DTHUMB")
-	
+	set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -mcpu=cortex-m4 -fomit-frame-pointer -falign-functions=16 -std=gnu99 -ffunction-sections -fdata-sections -fno-common -mfloat-abi=hard -mfpu=fpv4-sp-d16 -fsingle-precision-constant -mno-thumb-interwork -mthumb -Wall -Wextra -Wstrict-prototypes -DCORTEX_USE_FPU=TRUE -DTHUMB_PRESENT -DTHUMB_NO_INTERWORKING -MD -MP -MF -DTHUMB")
+
 	add_subdirectory(Avionics.Shared)
     add_subdirectory(Avionics.Firmware)
 else (${BUILD_GUI})
     message(FATAL_ERROR "Nothing selected to build (select either BUILD_FIRMWARE or BUILD_GUI)")
 endif (${BUILD_GUI})
-
-

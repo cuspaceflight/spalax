@@ -132,6 +132,8 @@ INCDIR = $(PORTINC) $(KERNINC) $(TESTINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) \
          $(CHIBIOS)/os/various $(FATFSINC) config $(AVIONICS_INCLUDES)
 
+LDFLAGS = -g
+
 #
 # Project, sources and paths
 ##############################################################################

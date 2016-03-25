@@ -43,12 +43,29 @@ static volatile char telemetry_ref_memory_pool_buffer[MAX_NUM_TELEMETRY_REFS * s
 
 static MemoryPool telemetry_ref_memory_pool;
 
-void init_messaging(void) {
+static volatile bool is_started = false;
+
+// Defined in component_state.c
+void component_state_register_with_messaging(void);
+
+void messaging_start(void) {
 	chPoolInit(&telemetry_ref_memory_pool, sizeof(telemetry_ref_t), NULL);
 	chPoolLoadArray(&telemetry_ref_memory_pool, (void*)telemetry_ref_memory_pool_buffer, MAX_NUM_TELEMETRY_REFS);
 	chMtxInit(&consumer_register_mutex);
 	chMtxInit(&producer_register_mutex);
+
+    memory_barrier_release();
+
+    is_started = true;
+
+    component_state_register_with_messaging();
     COMPONENT_STATE_UPDATE(avionics_component_messaging, state_ok);
+}
+
+bool messaging_started(void) {
+    bool is_started_local = is_started;
+    memory_barrier_acquire();
+    return is_started_local;
 }
 
 //
@@ -115,12 +132,7 @@ bool messaging_producer_init(message_producer_t* producer) {
 	producer->impl->parent = producer;
     telemetry_allocator_init(producer->telemetry_allocator);
 
-    // Data Memory Barrier acts as a memory barrier. It ensures that all explicit
-    // memory accesses that appear in program order before the DMB instruction
-    // are observed before any explicit memory accesses that appear in program
-    // order after the DMB instruction.
-    // The SY option means it only waits for stores to complete
-    asm volatile("DMB SY" ::: "memory");
+    memory_barrier_release();
 
 	// We don't need the thread safe version
 	// As stores are atomic and we only modify within this lock zone
@@ -148,12 +160,7 @@ bool messaging_consumer_init(message_consumer_t* consumer) {
 	// Perform any initialisation
 	chMBInit(&consumer->impl->mailbox, (msg_t*)consumer->mailbox_buffer, consumer->mailbox_size);
 
-    // Data Memory Barrier acts as a memory barrier. It ensures that all explicit
-    // memory accesses that appear in program order before the DMB instruction
-    // are observed before any explicit memory accesses that appear in program
-    // order after the DMB instruction.
-    // The SY option means it only waits for stores to complete
-    asm volatile("DMB SY" ::: "memory");
+    memory_barrier_release();
 
 	// We don't need the thread safe version
 	// As stores are atomic and we only modify within this lock zone
@@ -212,6 +219,8 @@ messaging_send_return_codes messaging_producer_send(message_producer_t* producer
 	// If a consumer register during this call it isn't a massive deal that
 	// we won't pass it the packet
 	uint32_t num_consumers = cur_consumer_pool_index;
+    memory_barrier_acquire();
+
 	for (uint32_t i = 0; i < num_consumers; ++i) {
 		message_consumer_t* consumer = consumer_pool[i].parent;
 		if ((consumer->packet_source_mask & packet->header.id) == consumer->packet_source
