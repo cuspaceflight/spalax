@@ -1,10 +1,11 @@
 #include "telemetry_allocator.h"
 #include <new>
+#include "component_state.h"
 
 // TODO: Enforce heap limits
 
 void init_telemetry_allocators(void) {
-    
+    COMPONENT_STATE_UPDATE(avionics_component_telemetry_allocator, state_ok);
 }
 
 extern "C" bool telemetry_allocator_init(telemetry_allocator_t* allocator) {
@@ -16,12 +17,16 @@ extern "C" telemetry_t* telemetry_allocator_alloc(telemetry_allocator_t* allocat
     // TODO: Enforce some sort of max payload_size limit
 
     // We use the no throw versions to prevent C++ exceptions crossing language boundaries
+    // Although if new is failing something is seriously wrong...
     auto ret = new (std::nothrow) telemetry_t();
-    if (ret == nullptr)
+    if (ret == nullptr) {
+        COMPONENT_STATE_UPDATE(avionics_component_telemetry_allocator, state_error);
         return nullptr;
+    }
     auto data = new (std::nothrow) uint8_t[payload_size];
     if (data == nullptr) {
         delete ret;
+        COMPONENT_STATE_UPDATE(avionics_component_telemetry_allocator, state_error);
         return nullptr;
     }
     ret->payload = data;

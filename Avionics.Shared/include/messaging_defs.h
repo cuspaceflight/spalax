@@ -10,7 +10,7 @@ extern "C" {
 typedef uint16_t message_metadata_t;
 typedef uint32_t messaging_consumer_id;
 typedef uint32_t messaging_producer_id;
-typedef void(*messaging_consumer_func)(telemetry_t*, message_metadata_t);
+typedef void(*messaging_consumer_func_t)(telemetry_t*, message_metadata_t);
 
 typedef struct message_producer_impl_t message_producer_impl_t;
 typedef struct message_consumer_impl_t message_consumer_impl_t;
@@ -27,7 +27,7 @@ typedef struct message_consumer_t {
     const uint16_t packet_source_mask;
     const message_metadata_t message_metadata;
     const message_metadata_t message_metadata_mask;
-    const messaging_consumer_func consumer_func;
+    const messaging_consumer_func_t consumer_func;
     const uint32_t mailbox_size; // Maximum number of packets which can be waiting for processing
     volatile int32_t* const mailbox_buffer;
     message_consumer_impl_t* impl; // Used for implementation specific data

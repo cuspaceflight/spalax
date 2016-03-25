@@ -9,6 +9,7 @@ extern "C" {
 #ifdef WIN32
 #define MEMORY_BUFFER_ATTRIBUTES
 #else
+#include "ch.h"
 #define MEMORY_BUFFER_ATTRIBUTES __attribute__((aligned(sizeof(stkalign_t)))) __attribute__((section(".ccm")))
 #endif
 // This file contains declarations which are to be defined elsewhere

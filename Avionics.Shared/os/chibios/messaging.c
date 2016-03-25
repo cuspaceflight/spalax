@@ -4,6 +4,7 @@
 #include <string.h>
 #include "core_cmInstr.h"
 #include "platform.h"
+#include "component_state.h"
 
 #define MAX_NUM_CONSUMERS 20
 #define MAX_NUM_PRODUCERS 20
@@ -47,6 +48,7 @@ void init_messaging(void) {
 	chPoolLoadArray(&telemetry_ref_memory_pool, (void*)telemetry_ref_memory_pool_buffer, MAX_NUM_TELEMETRY_REFS);
 	chMtxInit(&consumer_register_mutex);
 	chMtxInit(&producer_register_mutex);
+    COMPONENT_STATE_UPDATE(avionics_component_messaging, state_ok);
 }
 
 //
@@ -97,12 +99,14 @@ static void telemetry_reference_release(telemetry_ref_t* ref) {
 
 // Initialise a producer - returns false on error
 bool messaging_producer_init(message_producer_t* producer) {
-	if (producer->impl != NULL)
+    chMtxLock(&producer_register_mutex);
+	if (producer->impl != NULL) {
+        chMtxUnlock(); // producer_register_mutex
 		return true; // We assume it has already been initialised
-
-	chMtxLock(&producer_register_mutex);
+    }
 	if (cur_producer_pool_index >= MAX_NUM_PRODUCERS) {
 		chMtxUnlock(); // producer_register_mutex
+        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
 		return false;
 	}
 	producer->impl = &producer_pool[cur_producer_pool_index];
@@ -110,6 +114,13 @@ bool messaging_producer_init(message_producer_t* producer) {
 	// Perform any initialisation
 	producer->impl->parent = producer;
     telemetry_allocator_init(producer->telemetry_allocator);
+
+    // Data Memory Barrier acts as a memory barrier. It ensures that all explicit
+    // memory accesses that appear in program order before the DMB instruction
+    // are observed before any explicit memory accesses that appear in program
+    // order after the DMB instruction.
+    // The SY option means it only waits for stores to complete
+    asm volatile("DMB SY" ::: "memory");
 
 	// We don't need the thread safe version
 	// As stores are atomic and we only modify within this lock zone
@@ -120,12 +131,15 @@ bool messaging_producer_init(message_producer_t* producer) {
 
 // Initialise a consumer - returns false on error
 bool messaging_consumer_init(message_consumer_t* consumer) {
-	if (consumer->impl != NULL)
+    chMtxLock(&consumer_register_mutex);
+	if (consumer->impl != NULL) {
+        chMtxUnlock(); // consumer_register_mutex
 		return true; // We assume it has already been initialised
+    }
 
-	chMtxLock(&consumer_register_mutex);
 	if (cur_consumer_pool_index >= MAX_NUM_CONSUMERS) {
 		chMtxUnlock(); // consumer_register_mutex
+        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
 		return false;
 	}
 	consumer->impl = &consumer_pool[cur_consumer_pool_index];
@@ -133,6 +147,13 @@ bool messaging_consumer_init(message_consumer_t* consumer) {
 
 	// Perform any initialisation
 	chMBInit(&consumer->impl->mailbox, (msg_t*)consumer->mailbox_buffer, consumer->mailbox_size);
+
+    // Data Memory Barrier acts as a memory barrier. It ensures that all explicit
+    // memory accesses that appear in program order before the DMB instruction
+    // are observed before any explicit memory accesses that appear in program
+    // order after the DMB instruction.
+    // The SY option means it only waits for stores to complete
+    asm volatile("DMB SY" ::: "memory");
 
 	// We don't need the thread safe version
 	// As stores are atomic and we only modify within this lock zone
@@ -154,23 +175,30 @@ static bool messaging_consumer_enqueue_packet(message_consumer_t* consumer, tele
 // Send a mesage from the specified producer
 // A copy of the data will be made, so you can freely modify/release the data after this call
 messaging_send_return_codes messaging_producer_send(message_producer_t* producer, uint16_t tag, message_metadata_t flags, const uint8_t* data, uint16_t length) {
-	if (producer->impl == NULL)
+	if (producer->impl == NULL) {
+        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
 		return messaging_send_invalid_producer;
-	if ((tag & producer->packet_source_mask) != 0)
+    }
+	if ((tag & producer->packet_source_mask) != 0) {
+        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
 		return messaging_send_invalid_tag;
+    }
 
 	telemetry_ref_t* ref = telemetry_reference_create();
-	if (ref == NULL)
-		return messaging_send_internal_pool_full; // TODO: Log error
-
+	if (ref == NULL) {
+        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
+		return messaging_send_internal_pool_full;
+    }
 
 	telemetry_t* packet = telemetry_allocator_alloc(producer->telemetry_allocator, length);
-	ref->packet = packet;
-    ref->flags = flags;
 	if (packet == NULL) {
+        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
 		telemetry_reference_release(ref);
 		return messaging_send_producer_heap_full;
 	}
+
+    ref->packet = packet;
+    ref->flags = flags;
 	memcpy(packet->payload, data, length);
 
     // We have already checked the tag and source don't overlap earlier
@@ -200,8 +228,10 @@ messaging_send_return_codes messaging_producer_send(message_producer_t* producer
 // Consume the next packet in the consumer's buffer
 // If silent is specified will not invoke the callback function
 messaging_receive_return_codes messaging_consumer_receive(message_consumer_t* consumer, bool blocking, bool silent) {
-    if (consumer->impl == NULL)
+    if (consumer->impl == NULL) {
+        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
         return messaging_receive_invalid_consumer;
+    }
 
     intptr_t data_msg;
     msg_t mailbox_ret = chMBFetch(&(consumer->impl->mailbox), (msg_t*)&data_msg, blocking ? TIME_INFINITE : TIME_IMMEDIATE);
