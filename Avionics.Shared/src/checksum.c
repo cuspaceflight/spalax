@@ -31,7 +31,7 @@ uint32_t checksum_crc32(const uint8_t* buffer, uint32_t length) {
 
 // CRC16 implementation from https://github.com/cuspaceflight/m2-electronics/blob/master/m2serial/m2serial.c
 uint16_t checksum_crc16(const uint8_t* buffer, uint32_t length) {
-    size_t i, j;
+    uint32_t i, j;
     uint16_t crc = 0xFFFF;
     for (i = 0; i<length; i++) {
         crc ^= (uint16_t)buffer[i] << 8;

@@ -8,6 +8,7 @@
 #include "messaging.h"
 #include "usb_telemetry.h"
 #include "telemetry_allocator.h"
+#include <checksum.h>
 
 #define USE_USB_TELEMETRY
 
