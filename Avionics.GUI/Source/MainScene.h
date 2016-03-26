@@ -10,7 +10,6 @@ class StateDetailView;
 class State3DRenderer;
 enum KeyName;
 enum KeyState;
-class DataSource;
 
 class MainScene : public FTScene {
 public:
@@ -19,7 +18,6 @@ public:
 
 protected:
     state_estimate_t state_estimate_;
-    std::unique_ptr<DataSource> data_source_;
     
     double time_left_after_ticks_;
 

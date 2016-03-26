@@ -31,3 +31,12 @@ TARGET_LINK_LIBRARIES(Avionics.GUI.Launcher
     Avionics.GUI
     ${FRONTIER_ENGINE_LIBS}
 )
+
+
+add_custom_command(TARGET Avionics.GUI.Launcher POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_CURRENT_SOURCE_DIR}/Resources ${CMAKE_CURRENT_BINARY_DIR}/Resources)
+
+#add_custom_command(TARGET Avionics.GUI.Launcher POST_BUILD 
+#                    COMMAND ${CMAKE_COMMAND} -E  create_symlink
+#                        ${CMAKE_CURRENT_SOURCE_DIR}/Resources ${CMAKE_CURRENT_BINARY_DIR}/Resources)

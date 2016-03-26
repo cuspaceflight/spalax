@@ -15,4 +15,5 @@ set (HEADERS ${HEADERS}
 	${CMAKE_CURRENT_SOURCE_DIR}/telemetry_allocator.h
 	${CMAKE_CURRENT_SOURCE_DIR}/time_utils.h
     ${CMAKE_CURRENT_SOURCE_DIR}/avionics_config.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/checksum.h
     PARENT_SCOPE)

@@ -55,10 +55,9 @@ int main(void) {
     chRegSetThreadName("Main");
 
     component_state_start();
+    checksum_init();
     telemetry_allocator_start();
     messaging_start();
-
-
 
     //chThdCreateStatic(waMission, sizeof(waMission), NORMALPRIO, mission_thread, NULL);
     chThdCreateStatic(waBadThing, sizeof(waBadThing), NORMALPRIO, bthandler_thread, NULL);
