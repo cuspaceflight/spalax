@@ -7,4 +7,4 @@ set -xe
 # Required packages: gcc-arm-none-eabi libnewlib-arm-none-eabi
 
 cd Avionics.Firmware
-make all
+make all VERBOSE=1
