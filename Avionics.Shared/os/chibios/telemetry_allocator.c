@@ -69,7 +69,8 @@ bool telemetry_allocator_init(telemetry_allocator_t* allocator) {
 // the payload_size should be in bytes
 // Will return NULL if allocation fails for any reason
 telemetry_t* telemetry_allocator_alloc(telemetry_allocator_t* allocator, uint32_t payload_size) {
-    // TODO: Enforce some sort of max payload_size limit
+    if (payload_size > MAX_TELEMETRY_PAYLOAD_SIZE)
+        return NULL;
     if (allocator->impl == NULL) {
         COMPONENT_STATE_UPDATE(avionics_component_telemetry_allocator, state_error);
         return NULL;

@@ -16,18 +16,25 @@ extern "C" {
 
 typedef enum {
     telemetry_source_mask_component_state = TELEMETRY_SOURCE_MASK(0),
+    telemetry_source_mask_ms5611 = TELEMETRY_SOURCE_MASK(0),
     telemetry_source_mask_state_estimators = TELEMETRY_SOURCE_MASK(2),
 
 } telemetry_source_mask_t;
 
 typedef enum {
     telemetry_source_component_state = TELEMETRY_SOURCE(0b00000000000, 0),
+
+    // Sensors
+    telemetry_source_ms5611 = TELEMETRY_SOURCE(0b00000001000, 0),
+
+
     telemetry_source_state_estimators = TELEMETRY_SOURCE(0b100000,2),
 
 } telemetry_source_t;
 
 typedef enum {
     telemetry_id_component_state_update = TELEMETRY_ID(0b00000000000, 0, 0),
+    telemetry_id_ms5611_data = TELEMETRY_ID(0b00000001000, 0, 0),
     telemetry_id_state_estimators_quaternion = TELEMETRY_ID(0b100000, 0b00, 2),
 } telemetry_id_t;
 

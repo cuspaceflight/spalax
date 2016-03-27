@@ -27,7 +27,7 @@ typedef struct message_consumer_t {
     const uint16_t packet_source_mask;
     const message_metadata_t message_metadata;
     const message_metadata_t message_metadata_mask;
-    const messaging_consumer_func_t consumer_func;
+    messaging_consumer_func_t const consumer_func;
     const uint32_t mailbox_size; // Maximum number of packets which can be waiting for processing
     volatile int32_t* const mailbox_buffer;
     message_consumer_impl_t* impl; // Used for implementation specific data

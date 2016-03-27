@@ -2,7 +2,7 @@
 #include "messaging.h"
 #include "platform.h"
 
-//STATIC_ASSERT(avionics_component_max < UINT8_MAX, too_many_avionics_components);
+STATIC_ASSERT(avionics_component_max < UINT8_MAX, too_many_avionics_components);
 static volatile uint8_t component_states[avionics_component_max];
 
 typedef struct component_state_update_t {
@@ -11,7 +11,7 @@ typedef struct component_state_update_t {
     uint16_t line_number;
 } component_state_update_t;
 
-//STATIC_ASSERT(sizeof(component_state_update_t) == 4, component_state_update_invalid_size);
+STATIC_ASSERT(sizeof(component_state_update_t) == 4, component_state_update_invalid_size);
 
 MESSAGING_PRODUCER(messaging_producer, telemetry_source_component_state, telemetry_source_mask_component_state, 128);
 
@@ -44,7 +44,7 @@ void component_state_update(avionics_component_t component, avionics_component_s
 
     bool messaging_enabled_local = messaging_enabled;
     memory_barrier_acquire();
-    
+
     if (messaging_enabled_local && (component != avionics_component_messaging || state != state_error || component_states[component] != state)) {
         // The if statement protects against potential error loops when
         // there is a problem in the messaging system:

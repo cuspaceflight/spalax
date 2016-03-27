@@ -179,42 +179,17 @@ static bool messaging_consumer_enqueue_packet(message_consumer_t* consumer, tele
 	return false;
 }
 
-// Send a mesage from the specified producer
-// A copy of the data will be made, so you can freely modify/release the data after this call
-messaging_send_return_codes messaging_producer_send(message_producer_t* producer, uint16_t tag, message_metadata_t flags, const uint8_t* data, uint16_t length) {
-	if (producer->impl == NULL) {
-        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
-		return messaging_send_invalid_producer;
-    }
-	if ((tag & producer->packet_source_mask) != 0) {
-        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
-		return messaging_send_invalid_tag;
-    }
-
-	telemetry_ref_t* ref = telemetry_reference_create();
+messaging_send_return_codes messaging_send(telemetry_t* packet, message_metadata_t flags) {
+    telemetry_ref_t* ref = telemetry_reference_create();
 	if (ref == NULL) {
         COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
+        telemetry_allocator_free(packet);
 		return messaging_send_internal_pool_full;
     }
-
-	telemetry_t* packet = telemetry_allocator_alloc(producer->telemetry_allocator, length);
-	if (packet == NULL) {
-        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
-		telemetry_reference_release(ref);
-		return messaging_send_producer_heap_full;
-	}
-
     ref->packet = packet;
     ref->flags = flags;
-	memcpy(packet->payload, data, length);
 
-    // We have already checked the tag and source don't overlap earlier
-    packet->header.id = tag | producer->packet_source;
-    packet->header.length = length;
-    packet->header.timestamp = platform_get_counter_value();
-    packet->header.origin = local_config.origin;
-
-	bool enqueue_successful = true;
+    bool enqueue_successful = true;
 	// We create a local copy as it frees up the compiler
 	// If a consumer register during this call it isn't a massive deal that
 	// we won't pass it the packet
@@ -232,6 +207,34 @@ messaging_send_return_codes messaging_producer_send(message_producer_t* producer
 
 	telemetry_reference_release(ref);
 	return enqueue_successful ? messaging_send_ok : messaging_send_consumer_buffer_full;
+}
+
+// Send a mesage from the specified producer
+// A copy of the data will be made, so you can freely modify/release the data after this call
+messaging_send_return_codes messaging_producer_send(message_producer_t* producer, uint16_t tag, message_metadata_t flags, const uint8_t* data, uint16_t length) {
+	if (producer->impl == NULL) {
+        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
+		return messaging_send_invalid_producer;
+    }
+	if ((tag & producer->packet_source_mask) != 0) {
+        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
+		return messaging_send_invalid_tag;
+    }
+
+	telemetry_t* packet = telemetry_allocator_alloc(producer->telemetry_allocator, length);
+	if (packet == NULL) {
+        COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
+		return messaging_send_producer_heap_full;
+	}
+
+	memcpy(packet->payload, data, length);
+    // We have already checked the tag and source don't overlap earlier
+    packet->header.id = tag | producer->packet_source;
+    packet->header.length = length;
+    packet->header.timestamp = platform_get_counter_value();
+    packet->header.origin = local_config.origin;
+
+    return messaging_send(packet, flags);
 }
 
 // Consume the next packet in the consumer's buffer

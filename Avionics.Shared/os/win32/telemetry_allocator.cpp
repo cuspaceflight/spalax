@@ -23,8 +23,9 @@ extern "C" bool telemetry_allocator_init(telemetry_allocator_t* allocator) {
 }
 
 extern "C" telemetry_t* telemetry_allocator_alloc(telemetry_allocator_t* allocator, uint32_t payload_size) {
-    // TODO: Enforce some sort of max payload_size limit
-
+    if (payload_size > MAX_TELEMETRY_PAYLOAD_SIZE)
+        return nullptr;
+        
     // We use the no throw versions to prevent C++ exceptions crossing language boundaries
     // Although if new is failing something is seriously wrong...
     auto ret = new (std::nothrow) telemetry_t();

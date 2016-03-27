@@ -9,6 +9,7 @@
 #include <messaging.h>
 #include <checksum.h>
 #include <component_state.h>
+#include <SerialDriver.h>
 
 #ifdef _WIN32
 #define _CRTDBG_MAP_ALLOC
@@ -42,7 +43,9 @@ int main() {
 
     if (FTEngine::setup()) {
         rocket_main();
-        
+
+        auto driver = std::make_unique<SerialDriver>("COM6", 38400);
+
         FTEngine::getFileManager()->addSearchPath("Resources");
 
         auto scene = std::static_pointer_cast<FTScene>(std::make_shared<MainScene>());

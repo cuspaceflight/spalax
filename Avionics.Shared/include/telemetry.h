@@ -8,6 +8,9 @@
 extern "C" {
 #endif
 
+// This is somewhat arbitrary atm
+#define MAX_TELEMETRY_PAYLOAD_SIZE 4000
+
 typedef struct telemetry_header_t {
     struct {
         unsigned int id : 11;
