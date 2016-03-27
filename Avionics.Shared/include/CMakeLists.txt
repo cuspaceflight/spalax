@@ -1,3 +1,5 @@
+add_subdirectory(config)
+
 set (SOURCES ${SOURCES}
     PARENT_SCOPE)
 
@@ -14,7 +16,6 @@ set (HEADERS ${HEADERS}
 	${CMAKE_CURRENT_SOURCE_DIR}/telemetry.h
 	${CMAKE_CURRENT_SOURCE_DIR}/telemetry_allocator.h
 	${CMAKE_CURRENT_SOURCE_DIR}/time_utils.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/avionics_config.h
     ${CMAKE_CURRENT_SOURCE_DIR}/checksum.h
     ${CMAKE_CURRENT_SOURCE_DIR}/serial_interface.h
     PARENT_SCOPE)

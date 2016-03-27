@@ -8,6 +8,7 @@
 #include "badthinghandler.h"
 #include "compilermacros.h"
 #include "mpu9250-reg.h"
+#include "messaging.h"
 
 #define MPU9250_SPID         SPID1
 #define MPU9250_SPI_CS_PORT  GPIOA
@@ -246,6 +247,8 @@ void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
     chSysUnlockFromIsr();
 }
 
+MESSAGING_PRODUCER(messaging_producer, telemetry_source_mpu9250, telemetry_source_mask_mpu9250, sizeof(mpu9250_data_t) * 10)
+
 msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
     const SPIConfig spi_cfg = {
         NULL,
@@ -290,14 +293,17 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
 
     COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_ok);
 
+    messaging_producer_init(&messaging_producer);
+
+
     uint16_t raw_data[10];
+    mpu9250_data_t* data = (mpu9250_data_t*)raw_data;
     while(TRUE) {
         chSysLock();
         chBSemWaitTimeoutS(&mpu9250_semaphore, 100);
         chSysUnlock();
 
         mpu9250_burst_read(raw_data);
-
-        // TODO Convert raw_data to meaningful numbers
+        messaging_producer_send(&messaging_producer, 0, 0, (const uint8_t*)&data, sizeof(raw_data));
     }
 }

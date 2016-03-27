@@ -18,6 +18,7 @@ inline void memory_barrier_acquire(void) {
     asm volatile("DMB" ::: "memory");
 }
 
+
 inline void memory_barrier_release(void) {
     asm volatile("DMB" ::: "memory");
 }

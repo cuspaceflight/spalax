@@ -1,8 +1,8 @@
-﻿#include "FTEngine.h"
+﻿#include <Frontier.h>
+#include "FTEngine.h"
 #include <MainScene.h>
 #include <Rendering/FTDirector.h>
 #include <Util/FTFileManager.h>
-#include <thread>
 
 
 #include "avionics_config.h"

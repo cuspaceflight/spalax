@@ -1,6 +1,7 @@
 #include "component_state.h"
 #include "messaging.h"
 #include "platform.h"
+#include "avionics_config.h"
 
 STATIC_ASSERT(avionics_component_max < UINT8_MAX, too_many_avionics_components);
 static volatile uint8_t component_states[avionics_component_max];

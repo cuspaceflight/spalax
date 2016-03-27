@@ -1,6 +1,6 @@
 #ifndef COMPONENT_STATE_H
 #define COMPONENT_STATE_H
-#include "avionics_config.h"
+#include "component_state_config.h"
 #include <stdint.h>
 #include <stdbool.h>
 

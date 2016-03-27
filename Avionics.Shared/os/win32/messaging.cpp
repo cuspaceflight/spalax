@@ -4,6 +4,7 @@
 #include <TQueue.h>
 #include <atomic>
 #include "component_state.h"
+#include "avionics_config.h"
 
 #define MAX_NUM_CONSUMERS 20
 #define MAX_NUM_PRODUCERS 20
@@ -144,7 +145,7 @@ extern "C" messaging_send_return_codes messaging_producer_send(message_producer_
         COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
         return messaging_send_producer_heap_full;
     }
-    
+
     memcpy(packet->payload, data, length);
 
     // We have already checked the tag and source don't overlap earlier

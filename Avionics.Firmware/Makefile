@@ -64,6 +64,9 @@ endif
 # Project, sources and paths
 #
 
+.PHONY: all
+.DEFAULT_GOAL := all
+
 # Define project name here
 PROJECT = IMU
 
@@ -75,6 +78,9 @@ include $(CHIBIOS)/os/hal/hal.mk
 include $(CHIBIOS)/os/ports/GCC/ARMCMx/STM32F4xx/port.mk
 include $(CHIBIOS)/os/kernel/kernel.mk
 include $(CHIBIOS)/test/test.mk
+
+AVIONICS = ../Avionics.Shared
+include $(AVIONICS)/avionics.mk
 
 # Define linker script file here
 LDSCRIPT= config/STM32F407xG_CCM.ld
@@ -225,10 +231,13 @@ ULIBS =
 RULESPATH = $(CHIBIOS)/os/ports/GCC/ARMCMx
 include $(RULESPATH)/rules.mk
 
+$(OBJS): $(AVIONICS_LIB)
+clean: clean_avionics
+
 ##############################################################################
 # Black Magic Probe flashing via GDB
 #
-flash: build/$(PROJECT).elf
+flash: all
 	arm-none-eabi-gdb --batch \
                       -ex 'target extended-remote /dev/ttyACM0' \
                       -ex 'monitor version' \
@@ -236,7 +245,7 @@ flash: build/$(PROJECT).elf
                       -ex 'attach 1' \
                       -ex 'load' build/$(PROJECT).elf \
 
-debug: build/$(PROJECT).elf
+debug: all
 	arm-none-eabi-gdb -ex 'target extended-remote /dev/ttyACM0' \
                       -ex 'monitor swdp_scan' \
                       -ex 'attach 1' \

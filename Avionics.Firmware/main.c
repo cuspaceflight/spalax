@@ -9,6 +9,7 @@
 #include "usb_telemetry.h"
 #include "telemetry_allocator.h"
 #include "checksum.h"
+#include "avionics_config.h"
 
 #define USE_USB_TELEMETRY
 

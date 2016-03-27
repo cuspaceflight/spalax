@@ -56,13 +56,13 @@ int SerialPort::read(uint8_t* buff, size_t size) {
 
 	if (size > 4096)
 		size = 4096;
-	ReadFile(port_handle_, buff, size, &n, nullptr);
+	ReadFile(port_handle_, buff, (DWORD)size, &n, nullptr);
 	return n;
 }
 
 int SerialPort::write(const uint8_t* buff, size_t size) {
 	FTAssert(portIsOpen(), "Trying to write to closed port");
 	DWORD n;
-	WriteFile(port_handle_, buff, size, &n, nullptr);
+	WriteFile(port_handle_, buff, (DWORD)size, &n, nullptr);
 	return (int)n;
 }

@@ -1,7 +1,7 @@
 #ifndef TELEMETRY_H
 #define TELEMETRY_H
 #include <stdint.h>
-#include "avionics_config.h"
+#include "telemetry_config.h"
 #include "compilermacros.h"
 
 #ifdef __cplusplus

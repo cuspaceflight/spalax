@@ -1,3 +1,14 @@
+cmake_minimum_required (VERSION 3.2)
+
+if ("${PROJECT_BINARY_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}")
+  message(FATAL_ERROR
+    "In-source builds are not permitted!  Make a separate folder for"
+    " building, e.g.,"
+    "mkdir build; cd build; cmake .."
+    "Before that, remove the files created by this failed run with"
+    "rm -rf CMakeCache.txt CMakeFiles")
+endif ()
+
 add_subdirectory(include)
 add_subdirectory(src)
 
@@ -27,13 +38,19 @@ endforeach()
 
 add_library(Avionics ${HEADERS} ${SOURCES} ${CMAKELISTS})
 
+set(CMAKE_C_FLAGS ${ADDITIONAL_C_FLAGS})
+
 set_property(TARGET Avionics PROPERTY C_STANDARD 11)
 
-SET (AVIONICS_INCLUDES 
+SET (AVIONICS_INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/config
 )
 
-SET (AVIONICS_INCLUDES ${AVIONICS_INCLUDES} PARENT_SCOPE)
+get_directory_property(hasParent PARENT_DIRECTORY)
+if (hasParent)
+	SET(AVIONICS_INCLUDES ${AVIONICS_INCLUDES} PARENT_SCOPE)
+endif()
 
 target_include_directories ( Avionics PUBLIC
     ${AVIONICS_INCLUDES}

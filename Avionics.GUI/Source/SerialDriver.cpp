@@ -2,6 +2,8 @@
 #include "serial_interface.h"
 #include <atomic>
 #include "messaging.h"
+#include <avionics_config.h>
+#include "messaging_config.h"
 
 #define READ_BUFFER_SIZE 255
 #define WRITE_BUFFER_SIZE 255

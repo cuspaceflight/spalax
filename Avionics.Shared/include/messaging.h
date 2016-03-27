@@ -8,6 +8,20 @@
 extern "C" {
 #endif
 
+#define MESSAGING_PRODUCER(name, packet_source, packet_source_mask, heap_size) \
+    TELEMETRY_ALLOCATOR(name##_allocator, heap_size) \
+    static message_producer_t name = {packet_source, packet_source_mask, &name##_allocator, NULL};
+
+#ifdef WIN32
+// On windows we don't bother allocating the buffer as it won't be used
+#define MESSAGING_CONSUMER(name, packet_source, packet_source_mask, message_metadata, message_metadata_mask, consumer_func, mailbox_size) \
+    static message_consumer_t name = {packet_source, packet_source_mask, message_metadata, message_metadata_mask, consumer_func, mailbox_size, NULL, NULL};
+#else
+#define MESSAGING_CONSUMER(name, packet_source, packet_source_mask, message_metadata, message_metadata_mask, consumer_func, mailbox_size) \
+    static volatile msg_t name##_mailbox_buffer[mailbox_size] MEMORY_BUFFER_ATTRIBUTES; \
+    static message_consumer_t name = {packet_source, packet_source_mask, message_metadata, message_metadata_mask, consumer_func, mailbox_size, name##_mailbox_buffer, NULL};
+#endif
+
 void messaging_start(void);
 
 bool messaging_started(void);
