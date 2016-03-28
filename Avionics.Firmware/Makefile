@@ -237,31 +237,38 @@ clean: clean_avionics
 ##############################################################################
 # Black Magic Probe flashing via GDB
 #
+ifeq ($(OS),Windows_NT)
+    EXTENDED_REMOTE := COM6
+else
+    EXTENDED_REMOTE := /dev/ttyACM0
+endif
+
+
 flash: all
 	arm-none-eabi-gdb --batch \
-                      -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'target extended-remote $(EXTENDED_REMOTE)' \
                       -ex 'monitor version' \
                       -ex 'monitor swdp_scan' \
                       -ex 'attach 1' \
-                      -ex 'load' build/$(PROJECT).elf \
+                      -ex 'load build/$(PROJECT).elf'
 
 debug: all
-	arm-none-eabi-gdb -ex 'target extended-remote /dev/ttyACM0' \
+	arm-none-eabi-gdb -ex 'target extended-remote $(EXTENDED_REMOTE)' \
                       -ex 'monitor swdp_scan' \
                       -ex 'attach 1' \
-                      -ex "file build/$(PROJECT).elf"
+                      -ex 'file build/$(PROJECT).elf'
 power:
 	arm-none-eabi-gdb --batch \
-                      -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'target extended-remote $(EXTENDED_REMOTE)' \
                       -ex 'monitor tpwr enable'
 unpower:
 	arm-none-eabi-gdb --batch \
-                      -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'target extended-remote $(EXTENDED_REMOTE)' \
                       -ex 'monitor tpwr disable'
 
 run:
 	arm-none-eabi-gdb --batch \
-                      -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'target extended-remote $(EXTENDED_REMOTE)' \
                       -ex 'monitor swdp_scan' \
                       -ex 'attach 1' \
                       -ex 'run'
