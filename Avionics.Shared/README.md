@@ -1,7 +1,5 @@
 # Avionics Shared
 
-## Description
-
 A static library that shares common code between the GUI and firmware.
 
 ## Compilation

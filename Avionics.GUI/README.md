@@ -1,8 +1,6 @@
 Avionics GUI
 ===========================
 
-## Description
-
 A 3D GUI which renders, in real-time, telemetry streamed to it over a serial port.
 
 ## Requirements

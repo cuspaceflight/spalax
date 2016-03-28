@@ -1,7 +1,5 @@
 # Avionics Firmware
 
-## Description
-
 The firmware for the IMU board.
 
 ## Requirements
