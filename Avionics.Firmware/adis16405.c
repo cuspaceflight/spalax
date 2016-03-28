@@ -100,7 +100,14 @@ static void adis16405_init(void) {
     // Setting sleep mode 0x0000 turn sleep mode off
     adis16405_write_u8(0x3A,0x00);
     adis16405_write_u8(0x3B,0x00);
+}
 
+static bool adis16405_id_check(void) {
+    uint16_t id = adis16405_read_u16(0x7E);
+    return id == 0x4068;
+}
+
+static bool adis16405_self_test(void) {
     // Self tests - using the internal testing routine - do all self test
     adis16405_write_u8(0xB5,0x04);
 
@@ -110,16 +117,7 @@ static void adis16405_init(void) {
     }
 
     // Self test - Checks if error found when test run
-    if(!adis16405_read_u16(0x3C))
-    {
-        // TODO Check what happens when error
-        bthandler_set_error(ERROR_ADIS16405, true);
-    }
-}
-
-static bool adis16405_id_check(void) {
-    uint16_t id = adis16405_read_u16(0x7E);
-    return id == 0x4068;
+    return adis16405_read_u16(0x3C);
 }
 
 void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
@@ -150,13 +148,21 @@ msg_t adis16405_thread(void *arg) {
 
     spiStart(&ADIS16405_SPID, &spi_cfg);
 
+    COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
+
     // Wait for startup
     while (!adis16405_id_check()) {
-        bthandler_set_error(ERROR_ADIS16405, true);
-        chThdSleepMilliseconds(500);
+        chThdSleepMilliseconds(50);
     }
-    bthandler_set_error(ERROR_ADIS16405, false);
 
+    // Log that we have passed id check
+    COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
+
+    while (!adis16405_self_test()) {
+        chThdSleepMilliseconds(50);
+    }
+
+    COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_ok);
 
     adis16405_init();
 

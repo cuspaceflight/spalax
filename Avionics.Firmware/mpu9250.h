@@ -3,7 +3,8 @@
 
 #include "ch.h"
 #include "hal.h"
-
+#include "compilermacros.h"
+#include "mpu9250_config.h"
 
 msg_t mpu9250_thread(void *arg);
 

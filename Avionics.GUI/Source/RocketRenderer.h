@@ -3,7 +3,7 @@
 
 class RocketRenderer : public FTCube {
 public:
-	RocketRenderer();
-	~RocketRenderer();
+    RocketRenderer();
+    ~RocketRenderer();
 
 };

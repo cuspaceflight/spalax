@@ -2,79 +2,82 @@
 #include "hal.h"
 #include "badthinghandler.h"
 
-#define NO_BEEPING true
+#define NO_BEEPING
 
-volatile bool error_states[ERROR_MAX];
-
-static void setIMUOk(bool ok) {
-	// If it is OK we don't set GPIOE_STAT_IMU as the main method will be blinking it
-	if (!ok) {
-		// SET GPIOE_STAT_NIMU
-
-	}
+static inline void beep_start(void) {
+    #ifndef NO_BEEPING
+    palSetPad(GPIOE, GPIOE_STAT_BUZZER);
+    #endif
 }
+
+static inline void beep_stop(void) {
+    #ifndef NO_BEEPING
+    palClearPad(GPIOE, GPIOE_STAT_BUZZER);
+    #endif
+}
+
 
 static void setSensorOk(bool ok) {
-	if (ok) {
-		// Set GPIOB_STAT_SENSORS
-		// Turn off GPIOE_STAT_NSENSORS
+    if (ok) {
+        // Set GPIOB_STAT_SENSORS
+        // Turn off GPIOE_STAT_NSENSORS
         palSetPad(GPIOB, GPIOB_STAT_SENSORS);
         palClearPad(GPIOE, GPIOE_STAT_NSENSORS);
-	}
-	else {
-		// SET GPIOE_STAT_NSENSORS
-		// Turn off GPIOB_STAT_SENSORS
+    }
+    else {
+        // SET GPIOE_STAT_NSENSORS
+        // Turn off GPIOB_STAT_SENSORS
         palClearPad(GPIOB, GPIOB_STAT_SENSORS);
         palSetPad(GPIOE, GPIOE_STAT_NSENSORS);
-	}
-}
-
-static void beeper(int n, int ontime, int offtime)
-{
-#if (NO_BEEPING == 0 ? 1:0)
-	int i;
-	for (i = 0; i<n; i++) {
-		palSetPad(GPIOE, GPIOE_STAT_BUZZER);
-		chThdSleepMilliseconds(ontime);
-		palClearPad(GPIOE, GPIOE_STAT_BUZZER);
-		chThdSleepMilliseconds(offtime);
-	}
-#else
-	chThdSleepMilliseconds(n*(offtime + ontime));
-#endif
-
-}
-
-void bthandler_reset(void) {
-    for (int i = 0; i < ERROR_MAX; i++) {
-		error_states[i] = false;
-	}
+    }
 }
 
 msg_t bthandler_thread(void* arg) {
-	(void)arg;
+    (void)arg;
     chRegSetThreadName("BadThingHandler");
-	while (true) {
-        bool no_bad_thing = true;
-		for (int i = 0; i < ERROR_MAX; i++) {
-			if (error_states[i]) {
-				no_bad_thing = false;
-			}
-		}
+    const volatile uint8_t* component_states = component_state_get_states();
+    while (true) {
 
-		setIMUOk(no_bad_thing);
-		setSensorOk(!(error_states[ERROR_ADIS16405] || error_states[ERROR_MPU9250] || error_states[ERROR_ALTIM]));
+        bool has_error = false;
+        bool has_initializing = false;
+        for (int i = 0; i < avionics_component_max; i++) {
+            avionics_component_state_t state = component_states[i];
+            if (state == state_error) {
+                has_error = true;
+            } else if (state == state_initializing) {
+                has_initializing = true;
+            }
+        }
 
-		if (no_bad_thing) {
-			beeper(1, 10, 990);
-		}
-		else {
-			beeper(1, 800, 200);
-		}
-	}
+        setSensorOk(!(component_states[avionics_component_adis16405] == state_error || component_states[avionics_component_mpu9250] == state_error || component_states[avionics_component_ms5611] == state_error));
 
-}
+        if (has_error) {
+            palClearPad(GPIOE, GPIOE_STAT_IMU);
+            palSetPad(GPIOE, GPIOE_STAT_NIMU);
+            beep_start();
+            chThdSleepMilliseconds(500);
+            beep_stop();
+            chThdSleepMilliseconds(500);
+            palClearPad(GPIOE, GPIOE_STAT_NIMU);
+        } else if (has_initializing) {
+            palSetPad(GPIOE, GPIOE_STAT_IMU);
+            palSetPad(GPIOE, GPIOE_STAT_NIMU);
+            beep_start();
+            chThdSleepMilliseconds(500);
+            beep_stop();
+            chThdSleepMilliseconds(500);
+            palClearPad(GPIOE, GPIOE_STAT_NIMU);
+            palClearPad(GPIOE, GPIOE_STAT_IMU);
+        } else {
+            palSetPad(GPIOE, GPIOE_STAT_IMU);
+            palClearPad(GPIOE, GPIOE_STAT_NIMU);
+            beep_start();
+            chThdSleepMilliseconds(20);
+            beep_stop();
+            chThdSleepMilliseconds(480);
+            palClearPad(GPIOE, GPIOE_STAT_IMU);
+            chThdSleepMilliseconds(500);
+        }
+    }
 
-void bthandler_set_error(bthandler_error_t err, bool set) {
-	error_states[err] = set;
 }

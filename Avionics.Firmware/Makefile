@@ -64,25 +64,31 @@ endif
 # Project, sources and paths
 #
 
+.PHONY: all
+.DEFAULT_GOAL := all
+
 # Define project name here
 PROJECT = IMU
 
 # Imported source files and paths
 CHIBIOS = ../ChibiOS-RT
-include board.mk
+include config/board.mk
 include $(CHIBIOS)/os/hal/platforms/STM32F4xx/platform.mk
 include $(CHIBIOS)/os/hal/hal.mk
 include $(CHIBIOS)/os/ports/GCC/ARMCMx/STM32F4xx/port.mk
 include $(CHIBIOS)/os/kernel/kernel.mk
 include $(CHIBIOS)/test/test.mk
 
+AVIONICS = ../Avionics.Shared
+include $(AVIONICS)/avionics.mk
+
 # Define linker script file here
-LDSCRIPT= STM32F407xG_CCM.ld
+LDSCRIPT= config/STM32F407xG_CCM.ld
 
 # Override fatfs.mk to use local (in-repository) fatfs source
 FATFSSRC = ${CHIBIOS}/os/various/fatfs_bindings/fatfs_diskio.c \
-		   ${CHIBIOS}/os/various/fatfs_bindings/fatfs_syscall.c \
-		   fatfs/src/ff.c fatfs/src/option/ccsbcs.c
+           ${CHIBIOS}/os/various/fatfs_bindings/fatfs_syscall.c \
+           fatfs/src/ff.c fatfs/src/option/ccsbcs.c
 FATFSINC = fatfs/src
 
 # C sources that can be compiled in ARM or THUMB mode depending on the global
@@ -94,12 +100,12 @@ CSRC = $(PORTSRC) \
        $(PLATFORMSRC) \
        $(BOARDSRC) \
        $(FATFSSRC) \
-	   $(CHIBIOS)/os/various/memstreams.c \
+       $(CHIBIOS)/os/various/memstreams.c \
        $(CHIBIOS)/os/various/chprintf.c \
        $(CHIBIOS)/os/various/syscalls.c \
        $(CHIBIOS)/os/various/shell.c \
-       main.c adis16405.c platform_firmware.c badthinghandler.c mpu9250.c \
-       ms5611.c usbcfg.c serialconsole.c
+       main.c adis16405.c badthinghandler.c mpu9250.c ms5611.c \
+       config/usbcfg.c serialconsole.c usb_telemetry.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -130,7 +136,9 @@ ASMSRC = $(PORTASM)
 
 INCDIR = $(PORTINC) $(KERNINC) $(TESTINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) \
-         $(CHIBIOS)/os/various $(FATFSINC) $(AVIONICS_INCLUDES)
+         $(CHIBIOS)/os/various $(FATFSINC) config $(AVIONICS_INCLUDES)
+
+LDFLAGS = -g
 
 #
 # Project, sources and paths
@@ -223,37 +231,40 @@ ULIBS =
 RULESPATH = $(CHIBIOS)/os/ports/GCC/ARMCMx
 include $(RULESPATH)/rules.mk
 
+$(OBJS): $(AVIONICS_LIB)
+clean: clean_avionics
+
 ##############################################################################
 # Black Magic Probe flashing via GDB
 #
-flash: build/$(PROJECT).elf
+flash: all
 	arm-none-eabi-gdb --batch \
-		              -ex 'target extended-remote /dev/ttyACM0' \
-					  -ex 'monitor version' \
-					  -ex 'monitor swdp_scan' \
-					  -ex 'attach 1' \
-					  -ex 'load' build/$(PROJECT).elf \
+                      -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'monitor version' \
+                      -ex 'monitor swdp_scan' \
+                      -ex 'attach 1' \
+                      -ex 'load' build/$(PROJECT).elf \
 
-debug: build/$(PROJECT).elf
+debug: all
 	arm-none-eabi-gdb -ex 'target extended-remote /dev/ttyACM0' \
-		              -ex 'monitor swdp_scan' \
-					  -ex 'attach 1' \
-					  -ex "file build/$(PROJECT).elf"
+                      -ex 'monitor swdp_scan' \
+                      -ex 'attach 1' \
+                      -ex "file build/$(PROJECT).elf"
 power:
 	arm-none-eabi-gdb --batch \
-	                  -ex 'target extended-remote /dev/ttyACM0' \
-		              -ex 'monitor tpwr enable'
+                      -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'monitor tpwr enable'
 unpower:
 	arm-none-eabi-gdb --batch \
-		              -ex 'target extended-remote /dev/ttyACM0' \
-		              -ex 'monitor tpwr disable'
+                      -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'monitor tpwr disable'
 
 run:
 	arm-none-eabi-gdb --batch \
-	                  -ex 'target extended-remote /dev/ttyACM0' \
-		              -ex 'monitor swdp_scan' \
-					  -ex 'attach 1' \
-					  -ex 'run'
+                      -ex 'target extended-remote /dev/ttyACM0' \
+                      -ex 'monitor swdp_scan' \
+                      -ex 'attach 1' \
+                      -ex 'run'
 
 #
 # End BMP flashing

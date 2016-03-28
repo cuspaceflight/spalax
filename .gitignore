@@ -194,3 +194,4 @@ install_manifest.txt
 *.bck
 *.kicad_pcb-bak
 *-cache.lib
+Avionics.Shared/build-fw/

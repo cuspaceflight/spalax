@@ -8,10 +8,14 @@
 #define MS5611_H
 
 #include <ch.h>
+#include "ms5611_config.h"
+
 
 typedef struct {
     uint16_t c1, c2, c3, c4, c5, c6;
 } MS5611CalData;
+
+
 
 /* The main thread. Run this. */
 msg_t ms5611_thread(void *arg);
