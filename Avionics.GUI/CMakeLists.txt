@@ -12,8 +12,6 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Frontier.Engine ${CMAKE_CURRENT_
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Avionics.Shared ${CMAKE_CURRENT_BINARY_DIR}/Avionics.Shared)
 add_subdirectory(Source)
 
-set_target_properties(glfw PROPERTIES FOLDER Frontier.Engine//ThirdParty//glfw)
-
 if ("${PROJECT_BINARY_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}")
   message(FATAL_ERROR
     "In-source builds are not permitted!  Make a separate folder for"
