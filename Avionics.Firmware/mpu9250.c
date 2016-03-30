@@ -230,6 +230,8 @@ static void mpu9250_init(void) {
         { MPU9250_REG_PWR_MGMT_1, 0x00 }, // Select internal 20MHz source
         { MPU9250_REG_PWR_MGMT_2, 0x00 }, // Enable gyro & accel
         { MPU9250_REG_USER_CTRL, 0x10 }, // SPI only, disable FIFO
+        { MPU9250_REG_INT_PIN_CFG, 0b00110000}, // Latch Interrupt and clear on read
+        { MPU9250_REG_INT_ENABLE,  0b00000001}, // Enable interrupt on data ready
     };
 
     // Perform initial reset
@@ -247,7 +249,7 @@ void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
     chSysUnlockFromIsr();
 }
 
-MESSAGING_PRODUCER(messaging_producer, telemetry_source_mpu9250, telemetry_source_mask_mpu9250, sizeof(mpu9250_data_t) * 10)
+MESSAGING_PRODUCER(messaging_producer, telemetry_source_mpu9250, telemetry_source_mask_mpu9250, (sizeof(telemetry_header_t) + sizeof(mpu9250_data_t)) * 40)
 
 msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
     const SPIConfig spi_cfg = {
@@ -305,5 +307,6 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
 
         mpu9250_burst_read(raw_data);
         messaging_producer_send(&messaging_producer, 0, 0, (const uint8_t*)&data, sizeof(raw_data));
+        chThdYield(); // Ensure other threads actually get a chance to run
     }
 }

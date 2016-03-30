@@ -20,9 +20,15 @@ static SerialDriver* s_instance = nullptr;
 static SerialPort* s_port = nullptr;
 
 static uint8_t stream_get() {
-    if (read_buffer_index >= read_buffer_limit) {
+    while (read_buffer_index >= read_buffer_limit) {
+        if (s_port == nullptr) {
+            // Trigger termination of the read
+            return 0x7E;
+        }
         read_buffer_limit = s_port->read(read_buffer, READ_BUFFER_SIZE);
         read_buffer_index = 0;
+        if (read_buffer_index >= read_buffer_limit)
+            std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
 
     FTAssert(read_buffer_index < read_buffer_limit, "Failed to fill read buffer!");
@@ -46,22 +52,23 @@ static bool stream_flush() {
 
 SERIAL_INTERFACE(serial_interface, stream_get, stream_put, stream_flush, 1024);
 
-static void receive_packet(telemetry_t* packet, message_metadata_t flags) {
+static bool receive_packet(telemetry_t* packet, message_metadata_t flags) {
     if (packet->header.origin == local_config.origin)
-        serial_interface_send_packet(&serial_interface, packet);
+        return serial_interface_send_packet(&serial_interface, packet);
+    return true;
 }
 
 
 MESSAGING_CONSUMER(messaging_consumer, 0, 0, 0, message_flags_dont_send_over_usb, receive_packet, 100);
 
 static void reader_thread(SerialDriver* driver) {
-    while (true) {
+    while (s_port != nullptr) {
         messaging_consumer_receive(&messaging_consumer, true, false);
     }
 }
 
 static void writer_thread(SerialDriver* driver) {
-    while (true) {
+    while (s_port != nullptr) {
         telemetry_t* packet = serial_interface_next_packet(&serial_interface);
         if (packet != nullptr)
             messaging_send(packet, 0);
@@ -105,4 +112,7 @@ SerialDriver::~SerialDriver() {
     is_initialised = false;
     s_port = nullptr;
     s_instance = nullptr;
+
+    writer_thread_.join();
+    reader_thread_.join();
 }

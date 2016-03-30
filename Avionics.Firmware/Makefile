@@ -238,7 +238,7 @@ clean: clean_avionics
 # Black Magic Probe flashing via GDB
 #
 ifeq ($(OS),Windows_NT)
-    EXTENDED_REMOTE := COM6
+    EXTENDED_REMOTE := COM4
 else
     EXTENDED_REMOTE := /dev/ttyACM0
 endif

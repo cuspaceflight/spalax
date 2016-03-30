@@ -31,6 +31,7 @@ struct message_producer_impl_t {
 struct message_consumer_impl_t {
     TQueue<std::shared_ptr<TelemetryRef>> mailbox;
     message_consumer_t* parent;
+    volatile bool is_paused;
 };
 
 static std::atomic<uint32_t> cur_consumer_pool_index = 0;
@@ -116,7 +117,8 @@ messaging_send_return_codes messaging_send(telemetry_t* packet, message_metadata
 
     for (uint32_t i = 0; i < num_consumers; ++i) {
         message_consumer_t* consumer = consumer_pool[i].parent;
-        if ((consumer->packet_source_mask & packet->header.id) == consumer->packet_source
+        if (!consumer->impl->is_paused
+            && (consumer->packet_source_mask & packet->header.id) == consumer->packet_source
             && (consumer->message_metadata_mask & flags) == consumer->message_metadata
             && !messaging_consumer_enqueue_packet(consumer, ref)) {
             enqueue_successful = false;
@@ -169,8 +171,21 @@ extern "C" messaging_receive_return_codes messaging_consumer_receive(message_con
         return messaging_receive_buffer_empty;
 
     auto ref = consumer->impl->mailbox.dequeue();
-    if (!silent)
-        consumer->consumer_func(ref->packet, ref->flags);
+    if (!silent) {
+        if (!consumer->consumer_func(ref->packet, ref->flags)) {
+            return messaging_receive_callback_error;
+        }
+    }
 
     return messaging_receive_ok;
+}
+
+void messaging_pause_consumer(message_consumer_t* consumer, bool flush_buffer) {
+    consumer->impl->is_paused = true;
+    if (flush_buffer)
+        while (messaging_consumer_receive(consumer, false, true) != messaging_receive_buffer_empty);
+}
+
+void messaging_resume_consumer(message_consumer_t* consumer) {
+    consumer->impl->is_paused = false;
 }

@@ -30,7 +30,7 @@ static WORKING_AREA(waUSB, 1024);
  */
 static const EXTConfig extcfg = { {
 					  { EXT_CH_MODE_DISABLED, NULL }, /* Pin 0 */
-					  { EXT_CH_MODE_DISABLED, NULL }, /* Pin 1 */
+					  { EXT_CH_MODE_AUTOSTART | EXT_CH_MODE_RISING_EDGE | EXT_MODE_GPIOA, mpu9250_wakeup }, /* Pin 1 */
 					  { EXT_CH_MODE_DISABLED, NULL }, /* Pin 2 */
 					  { EXT_CH_MODE_DISABLED, NULL }, /* Pin 3 */
 					  { EXT_CH_MODE_DISABLED, NULL }, /* Pin 4 */

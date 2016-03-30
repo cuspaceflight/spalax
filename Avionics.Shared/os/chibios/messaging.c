@@ -26,6 +26,7 @@ struct message_producer_impl_t {
 struct message_consumer_impl_t {
 	Mailbox mailbox;
 	message_consumer_t* parent;
+    volatile bool is_paused;
 };
 
 static volatile uint32_t cur_consumer_pool_index = 0;
@@ -199,7 +200,8 @@ messaging_send_return_codes messaging_send(telemetry_t* packet, message_metadata
 
 	for (uint32_t i = 0; i < num_consumers; ++i) {
 		message_consumer_t* consumer = consumer_pool[i].parent;
-		if ((consumer->packet_source_mask & packet->header.id) == consumer->packet_source
+		if (!consumer->impl->is_paused
+            && (consumer->packet_source_mask & packet->header.id) == consumer->packet_source
             && (consumer->message_metadata_mask & flags) == consumer->message_metadata
 		    && !messaging_consumer_enqueue_packet(consumer, ref)) {
 			enqueue_successful = false;
@@ -252,9 +254,25 @@ messaging_receive_return_codes messaging_consumer_receive(message_consumer_t* co
         return messaging_receive_buffer_empty;
 
     telemetry_ref_t* ref = (telemetry_ref_t*)data_msg;
-    if (!silent)
-        consumer->consumer_func(ref->packet, ref->flags);
+    if (!silent) {
+        if (!consumer->consumer_func(ref->packet, ref->flags)) {
+            telemetry_reference_release(ref);
+            return messaging_receive_callback_error;
+        }
+    }
 
     telemetry_reference_release(ref);
     return messaging_receive_ok;
+}
+
+void messaging_pause_consumer(message_consumer_t* consumer, bool flush_buffer) {
+    consumer->impl->is_paused = true;
+    if (flush_buffer)
+        while (messaging_consumer_receive(consumer, false, true) != messaging_receive_buffer_empty) {
+            consumer->impl->is_paused = true;
+        }
+}
+
+void messaging_resume_consumer(message_consumer_t* consumer) {
+    consumer->impl->is_paused = false;
 }

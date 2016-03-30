@@ -3,6 +3,7 @@
 #include "telemetry.h"
 #include <stdbool.h>
 #include "messaging_defs.h"
+#include "platform.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,7 +48,12 @@ messaging_send_return_codes messaging_send(telemetry_t* packet, message_metadata
 
 // Consume the next packet in the consumer's buffer
 // If silent is specified will not invoke the callback function
+// This function must be capable of being called recursively (e.g consumer pauses during callback)
 messaging_receive_return_codes messaging_consumer_receive(message_consumer_t* consumer_id, bool blocking, bool silent);
+
+void messaging_pause_consumer(message_consumer_t* consumer, bool flush_buffer);
+
+void messaging_resume_consumer(message_consumer_t* consumer);
 
 #ifdef __cplusplus
 }

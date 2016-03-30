@@ -56,6 +56,7 @@ msg_t bthandler_thread(void* arg) {
             palSetPad(GPIOE, GPIOE_STAT_NIMU);
             beep_start();
             chThdSleepMilliseconds(500);
+            palClearPad(GPIOE, GPIOE_STAT_NIMU);
             beep_stop();
             chThdSleepMilliseconds(500);
             palClearPad(GPIOE, GPIOE_STAT_NIMU);

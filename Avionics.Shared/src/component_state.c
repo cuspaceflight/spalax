@@ -46,7 +46,7 @@ void component_state_update(avionics_component_t component, avionics_component_s
     bool messaging_enabled_local = messaging_enabled;
     memory_barrier_acquire();
 
-    if (messaging_enabled_local && (component != avionics_component_messaging || state != state_error || component_states[component] != state)) {
+    if (messaging_enabled_local && ((component != avionics_component_messaging && component != avionics_component_telemetry_allocator) || component_states[component] != state)) {
         // The if statement protects against potential error loops when
         // there is a problem in the messaging system:
         // error generated -> we send a packet -> an error is generated...
