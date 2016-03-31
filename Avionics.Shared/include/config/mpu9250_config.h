@@ -1,26 +1,21 @@
 #ifndef MPU9250_CONFIG_H
 #define MPU9250_CONFIG_H
 #include "compilermacros.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct mpu9250_data_t {
-    uint16_t accel_x;
-    uint16_t accel_y;
-    uint16_t accel_z;
-    uint16_t temp;
-    uint16_t gyro_x;
-    uint16_t gyro_y;
-    uint16_t gyro_z;
-    uint16_t magno_x;
-    uint16_t magno_y;
-    uint16_t magno_z;
+    int16_t accel[3];
+    int16_t temp;
+    int16_t gyro[3];
 } mpu9250_data_t;
 
-STATIC_ASSERT(sizeof(mpu9250_data_t) == 20, ms5611data_padded);
+STATIC_ASSERT(sizeof(mpu9250_data_t) == 14, ms5611data_padded);
 
+static const int mpu9250_send_over_usb_count = 100; // Will send 1 in every 100
 
 #ifdef __cplusplus
 }

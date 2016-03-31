@@ -31,11 +31,11 @@ static void mpu9250_write_u8(uint8_t addr, uint8_t val);
 
 //// HIGH-LEVEL OPERATIONS ////
 
-// mpu9250_burst_read will grab all the sensor data and writes it to out which
+// mpu9250_read_accel_temp_gyro will grab all the sensor data and writes it to out which
 // must point to a buffer of at least 10 uint16_t-s. The values written are:
 // ACCEL_XOUT, ACCEL_YOUT, ACCEL_ZOUT, TEMP_OUT, GYRO_XOUT, GYRO_YOUT, GYRO_ZOUT
 // MAGNO_XOUT, MAGNO_YOUT, MAGNO_ZOUT
-static void mpu9250_burst_read(uint16_t *out);
+static void mpu9250_read_accel_temp_gyro(uint16_t *out);
 
 // mpu9250_id_check performs a simple sanity check on MPU9250 communication by
 // checking that the WHO_AM_I register of the MPU9250 has an expected value.
@@ -91,19 +91,16 @@ static void mpu9250_write_u8(uint8_t addr, uint8_t val) {
     spiUnselect(&MPU9250_SPID);
 }
 
-static void mpu9250_burst_read(uint16_t *out) {
+static void mpu9250_read_accel_temp_gyro(uint16_t *out) {
     // Cast output to uint8_t buffer
     uint8_t *out_u8 = (uint8_t*)out;
 
     // Read accel, temp and gyro.
     mpu9250_read_multiple(MPU9250_REG_ACCEL_XOUT_H, out_u8, 14);
 
-    // Read magno data
-    mpu9250_read_multiple(0x03, out_u8 + 14, 6);
-
-    // If necessary, convert buffer to host endian-ness
+    // Convert buffer to host endian-ness
 #if BYTE_ORDER != BIG_ENDIAN
-    for(int i=0; i<20; i+=2) {
+    for(int i=0; i<14; i+=2) {
         uint8_t tmp = out_u8[i];
         out_u8[i] = out_u8[i+1];
         out_u8[i+1] = tmp;
@@ -132,7 +129,7 @@ static bool mpu9250_self_test_gyro(void) {
     chThdSleepMilliseconds(50);
 
     // Read baseline data
-    mpu9250_burst_read(base_data);
+    mpu9250_read_accel_temp_gyro(base_data);
 
     // Set gyro config to self test on all axes with gyro range of +/- 250
     // degrees/s
@@ -142,7 +139,7 @@ static bool mpu9250_self_test_gyro(void) {
     chThdSleepMilliseconds(50);
 
     // Read self-test data
-    mpu9250_burst_read(self_test_data);
+    mpu9250_read_accel_temp_gyro(self_test_data);
 
     // Preserve previous config
     mpu9250_write_u8(MPU9250_REG_GYRO_CONFIG, old_config);
@@ -186,7 +183,7 @@ static bool mpu9250_self_test_accel(void) {
     chThdSleepMilliseconds(50);
 
     // Read baseline data
-    mpu9250_burst_read(base_data);
+    mpu9250_read_accel_temp_gyro(base_data);
 
     // Set accel config to self test on all axes with accel range of +/- 2g
     mpu9250_write_u8(MPU9250_REG_ACCEL_CONFIG, 0xe0);
@@ -195,7 +192,7 @@ static bool mpu9250_self_test_accel(void) {
     chThdSleepMilliseconds(50);
 
     // Read self-test data
-    mpu9250_burst_read(self_test_data);
+    mpu9250_read_accel_temp_gyro(self_test_data);
 
     // Preserve previous config
     mpu9250_write_u8(MPU9250_REG_ACCEL_CONFIG, old_config);
@@ -298,15 +295,24 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
     messaging_producer_init(&messaging_producer);
 
 
-    uint16_t raw_data[10];
-    mpu9250_data_t* data = (mpu9250_data_t*)raw_data;
+    mpu9250_data_t data;
+    int count = mpu9250_send_over_usb_count;
     while(TRUE) {
         chSysLock();
         chBSemWaitTimeoutS(&mpu9250_semaphore, 100);
         chSysUnlock();
 
-        mpu9250_burst_read(raw_data);
-        messaging_producer_send(&messaging_producer, 0, 0, (const uint8_t*)&data, sizeof(raw_data));
+        mpu9250_read_accel_temp_gyro((uint16_t*)&data);
+        message_metadata_t flags = 0;
+
+        if (count == mpu9250_send_over_usb_count)
+            count = 0;
+        else {
+            flags |= message_flags_dont_send_over_usb;
+            count++;
+        }
+
+        messaging_producer_send(&messaging_producer, 0, flags, (const uint8_t*)&data, 20);
         chThdYield(); // Ensure other threads actually get a chance to run
     }
 }

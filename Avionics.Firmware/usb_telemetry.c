@@ -32,7 +32,7 @@ static bool transmit_packet(telemetry_t* packet, message_metadata_t metadata) {
     if (packet->header.origin == local_config.origin) {
         if (!serial_interface_send_packet(&serial_interface, packet)) {
             // This will cause the transmit thread to back off for a second
-            // This occurs when the connected device's input buffer is full
+            // This occurs when the receiver's input buffer is full
             // Either we are writing to it too fast or nothing is reading it
             return false;
         }

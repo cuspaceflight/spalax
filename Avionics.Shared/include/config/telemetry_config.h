@@ -24,9 +24,7 @@ typedef enum {
     // Sensors
     telemetry_source_ms5611 = TELEMETRY_SOURCE(0b00000001000, 0),
     telemetry_source_mpu9250 = TELEMETRY_SOURCE(0b00000001001, 0),
-
-
-    telemetry_source_state_estimators = TELEMETRY_SOURCE(0b100000,2),
+    telemetry_source_state_estimators = TELEMETRY_SOURCE(0b000000011,2),
 
 } telemetry_source_t;
 
@@ -34,7 +32,7 @@ typedef enum {
     telemetry_id_component_state_update = TELEMETRY_ID(0b00000000000, 0, 0),
     telemetry_id_ms5611_data = TELEMETRY_ID(0b00000001000, 0, 0),
     telemetry_id_mpu9250_data = TELEMETRY_ID(0b00000001001, 0, 0),
-    telemetry_id_state_estimators_quaternion = TELEMETRY_ID(0b100000, 0b00, 2),
+    telemetry_id_state_estimators_state_estimate = TELEMETRY_ID(0b000000011, 0b00, 2),
 } telemetry_id_t;
 
 typedef enum {

@@ -167,7 +167,7 @@ extern "C" messaging_receive_return_codes messaging_consumer_receive(message_con
         return messaging_receive_invalid_consumer;
     }
 
-    if (consumer->impl->mailbox.isEmpty() && !blocking)
+    if (!blocking && consumer->impl->mailbox.isEmpty())
         return messaging_receive_buffer_empty;
 
     auto ref = consumer->impl->mailbox.dequeue();

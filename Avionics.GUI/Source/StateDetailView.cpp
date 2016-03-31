@@ -5,17 +5,64 @@
 #include <sstream>
 #include <Util/FTStringUtils.h>
 #include <Rendering/FTWindowSizeNode.h>
+#include <telemetry.h>
+#include <messaging.h>
+#include <ms5611_config.h>
+#include <mpu9250_config.h>
 
 extern "C" {
-#include <state_estimate.h>
 #include <math_utils.h>
 }
 
+static StateDetailView* s_instance = nullptr;
+static const int num_labels = 12;
+uint32_t values[num_labels];
+
+static bool getPacket(telemetry_t* packet, message_metadata_t metadata) {
+    if (s_instance == nullptr)
+        return false;
+    if (packet->header.id == telemetry_id_mpu9250_data) {
+        FTAssert(packet->header.length == 20, "Incorrect Packet Size");
+        mpu9250_data_t* data = (mpu9250_data_t*)packet->payload;
+
+        values[2] = data->accel[0];
+        values[3] = data->accel[1];
+        values[4] = data->accel[2];
+
+        values[5] = data->gyro[0];
+        values[6] = data->gyro[1];
+        values[7] = data->gyro[2];
+
+        //values[8] = data->magno[0];
+        //values[9] = data->magno[1];
+        //values[10] = data->magno[2];
+
+        values[11] = data->temp;
+    }
+    else if (packet->header.id == telemetry_id_ms5611_data) {
+        FTAssert(packet->header.length == sizeof(ms5611data_t), "Incorrect Packet Size");
+        auto data = (ms5611data_t*)packet->payload;
+
+        values[0] = data->pressure;
+        values[1] = data->temperature;
+    }
+    return true;
+}
+
+MESSAGING_CONSUMER(messaging_consumer, 0b00000001000, 0b11111111000, 0, 0, getPacket, 1024);
+
 StateDetailView::StateDetailView() {
+    FTAssert(s_instance == nullptr, "Only one StateDetailView instance can exist at once");
+    
+
     setCamera(std::make_shared<FTCamera2D>());
 
-    const int num_labels = 21;
-    static const wchar_t* label_names[num_labels] = { L"Position X", L"Position Y", L"Position Z", L"Velocity X", L"Velocity Y", L"Velocity Z", L"Velocity Mag", L"Accel X", L"Accel Y", L"Accel Z", L"Accel Mag", L"Quat X", L"Quat Y", L"Quat Z", L"Quat W", L"Orientation Euler X", L"Orientation Euler Y", L"Orientation Euler Z", L"Angular Velocity X", L"Angular Velocity Y", L"Angular Velocity Z"};
+    static const wchar_t* label_names[num_labels] = { 
+        L"MS5611 Pressure", L"MS5611 Temperature", 
+        L"MPU9250 Accel X", L"MPU9250 Accel Y", L"MPU9250 Accel Z", 
+        L"MPU9250 Gyro X", L"MPU9250 Gyro Y", L"MPU9250 Gyro Z", 
+        L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z", 
+        L"MPU9250 Temp"};
 
     auto window_size_node = std::make_shared<FTWindowSizeNode>();
     window_size_node->setAnchorPoint(glm::vec2(0, -1.0f));
@@ -37,51 +84,23 @@ StateDetailView::StateDetailView() {
 
         value_labels_.push_back(label.get());
         y -= y_padding;
+
+        values[i] = 0;
     }
+
+    messaging_consumer_init(&messaging_consumer);
+
+    s_instance = this;
 }
 
 StateDetailView::~StateDetailView() {
     FTLog("State Detail View Destroyed");
 }
 
-void StateDetailView::updateDisplay(state_estimate_t& current_state) {
-    static wchar_t buff[1024];
-    value_labels_[0]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.pos[0]));
-    value_labels_[1]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.pos[1]));
-    value_labels_[2]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.pos[2]));
+void StateDetailView::updateDisplay() {
+    while (messaging_consumer_receive(&messaging_consumer, false, false) == messaging_receive_ok);
 
-    value_labels_[3]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.vel[0]));
-    value_labels_[4]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.vel[1]));
-    value_labels_[5]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.vel[2]));
-
-    float mag = sqrtf(current_state.vel[0] * current_state.vel[0] + current_state.vel[1] * current_state.vel[1] + current_state.vel[2] * current_state.vel[2]);
-    value_labels_[6]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", mag));
-
-
-    value_labels_[7]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.accel[0]));
-    value_labels_[8]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.accel[1]));
-    value_labels_[9]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.accel[2]));
-
-    mag = sqrtf(current_state.accel[0] * current_state.accel[0] + current_state.accel[1] * current_state.accel[1] + current_state.accel[2] * current_state.accel[2]);
-    value_labels_[10]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", mag));
-
-    value_labels_[11]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.orientation_q[0]));
-    value_labels_[12]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.orientation_q[1]));
-    value_labels_[13]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.orientation_q[2]));
-    value_labels_[14]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.orientation_q[3]));
-
-    float euler[3];
-    quat_to_euler(current_state.orientation_q,euler);
-
-    value_labels_[15]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", euler[0] * 57.2957795131f));
-    value_labels_[16]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", euler[1] * 57.2957795131f));
-    value_labels_[17]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", euler[2] * 57.2957795131f));
-
-    value_labels_[18]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.angular_velocity[0]));
-    value_labels_[19]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.angular_velocity[1]));
-    value_labels_[20]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.angular_velocity[2]));
-
-
-    //value_labels_[3]->setString(FTStringUtil<wchar_t>::formatString(buff, 1024, L"%.2f", current_state.vel[0]));
-
+    static wchar_t buff[24];
+    for (int i = 0; i < num_labels; i++)
+        value_labels_[i]->setString(FTStringUtil<wchar_t>::formatString(buff, 24, L"%i", values[i]));
 }

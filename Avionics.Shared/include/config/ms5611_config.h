@@ -1,6 +1,7 @@
 #ifndef MS5611_CONFIG_H
 #define MS5611_CONFIG_H
 #include "compilermacros.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
