@@ -52,7 +52,7 @@ static bool stream_flush() {
 
 SERIAL_INTERFACE(serial_interface, stream_get, stream_put, stream_flush, 1024);
 
-static bool receive_packet(telemetry_t* packet, message_metadata_t flags) {
+static bool receive_packet(const telemetry_t* packet, message_metadata_t flags) {
     if (packet->header.origin == local_config.origin)
         return serial_interface_send_packet(&serial_interface, packet);
     return true;

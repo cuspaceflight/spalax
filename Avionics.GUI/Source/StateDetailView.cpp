@@ -18,7 +18,7 @@ static StateDetailView* s_instance = nullptr;
 static const int num_labels = 12;
 uint32_t values[num_labels];
 
-static bool getPacket(telemetry_t* packet, message_metadata_t metadata) {
+static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
     if (s_instance == nullptr)
         return false;
     if (packet->header.id == telemetry_id_mpu9250_data) {

@@ -33,21 +33,21 @@ static bool write_bytes_to_buffer(serial_interface_t* serial_interface, const ui
     return true;
 }
 
-bool serial_interface_send_packet(serial_interface_t* serial_interface, telemetry_t* packet) {
+bool serial_interface_send_packet(serial_interface_t* serial_interface, const telemetry_t* packet) {
     if (!serial_interface->stream_put(0x7E))
         return false;
-    
-    if (!write_bytes_to_buffer(serial_interface, (uint8_t*)&packet->header, sizeof(packet->header)))
+
+    if (!write_bytes_to_buffer(serial_interface, (const uint8_t*)&packet->header, sizeof(packet->header)))
         return false;
-        
+
     uint16_t header_crc = checksum_crc16((const uint8_t*)&packet->header, sizeof(packet->header));
     if (!write_bytes_to_buffer(serial_interface, (uint8_t*)&header_crc, sizeof(header_crc)))
         return false;
-    
+
 
     if (!write_bytes_to_buffer(serial_interface, packet->payload, packet->header.length))
         return false;
-    
+
     uint32_t payload_crc = checksum_crc32(packet->payload, packet->header.length);
     if (!write_bytes_to_buffer(serial_interface, (uint8_t*)&payload_crc, sizeof(payload_crc)))
         return false;
@@ -96,7 +96,7 @@ static telemetry_t* serial_interface_read_frame(serial_interface_t* serial_inter
 
     uint32_t payload_crc = 0;
     read_bytes_to_buffer(serial_interface, (uint8_t*)&payload_crc, sizeof(payload_crc));
-    
+
     if (payload_crc != checksum_crc32(packet->payload, header.length)) {
         telemetry_allocator_free(packet);
         return NULL;

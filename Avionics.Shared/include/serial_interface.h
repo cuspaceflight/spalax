@@ -35,7 +35,7 @@ telemetry_t* serial_interface_next_packet(serial_interface_t* serial_interface);
 
 // Will send the packet over the provided interface
 // Will return false if there is an error
-bool serial_interface_send_packet(serial_interface_t* serial_interface, telemetry_t* packet);
+bool serial_interface_send_packet(serial_interface_t* serial_interface, const telemetry_t* packet);
 
 #ifdef __cplusplus
 }

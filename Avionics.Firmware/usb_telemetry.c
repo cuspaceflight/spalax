@@ -21,11 +21,11 @@ static bool stream_put(uint8_t byte) {
 
 SERIAL_INTERFACE(serial_interface, stream_get, stream_put, NULL, 1024);
 
-static bool transmit_packet(telemetry_t* packet, message_metadata_t metadata);
+static bool transmit_packet(const telemetry_t* packet, message_metadata_t metadata);
 
 MESSAGING_CONSUMER(usb_telemetry_messaging_consumer, 0, 0, 0, message_flags_dont_send_over_usb, transmit_packet, 20);
 
-static bool transmit_packet(telemetry_t* packet, message_metadata_t metadata) {
+static bool transmit_packet(const telemetry_t* packet, message_metadata_t metadata) {
     (void)metadata;
     if (serusbcfg.usbp->state != USB_ACTIVE)
         return false;

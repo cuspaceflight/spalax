@@ -91,6 +91,32 @@ static void mpu9250_write_u8(uint8_t addr, uint8_t val) {
     spiUnselect(&MPU9250_SPID);
 }
 
+static void mpu9250_i2c_slave0_write_u8(uint8_t addr, uint8_t val) {
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_ADDR, AK893_I2C_ADDR);
+    chThdSleepMilliseconds(5);
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_REG, addr);
+    chThdSleepMilliseconds(5);
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_DO, val);
+    chThdSleepMilliseconds(5);
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_CTRL, 0x81);
+
+    // Sleep a little to allow the I2C transaction to occur
+    chThdSleepMilliseconds(5);
+}
+
+static uint8_t mpu9250_i2c_slave0_read_u8(uint8_t addr) {
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_ADDR, AK893_I2C_ADDR | 0x80);
+    chThdSleepMilliseconds(5);
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_REG, addr);
+    chThdSleepMilliseconds(5);
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_CTRL, 0x81);
+
+    // Sleep a little to allow the I2C transaction to occur
+    chThdSleepMilliseconds(5);
+
+    return mpu9250_read_u8(MPU9250_REG_EXT_SENS_DATA_00);
+}
+
 static void mpu9250_read_accel_temp_gyro(uint16_t *out) {
     // Cast output to uint8_t buffer
     uint8_t *out_u8 = (uint8_t*)out;
@@ -111,7 +137,11 @@ static void mpu9250_read_accel_temp_gyro(uint16_t *out) {
 static bool mpu9250_id_check(void) {
     // Read WHO_AM_I Register
     uint8_t whoami = mpu9250_read_u8(MPU9250_REG_WHO_AM_I);
-    return whoami == MPU9250_WHO_AM_I_RESET_VALUE;
+    if (whoami != MPU9250_WHO_AM_I_RESET_VALUE)
+        return false;
+
+    whoami = mpu9250_i2c_slave0_read_u8(AK8963_REG_WHO_AM_I);
+    return whoami == AK893_WHO_AM_I_RESET_VALUE;
 }
 
 static bool mpu9250_self_test_gyro(void) {
@@ -224,17 +254,24 @@ static void mpu9250_init(void) {
     // Register/value pairs to reset/initialise MPU9250
     uint8_t init_sequence[][2] = {
         { MPU9250_REG_PWR_MGMT_1, 0x80 }, // Reset
-        { MPU9250_REG_PWR_MGMT_1, 0x00 }, // Select internal 20MHz source
+        { MPU9250_REG_PWR_MGMT_1, 0x01 }, // Select best clock source
         { MPU9250_REG_PWR_MGMT_2, 0x00 }, // Enable gyro & accel
-        { MPU9250_REG_USER_CTRL, 0x10 }, // SPI only, disable FIFO
+        { MPU9250_REG_USER_CTRL, 0x30 }, // SPI only, disable FIFO, Enable the I2C Master Module
         { MPU9250_REG_INT_PIN_CFG, 0b00110000}, // Latch Interrupt and clear on read
         { MPU9250_REG_INT_ENABLE,  0b00000001}, // Enable interrupt on data ready
+        { MPU9250_REG_I2C_MST_CTRL, 0x0D}, // Set I2C clock rate to 400kHz
     };
 
     // Perform initial reset
     for(size_t i=0; i < sizeof(init_sequence)/sizeof(init_sequence[0]); ++i) {
         mpu9250_write_u8(init_sequence[i][0], init_sequence[i][1]);
     }
+
+    // Reset Magnetometer
+    mpu9250_i2c_slave0_write_u8(AK8963_REG_CNTL2, 0x01);
+
+    // Continuous 16-bit measurement
+    mpu9250_i2c_slave0_write_u8(AK8963_REG_CNTL1, 0x12);
 }
 
 void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {

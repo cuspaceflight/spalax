@@ -134,6 +134,26 @@ enum {
     MPU9250_REG_ZA_OFFSET_L = 126,
 };
 
+enum {
+    AK8963_REG_WHO_AM_I = 0x00,
+    AK8963_REG_INFO     = 0x01,
+    AK8963_REG_ST1      = 0x02,
+    AK8963_REG_XOUT_L	= 0x03,
+    AK8963_REG_XOUT_H	= 0x04,
+    AK8963_REG_YOUT_L	= 0x05,
+    AK8963_REG_YOUT_H	= 0x06,
+    AK8963_REG_ZOUT_L	= 0x07,
+    AK8963_REG_ZOUT_H	= 0x08,
+    AK8963_REG_ST2      = 0x09,
+    AK8963_REG_CNTL1    = 0x0A,
+    AK8963_REG_CNTL2    = 0x0A,
+    AK8963_REG_ASTC     = 0x0C,
+    AK8963_REG_I2CDIS   = 0x0F,
+    AK8963_REG_ASAX     = 0x10,
+    AK8963_REG_ASAY     = 0x11,
+    AK8963_REG_ASAZ     = 0x12,
+};
+
 // MPU9250 reset values. All register have a reset value of 0x00 apart from the
 // ones noted below.
 #define MPU9250_DEFAULT_RESET_VALUE 0x00
@@ -151,6 +171,7 @@ enum {
     ( (((int16_t)(high)) << 8) | ((int16_t)(low)) )
 
 // The I2C address of the AK8963 embedded within the MPU9250.
-#define MPU9250_AK893_I2C_ADDR 0x0c
+#define AK893_I2C_ADDR 0x0c
+#define AK893_WHO_AM_I_RESET_VALUE 0x48
 
 #endif // MPU9250_REG_H
