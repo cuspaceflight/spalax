@@ -139,7 +139,7 @@ msg_t adis16405_thread(void *arg) {
         // Clock rate should be <= 1 MHz for burst mode
         // I believe this sets it to 168000000 / 4 / 64 ~= 1MHz
         // TODO: Verify this
-        SPI_CR1_BR_2 | SPI_CR1_CPOL | SPI_CR1_CPHA | SPI_CR1_DFF
+        SPI_CR1_BR_1 | SPI_CR1_BR_0 | SPI_CR1_CPOL | SPI_CR1_CPHA | SPI_CR1_DFF
     };
 
     chBSemInit(&adis16405_semaphore, true);
@@ -149,6 +149,9 @@ msg_t adis16405_thread(void *arg) {
     spiStart(&ADIS16405_SPID, &spi_cfg);
 
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
+
+    // This is used as the ~RST line on the adaptor board
+    palSetPad(GPIOD, GPIOD_CAN1_TX);
 
     // Wait for startup
     while (!adis16405_id_check()) {

@@ -80,7 +80,7 @@
 #define GPIOC_PIN1                  1
 #define GPIOC_PIN2                  2
 #define GPIOC_PIN3                  3
-#define GPIOC_ADIS_NSS                4
+#define GPIOC_ADIS_NSS              4
 #define GPIOC_ADIS_IRQ              5
 #define GPIOC_PIN6                  6
 #define GPIOC_PIN7                  7
@@ -510,7 +510,7 @@
 
 
 #define VAL_GPIOD_MODER             (PIN_MODE_ALTERNATE(GPIOD_CAN1_RX)             |\
-                                     PIN_MODE_ALTERNATE(GPIOD_CAN1_TX)            |\
+                                     PIN_MODE_OUTPUT(GPIOD_CAN1_TX)            |\
                                      PIN_MODE_ALTERNATE(GPIOD_SD_CMD)       |\
                                      PIN_MODE_INPUT(GPIOD_SD_CD)             |\
                                      PIN_MODE_INPUT(GPIOD_PIN4)             |\
@@ -542,7 +542,7 @@
                                      PIN_OTYPE_PUSHPULL(GPIOD_PIN14)        |\
                                      PIN_OTYPE_PUSHPULL(GPIOD_PIN15))
 #define VAL_GPIOD_OSPEEDR           (PIN_OSPEED_100M(GPIOD_CAN1_RX)              |\
-                                     PIN_OSPEED_100M(GPIOD_CAN1_TX)             |\
+                                     PIN_OSPEED_2M(GPIOD_CAN1_TX)             |\
                                      PIN_OSPEED_100M(GPIOD_SD_CMD)          |\
                                      PIN_OSPEED_2M(GPIOD_SD_CD)              |\
                                      PIN_OSPEED_2M(GPIOD_PIN4)              |\
@@ -574,7 +574,7 @@
                                      PIN_PUPDR_FLOATING(GPIOD_PIN14)          |\
                                      PIN_PUPDR_FLOATING(GPIOD_PIN15))
 #define VAL_GPIOD_ODR               (PIN_ODR_HIGH(GPIOD_CAN1_RX)               |\
-                                     PIN_ODR_HIGH(GPIOD_CAN1_TX)              |\
+                                     PIN_ODR_LOW(GPIOD_CAN1_TX)              |\
                                      PIN_ODR_HIGH(GPIOD_SD_CMD)             |\
                                      PIN_ODR_LOW(GPIOD_SD_CD)               |\
                                      PIN_ODR_LOW(GPIOD_PIN4)               |\
