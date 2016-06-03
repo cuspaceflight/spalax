@@ -33,9 +33,9 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[6] = data->gyro[1];
         values[7] = data->gyro[2];
 
-        //values[8] = data->magno[0];
-        //values[9] = data->magno[1];
-        //values[10] = data->magno[2];
+        values[8] = data->magno[0];
+        values[9] = data->magno[1];
+        values[10] = data->magno[2];
 
         values[11] = data->temp;
     }

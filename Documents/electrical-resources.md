@@ -14,12 +14,18 @@ resources:
 For reference, STMicroelectronics make available the schematics for their "STM32F4Discovery" board from the 
 [corresponding page](http://www.st.com/web/catalog/tools/FM116/SC959/SS1532/PF252419) on their website.
 
-## Sensor module
+## Sensor modules
 
-The module is a [ADIS16405BMLZ MEMS
+The main sensor module is a [ADIS16405BMLZ MEMS
 Module](http://onecall.farnell.com/analog-devices/adis16405bmlz/ic-module-gyro-accel-mag-24pin/dp/1849515?categoryId=&categoryName=&searchRef=SearchLookAhead).
 
 * [Datasheet](http://www.farnell.com/datasheets/1914493.pdf)
+
+The secondary sensor module is an MPU9250
+
+* [Datasheet](<https://www.invensense.com/wp-content/uploads/2015/02/MPU-9250-Datasheet.pdf>)
+* [Register Map](<https://www.invensense.com/wp-content/uploads/2015/02/MPU-9250-Register-Map.pdf>)
+* [Internal Magnetomer Datasheet](<https://www.akm.com/akm/en/file/datasheet/AK8963C.pdf>)
 
 ## Other components
 

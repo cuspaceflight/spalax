@@ -44,7 +44,7 @@ int main() {
     if (FTEngine::setup()) {
         rocket_main();
 
-        auto driver = std::make_unique<SerialDriver>("COM6", 38400);
+        auto driver = std::make_unique<SerialDriver>("COM3", 38400);
 
         FTEngine::getFileManager()->addSearchPath("Resources");
 

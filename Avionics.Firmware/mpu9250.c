@@ -9,12 +9,15 @@
 #include "compilermacros.h"
 #include "mpu9250-reg.h"
 #include "messaging.h"
+#include <string.h>
 
 #define MPU9250_SPID         SPID1
 #define MPU9250_SPI_CS_PORT  GPIOA
 #define MPU9250_SPI_CS_PIN   GPIOA_MPU_NSS
 
 static BinarySemaphore mpu9250_semaphore;
+
+#define I2C_MST_DLY 10
 
 //// LOW-LEVEL COMMUNICATION ////
 
@@ -87,29 +90,28 @@ static void mpu9250_write_u8(uint8_t addr, uint8_t val) {
     spiUnselect(&MPU9250_SPID);
 }
 
-static void mpu9250_i2c_slave0_write_u8(uint8_t addr, uint8_t val) {
-    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_ADDR, AK893_I2C_ADDR);
-    chThdSleepMilliseconds(5);
-    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_REG, addr);
-    chThdSleepMilliseconds(5);
-    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_DO, val);
-    chThdSleepMilliseconds(5);
-    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_CTRL, 0b10100001);
+
+static void mpu9250_i2c_write_u8(uint8_t addr, uint8_t val) {
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV4_ADDR, AK893_I2C_ADDR);
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV4_REG, addr);
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV4_DO, val);
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV4_CTRL, 0b10000000 | (I2C_MST_DLY & 0x1F));
     // Sleep a little to allow the I2C transaction to occur
     chThdSleepMilliseconds(5);
+
+    // SLV4's enable bit is automatically cleared after a successful transaction
 }
 
-static uint8_t mpu9250_i2c_slave0_read_u8(uint8_t addr) {
-    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_ADDR, AK893_I2C_ADDR | 0x80);
-    chThdSleepMilliseconds(5);
-    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_REG, addr);
-    chThdSleepMilliseconds(5);
-    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_CTRL, 0x81);
+static uint8_t mpu9250_i2c_read_u8(uint8_t addr) {
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV4_ADDR, AK893_I2C_ADDR | 0x80); // Tells MPU9250 that we want to read
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV4_REG, addr);
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV4_CTRL, 0b10000000 | (I2C_MST_DLY & 0x1F));
 
     // Sleep a little to allow the I2C transaction to occur
     chThdSleepMilliseconds(5);
 
-    return mpu9250_read_u8(MPU9250_REG_EXT_SENS_DATA_00);
+    // SLV4's enable bit is automatically cleared after a successful transaction
+    return mpu9250_read_u8(MPU9250_REG_I2C_SLV4_DI);
 }
 
 static void mpu9250_read_accel_temp_gyro(uint16_t *out) {
@@ -129,8 +131,17 @@ static void mpu9250_read_accel_temp_gyro(uint16_t *out) {
 #endif
 }
 
+static void mpu9250_read_magno(int16_t out[3]) {
+    uint8_t buff[8];
+
+    // This should be updated every I2C_MST_DLY samples automatically
+    mpu9250_read_multiple(MPU9250_REG_EXT_SENS_DATA_00, buff, 8);
+
+    memcpy(out, &buff[1],6);
+}
+
 static bool mpu9250_i2c_id_check(void) {
-    uint8_t whoami = mpu9250_i2c_slave0_read_u8(AK8963_REG_WHO_AM_I);
+    uint8_t whoami = mpu9250_i2c_read_u8(AK8963_REG_WHO_AM_I);
     return whoami == AK893_WHO_AM_I_RESET_VALUE;
 }
 
@@ -254,7 +265,9 @@ static void mpu9250_init(void) {
         { MPU9250_REG_USER_CTRL,   0b00110010 }, // SPI only, disable FIFO, Enable the I2C Master Module
         { MPU9250_REG_INT_PIN_CFG, 0b00110000}, // Latch Interrupt and clear on read
         { MPU9250_REG_INT_ENABLE,  0b00000001}, // Enable interrupt on data ready
-        { MPU9250_REG_I2C_MST_CTRL, 0b00011000}, // Set I2C clock rate to 400kHz
+        { MPU9250_REG_I2C_MST_CTRL, 0b01011000}, // Set I2C clock rate to 400kHz, delay DRDY interrupt until External sensor data is ready
+        { MPU9250_REG_I2C_MST_DELAY_CTRL, 0b00000001}, // Only sample Slave 0 every 1 + I2C_MST_DLY samples
+        { MPU9250_REG_I2C_SLV4_CTRL, (I2C_MST_DLY & 0x1F)}, // Set I2C_MST_DLY
     };
 
     // Perform initial reset
@@ -264,10 +277,17 @@ static void mpu9250_init(void) {
     }
 
     // Reset Magnetometer
-    mpu9250_i2c_slave0_write_u8(AK8963_REG_CNTL2, 0x01);
+    mpu9250_i2c_write_u8(AK8963_REG_CNTL2, 0x01);
 
-    // Continuous 16-bit measurement
-    mpu9250_i2c_slave0_write_u8(AK8963_REG_CNTL1, 0x12);
+    // First set mode to power down
+    mpu9250_i2c_write_u8(AK8963_REG_CNTL1, 0b00000000);
+    // Then can set to continuous 16-bit measurement at 100Hz
+    mpu9250_i2c_write_u8(AK8963_REG_CNTL1, 0b00010110);
+
+    // Configure automatic magnetometer read
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_ADDR, AK893_I2C_ADDR | 0x80);
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_REG, AK8963_REG_ST1);
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_CTRL, 0b10001000); // Read 8 bytes (we must read ST1 and ST2)
 }
 
 void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
@@ -346,6 +366,8 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
         chSysUnlock();
 
         mpu9250_read_accel_temp_gyro((uint16_t*)&data);
+        mpu9250_read_magno(data.magno);
+
         message_metadata_t flags = 0;
 
         if (count == mpu9250_send_over_usb_count)
