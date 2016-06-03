@@ -5,9 +5,9 @@
 #include "adis16405.h"
 #include "badthinghandler.h"
 
-#define ADIS16405_SPID         SPID1
-#define ADIS16405_SPI_CS_PORT  GPIOC
-#define ADIS16405_SPI_CS_PIN   GPIOC_ADIS_NSS
+#define ADIS16405_SPID         SPID3
+#define ADIS16405_SPI_CS_PORT  GPIOA
+#define ADIS16405_SPI_CS_PIN   GPIOA_ESPI_NSS
 
 static BinarySemaphore adis16405_semaphore;
 

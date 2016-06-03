@@ -232,7 +232,7 @@
                                      PIN_MODE_ALTERNATE(GPIOA_OTG_DS_DP) | \
                                      PIN_MODE_ALTERNATE(GPIOA_SWDIO) | \
                                      PIN_MODE_ALTERNATE(GPIOA_SWCLK) | \
-                                     PIN_MODE_INPUT(GPIOA_ESPI_NSS))
+                                     PIN_MODE_OUTPUT(GPIOA_ESPI_NSS))
 #define VAL_GPIOA_OTYPER            (PIN_OTYPE_PUSHPULL(GPIOA_PIN0)     |\
                                      PIN_OTYPE_PUSHPULL(GPIOA_MPU_IRQ)     |\
                                      PIN_OTYPE_PUSHPULL(GPIOA_USART2_TX) | \
@@ -606,7 +606,7 @@
                                      PIN_AFIO_AF(GPIOD_PIN14, 0)            |\
                                      PIN_AFIO_AF(GPIOD_PIN15, 0))
 
-#define VAL_GPIOE_MODER             (PIN_MODE_OUTPUT(GPIOE_ESPI_DRDY)       |\
+#define VAL_GPIOE_MODER             (PIN_MODE_INPUT(GPIOE_ESPI_DRDY)       |\
                                      PIN_MODE_INPUT(GPIOE_PIN1)             |\
                                      PIN_MODE_INPUT(GPIOE_PIN2)             |\
                                      PIN_MODE_OUTPUT(GPIOE_STAT_BUZZER)             |\

@@ -37,10 +37,6 @@ static void mpu9250_write_u8(uint8_t addr, uint8_t val);
 // MAGNO_XOUT, MAGNO_YOUT, MAGNO_ZOUT
 static void mpu9250_read_accel_temp_gyro(uint16_t *out);
 
-// mpu9250_id_check performs a simple sanity check on MPU9250 communication by
-// checking that the WHO_AM_I register of the MPU9250 has an expected value.
-static bool mpu9250_id_check(void);
-
 // mpu9250_self_test_gyro performs a self-test on the gyroscope. It returns true
 // iff the self-test passed.
 static bool mpu9250_self_test_gyro(void);
@@ -98,8 +94,7 @@ static void mpu9250_i2c_slave0_write_u8(uint8_t addr, uint8_t val) {
     chThdSleepMilliseconds(5);
     mpu9250_write_u8(MPU9250_REG_I2C_SLV0_DO, val);
     chThdSleepMilliseconds(5);
-    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_CTRL, 0x81);
-
+    mpu9250_write_u8(MPU9250_REG_I2C_SLV0_CTRL, 0b10100001);
     // Sleep a little to allow the I2C transaction to occur
     chThdSleepMilliseconds(5);
 }
@@ -134,14 +129,14 @@ static void mpu9250_read_accel_temp_gyro(uint16_t *out) {
 #endif
 }
 
-static bool mpu9250_id_check(void) {
-    // Read WHO_AM_I Register
-    uint8_t whoami = mpu9250_read_u8(MPU9250_REG_WHO_AM_I);
-    if (whoami != MPU9250_WHO_AM_I_RESET_VALUE)
-        return false;
-
-    whoami = mpu9250_i2c_slave0_read_u8(AK8963_REG_WHO_AM_I);
+static bool mpu9250_i2c_id_check(void) {
+    uint8_t whoami = mpu9250_i2c_slave0_read_u8(AK8963_REG_WHO_AM_I);
     return whoami == AK893_WHO_AM_I_RESET_VALUE;
+}
+
+static bool mpu9250_spi_id_check(void) {
+    uint8_t whoami = mpu9250_read_u8(MPU9250_REG_WHO_AM_I);
+    return whoami == MPU9250_WHO_AM_I_RESET_VALUE;
 }
 
 static bool mpu9250_self_test_gyro(void) {
@@ -256,15 +251,16 @@ static void mpu9250_init(void) {
         { MPU9250_REG_PWR_MGMT_1, 0x80 }, // Reset
         { MPU9250_REG_PWR_MGMT_1, 0x01 }, // Select best clock source
         { MPU9250_REG_PWR_MGMT_2, 0x00 }, // Enable gyro & accel
-        { MPU9250_REG_USER_CTRL, 0x30 }, // SPI only, disable FIFO, Enable the I2C Master Module
+        { MPU9250_REG_USER_CTRL,   0b00110010 }, // SPI only, disable FIFO, Enable the I2C Master Module
         { MPU9250_REG_INT_PIN_CFG, 0b00110000}, // Latch Interrupt and clear on read
         { MPU9250_REG_INT_ENABLE,  0b00000001}, // Enable interrupt on data ready
-        { MPU9250_REG_I2C_MST_CTRL, 0x0D}, // Set I2C clock rate to 400kHz
+        { MPU9250_REG_I2C_MST_CTRL, 0b00011000}, // Set I2C clock rate to 400kHz
     };
 
     // Perform initial reset
     for(size_t i=0; i < sizeof(init_sequence)/sizeof(init_sequence[0]); ++i) {
         mpu9250_write_u8(init_sequence[i][0], init_sequence[i][1]);
+        chThdSleepMilliseconds(10);
     }
 
     // Reset Magnetometer
@@ -306,7 +302,7 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
     COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
 
     // Wait for startup
-    while (!mpu9250_id_check()) {
+    while (!mpu9250_spi_id_check()) {
         chThdSleepMilliseconds(50);
     }
 
@@ -314,6 +310,16 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
     COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
 
     mpu9250_init();
+
+    // Log that we have passed init
+    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
+
+    while (!mpu9250_i2c_id_check()) {
+        chThdSleepMilliseconds(50);
+    }
+    // Log that we have passed I2C ID Check
+    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
+
 
     // Perform a self-test of the MPU9250
     while(!mpu9250_self_test_gyro()) {
