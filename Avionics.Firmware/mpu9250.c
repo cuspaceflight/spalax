@@ -256,7 +256,13 @@ static bool mpu9250_self_test_accel(void) {
     return true;
 }
 
-static void mpu9250_init(void) {
+static void mpu9250_init(mpu9250_config_t* config) {
+    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
+
+    ///
+    // MPU9250 Setup
+    ///
+
     // Register/value pairs to reset/initialise MPU9250
     uint8_t init_sequence[][2] = {
         { MPU9250_REG_PWR_MGMT_1, 0x80 }, // Reset
@@ -268,6 +274,22 @@ static void mpu9250_init(void) {
         { MPU9250_REG_I2C_MST_CTRL, 0b01011000}, // Set I2C clock rate to 400kHz, delay DRDY interrupt until External sensor data is ready
         { MPU9250_REG_I2C_MST_DELAY_CTRL, 0b00000001}, // Only sample Slave 0 every 1 + I2C_MST_DLY samples
         { MPU9250_REG_I2C_SLV4_CTRL, (I2C_MST_DLY & 0x1F)}, // Set I2C_MST_DLY
+        { MPU9250_REG_SMPLRT_DIV, 0x0}, // Set Maximum Sample Rate
+
+
+        // Set full gyro scale to +500dps
+        // We enable a digital low pass filter with:
+        // - bandwidth 184Hz on gyroscope
+        // - bandwidth 188Hz on temperature
+        // Note: this reduces ODR to 1 kHz and adds a 2.9ms delay
+        { MPU9250_REG_CONFIG, 0b00000001}, // Disable FSync and set DLPF_CFG to 1
+        { MPU9250_REG_GYRO_CONFIG, 0b00001000},
+
+        // Set full accelerometer scale to +16g
+        // Enable a 184Hz low pass filter on accelerometer
+        // Note: this reduces ODR to 1kHz and adds a 5.8ms delay
+        { MPU9250_REG_ACCEL_CONFIG, 0b00011000},
+        { MPU9250_REG_ACCEL_CONFIG_2, 0b00000001}
     };
 
     // Perform initial reset
@@ -275,6 +297,10 @@ static void mpu9250_init(void) {
         mpu9250_write_u8(init_sequence[i][0], init_sequence[i][1]);
         chThdSleepMilliseconds(10);
     }
+
+    ///
+    // Magnetometer Setup
+    ///
 
     // Reset Magnetometer
     mpu9250_i2c_write_u8(AK8963_REG_CNTL2, 0x01);
@@ -288,6 +314,42 @@ static void mpu9250_init(void) {
     mpu9250_write_u8(MPU9250_REG_I2C_SLV0_ADDR, AK893_I2C_ADDR | 0x80);
     mpu9250_write_u8(MPU9250_REG_I2C_SLV0_REG, AK8963_REG_ST1);
     mpu9250_write_u8(MPU9250_REG_I2C_SLV0_CTRL, 0b10001000); // Read 8 bytes (we must read ST1 and ST2)
+
+
+    ///
+    // Self Tests
+    ///
+
+    // Log that we have passed init
+    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
+
+    while (!mpu9250_i2c_id_check()) {
+        chThdSleepMilliseconds(50);
+    }
+    // Log that we have passed I2C ID Check
+    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
+
+    // Perform a self-test of the MPU9250
+    while(!mpu9250_self_test_gyro()) {
+        chThdSleepMilliseconds(50);
+    }
+
+    // Log that we have passed the gyro self test
+    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
+
+    while(!mpu9250_self_test_accel()) {
+        chThdSleepMilliseconds(50);
+    }
+
+    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
+
+    ///
+    // Config update
+    ///
+
+    config->accel_sf =  16.0f * 9.8f / 32767.0f;
+    config->gyro_sf = 500.0f * 0.01745329251f / 32767.0f;
+    config->magno_sf = 0.15f;
 }
 
 void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
@@ -299,7 +361,9 @@ void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
     chSysUnlockFromIsr();
 }
 
-MESSAGING_PRODUCER(messaging_producer, telemetry_id_mpu9250_data_raw, (sizeof(telemetry_header_t) + sizeof(mpu9250_data_t)) * 40)
+MESSAGING_PRODUCER(messaging_producer_data, telemetry_id_mpu9250_data, (sizeof(telemetry_header_t) + sizeof(mpu9250_data_t)) * 40)
+
+MESSAGING_PRODUCER(messaging_producer_config, telemetry_id_mpu9250_config, (sizeof(telemetry_header_t) + sizeof(mpu9250_config_t)) * 10)
 
 msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
     const SPIConfig spi_cfg = {
@@ -312,6 +376,8 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
         // TODO: Verify this
         SPI_CR1_BR_1 | SPI_CR1_BR_0 | SPI_CR1_CPOL | SPI_CR1_CPHA
     };
+
+    mpu9250_config_t mpu9250_config;
 
     chBSemInit(&mpu9250_semaphore, true);
 
@@ -326,40 +392,16 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
         chThdSleepMilliseconds(50);
     }
 
-    // Log that we have passed the id check
-    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
+    mpu9250_init(&mpu9250_config);
 
-    mpu9250_init();
-
-    // Log that we have passed init
-    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
-
-    while (!mpu9250_i2c_id_check()) {
-        chThdSleepMilliseconds(50);
-    }
-    // Log that we have passed I2C ID Check
-    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
-
-
-    // Perform a self-test of the MPU9250
-    while(!mpu9250_self_test_gyro()) {
-        chThdSleepMilliseconds(50);
-    }
-
-    // Log that we have passed the gyro self test
-    COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
-
-    while(!mpu9250_self_test_accel()) {
-        chThdSleepMilliseconds(50);
-    }
+    messaging_producer_init(&messaging_producer_data);
+    messaging_producer_init(&messaging_producer_config);
 
     COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_ok);
 
-    messaging_producer_init(&messaging_producer);
-
-
     mpu9250_data_t data;
-    int count = mpu9250_send_over_usb_count;
+    uint32_t send_over_usb_count = mpu9250_send_over_usb_count;
+    uint32_t send_config_count = mpu9250_send_config_count;
     while(TRUE) {
         chSysLock();
         chBSemWaitTimeoutS(&mpu9250_semaphore, 100);
@@ -370,14 +412,22 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
 
         message_metadata_t flags = 0;
 
-        if (count == mpu9250_send_over_usb_count)
-            count = 0;
+        if (send_over_usb_count == mpu9250_send_over_usb_count)
+            send_over_usb_count = 0;
         else {
             flags |= message_flags_dont_send_over_usb;
-            count++;
+            send_over_usb_count++;
         }
 
-        messaging_producer_send(&messaging_producer, flags, (const uint8_t*)&data, 20);
+        if (send_config_count == mpu9250_send_config_count) {
+            // Send config
+            messaging_producer_send(&messaging_producer_config, 0, (const uint8_t*)&mpu9250_config, sizeof(mpu9250_config));
+            send_config_count = 0;
+        } else {
+            send_config_count++;
+        }
+
+        messaging_producer_send(&messaging_producer_data, flags, (const uint8_t*)&data, sizeof(data));
         chThdYield(); // Ensure other threads actually get a chance to run
     }
 }

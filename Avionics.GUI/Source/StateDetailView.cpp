@@ -15,37 +15,46 @@ extern "C" {
 }
 
 static StateDetailView* s_instance = nullptr;
-static const int num_labels = 12;
-uint32_t values[num_labels];
+static const int num_labels = 11;
+float values[num_labels];
+bool has_mpu9250_config = false;
+mpu9250_config_t mpu9250_config;
+
 
 static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
     if (s_instance == nullptr)
         return false;
-    if (packet->header.id == telemetry_id_mpu9250_data_raw) {
-        FTAssert(packet->header.length == 20, "Incorrect Packet Size");
+    if (packet->header.id == telemetry_id_mpu9250_data) {
+        if (!has_mpu9250_config)
+            return true;
         mpu9250_data_t* data = (mpu9250_data_t*)packet->payload;
 
-        values[2] = data->accel[0];
-        values[3] = data->accel[1];
-        values[4] = data->accel[2];
+        mpu9250_calibrated_data_t calibrated;
+        mpu9250_calibrate_data(&mpu9250_config, data, &calibrated);
 
-        values[5] = data->gyro[0];
-        values[6] = data->gyro[1];
-        values[7] = data->gyro[2];
+        values[2] = calibrated.accel[0];
+        values[3] = calibrated.accel[1];
+        values[4] = calibrated.accel[2];
 
-        values[8] = data->magno[0];
-        values[9] = data->magno[1];
-        values[10] = data->magno[2];
+        values[5] = calibrated.gyro[0];
+        values[6] = calibrated.gyro[1];
+        values[7] = calibrated.gyro[2];
 
-        values[11] = data->temp;
+        values[8] = calibrated.magno[0];
+        values[9] = calibrated.magno[1];
+        values[10] = calibrated.magno[2];
+    } else if (packet->header.id == telemetry_id_mpu9250_config) {
+        mpu9250_config_t* config = (mpu9250_config_t*)packet->payload;
+        mpu9250_config = *config;
+        has_mpu9250_config = true;
     }
-    else if (packet->header.id == telemetry_id_ms5611_data_raw) {
-        FTAssert(packet->header.length == sizeof(ms5611data_t), "Incorrect Packet Size");
-        auto data = (ms5611data_t*)packet->payload;
-
-        values[0] = data->pressure;
-        values[1] = data->temperature;
-    }
+//    else if (packet->header.id == telemetry_id_ms5611_data) {
+//        FTAssert(packet->header.length == sizeof(ms5611data_t), "Incorrect Packet Size");
+//        auto data = (ms5611data_t*)packet->payload;
+//
+//        values[0] = data->pressure;
+//        values[1] = data->temperature;
+//    }
     return true;
 }
 
@@ -61,8 +70,7 @@ StateDetailView::StateDetailView() {
         L"MS5611 Pressure", L"MS5611 Temperature", 
         L"MPU9250 Accel X", L"MPU9250 Accel Y", L"MPU9250 Accel Z", 
         L"MPU9250 Gyro X", L"MPU9250 Gyro Y", L"MPU9250 Gyro Z", 
-        L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z", 
-        L"MPU9250 Temp"};
+        L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z"};
 
     auto window_size_node = std::make_shared<FTWindowSizeNode>();
     window_size_node->setAnchorPoint(glm::vec2(0, -1.0f));
@@ -76,11 +84,13 @@ StateDetailView::StateDetailView() {
         window_size_node->addChild(label);
         label->setPosition(glm::vec2(30, y));
         label->setAnchorPoint(glm::vec2(0, 0.5f));
+        label->setFillColor(glm::vec3(1, 1, 1));
 
         label = std::make_shared<FTLabel>("Fonts/Vera.ttf", L"0", 14, true);
         window_size_node->addChild(label);
         label->setPosition(glm::vec2(250, y));
         label->setAnchorPoint(glm::vec2(1, 0.5f));
+        label->setFillColor(glm::vec3(1, 1, 1));
 
         value_labels_.push_back(label.get());
         y -= y_padding;
@@ -102,5 +112,5 @@ void StateDetailView::updateDisplay() {
 
     static wchar_t buff[24];
     for (int i = 0; i < num_labels; i++)
-        value_labels_[i]->setString(FTStringUtil<wchar_t>::formatString(buff, 24, L"%i", values[i]));
+        value_labels_[i]->setString(FTStringUtil<wchar_t>::formatString(buff, 24, L"%.2f", values[i]));
 }

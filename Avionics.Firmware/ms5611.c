@@ -198,7 +198,7 @@ static void ms5611_read(MS5611CalData* cal_data,
 		COMPONENT_STATE_UPDATE(avionics_component_ms5611, state_error);
 }
 
-MESSAGING_PRODUCER(messaging_producer, telemetry_id_ms5611_data_raw, (sizeof(telemetry_header_t) + sizeof(ms5611data_t)) * 10)
+MESSAGING_PRODUCER(messaging_producer, telemetry_id_ms5611_data, (sizeof(telemetry_header_t) + sizeof(ms5611data_t)) * 10)
 
 /*
  * MS5611 main thread.

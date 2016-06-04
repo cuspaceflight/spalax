@@ -26,9 +26,6 @@ typedef enum {
 
     TELEMETRY_SOURCE(telemetry_source_system_state, telemetry_source_all,                   0b00000000000, 4),
     TELEMETRY_SOURCE(telemetry_source_sensor_data, telemetry_source_all,                    0b00010000000, 4),
-    TELEMETRY_SOURCE(telemetry_source_sensor_data_raw, telemetry_source_sensor_data,        0b00010000000, 5),
-    TELEMETRY_SOURCE(telemetry_source_sensor_data_calib, telemetry_source_sensor_data,      0b00011000000, 5),
-
     ///
     // Unique Sources
     ///
@@ -39,29 +36,19 @@ typedef enum {
     
 
     // MS5611
-    TELEMETRY_SOURCE(telemetry_source_ms5611_raw, telemetry_source_sensor_data_raw,         0b00010000010, 10),
-    TELEMETRY_ID(telemetry_id_ms5611_data_raw, telemetry_source_ms5611_raw,                 0b00010000010),
-
-    TELEMETRY_SOURCE(telemetry_source_ms5611_calib, telemetry_source_sensor_data_calib,     0b00011000010, 10),
-    TELEMETRY_ID(telemetry_id_ms5611_config, telemetry_source_ms5611_calib,                 0b00011000010),
-    TELEMETRY_ID(telemetry_id_ms5611_data_calib, telemetry_source_ms5611_calib,             0b00011000011),
-
+    TELEMETRY_SOURCE(telemetry_source_ms5611, telemetry_source_sensor_data,                 0b00010000010, 10),
+    TELEMETRY_ID(telemetry_id_ms5611_config, telemetry_source_ms5611,                       0b00010000010),
+    TELEMETRY_ID(telemetry_id_ms5611_data, telemetry_source_ms5611,                         0b00010000011),
 
     // MPU9250
-    TELEMETRY_SOURCE(telemetry_source_mpu9250_raw, telemetry_source_sensor_data_raw,        0b00010000100, 10),
-    TELEMETRY_ID(telemetry_id_mpu9250_data_raw, telemetry_source_mpu9250_raw,               0b00010000100),
+    TELEMETRY_SOURCE(telemetry_source_mpu9250, telemetry_source_sensor_data,                0b00010000100, 10),
+    TELEMETRY_ID(telemetry_id_mpu9250_config, telemetry_source_mpu9250,                     0b00010000100),
+    TELEMETRY_ID(telemetry_id_mpu9250_data, telemetry_source_mpu9250,                       0b00010000101),
 
-    TELEMETRY_SOURCE(telemetry_source_mpu9250_calib, telemetry_source_sensor_data_calib,    0b00011000100, 10),
-    TELEMETRY_ID(telemetry_id_mpu9250_config, telemetry_source_mpu9250_calib,               0b00011000100),
-    TELEMETRY_ID(telemetry_id_mpu9250_data_calib, telemetry_source_mpu9250_calib,           0b00011000101),
-
-    // ADIS16405
-    TELEMETRY_SOURCE(telemetry_source_adis16405_raw, telemetry_source_sensor_data_raw,      0b00010000110, 10),
-    TELEMETRY_ID(telemetry_id_adis16405_data_raw, telemetry_source_adis16405_raw,           0b00010000110),
-
-    TELEMETRY_SOURCE(telemetry_source_adis16405_calib, telemetry_source_sensor_data_calib,  0b00011000110, 10),
-    TELEMETRY_ID(telemetry_id_adis16405_config, telemetry_source_adis16405_calib,           0b00011000110),
-    TELEMETRY_ID(telemetry_id_adis16405_data_calib, telemetry_source_adis16405_calib,       0b00011000111),
+    //ADIS16405
+    TELEMETRY_SOURCE(telemetry_source_adis16405, telemetry_source_sensor_data,              0b00010000110, 10),
+    TELEMETRY_ID(telemetry_id_adis16405_config, telemetry_source_adis16405,                 0b00010000110),
+    TELEMETRY_ID(telemetry_id_adis16405_data, telemetry_source_adis16405,                   0b00010000111),
 
 } telemetry_id_t;
 
