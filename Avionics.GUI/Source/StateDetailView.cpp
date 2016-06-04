@@ -21,7 +21,7 @@ uint32_t values[num_labels];
 static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
     if (s_instance == nullptr)
         return false;
-    if (packet->header.id == telemetry_id_mpu9250_data) {
+    if (packet->header.id == telemetry_id_mpu9250_data_raw) {
         FTAssert(packet->header.length == 20, "Incorrect Packet Size");
         mpu9250_data_t* data = (mpu9250_data_t*)packet->payload;
 
@@ -39,7 +39,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
 
         values[11] = data->temp;
     }
-    else if (packet->header.id == telemetry_id_ms5611_data) {
+    else if (packet->header.id == telemetry_id_ms5611_data_raw) {
         FTAssert(packet->header.length == sizeof(ms5611data_t), "Incorrect Packet Size");
         auto data = (ms5611data_t*)packet->payload;
 
@@ -49,7 +49,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
     return true;
 }
 
-MESSAGING_CONSUMER(messaging_consumer, 0b00000001000, 0b11111111000, 0, 0, getPacket, 1024);
+MESSAGING_CONSUMER(messaging_consumer, telemetry_source_all, telemetry_source_all_mask, 0, 0, getPacket, 1024);
 
 StateDetailView::StateDetailView() {
     FTAssert(s_instance == nullptr, "Only one StateDetailView instance can exist at once");

@@ -13,8 +13,7 @@ typedef struct message_producer_impl_t message_producer_impl_t;
 typedef struct message_consumer_impl_t message_consumer_impl_t;
 
 typedef struct message_producer_t {
-    const uint16_t packet_source;
-    const uint16_t packet_source_mask;
+    const uint16_t packet_id;
     telemetry_allocator_t* const telemetry_allocator;
     message_producer_impl_t* impl; // Used for implementation specific data
 } message_producer_t;
@@ -34,7 +33,6 @@ typedef enum {
     messaging_send_ok, // Packet sent sucessfully
     messaging_send_producer_heap_full, // Insufficient space in producer heap to allocate packet
     messaging_send_invalid_producer, // The producer is invalid
-    messaging_send_invalid_tag, // The tag doesn't match the provided source mask
     messaging_send_internal_pool_full, // The internal memory pool of the component is full
     messaging_send_consumer_buffer_full // At least one consumer dropped the packet
 } messaging_send_return_codes;

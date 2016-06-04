@@ -299,7 +299,7 @@ void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
     chSysUnlockFromIsr();
 }
 
-MESSAGING_PRODUCER(messaging_producer, telemetry_source_mpu9250, telemetry_source_mask_mpu9250, (sizeof(telemetry_header_t) + sizeof(mpu9250_data_t)) * 40)
+MESSAGING_PRODUCER(messaging_producer, telemetry_id_mpu9250_data_raw, (sizeof(telemetry_header_t) + sizeof(mpu9250_data_t)) * 40)
 
 msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
     const SPIConfig spi_cfg = {
@@ -377,7 +377,7 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
             count++;
         }
 
-        messaging_producer_send(&messaging_producer, 0, flags, (const uint8_t*)&data, 20);
+        messaging_producer_send(&messaging_producer, flags, (const uint8_t*)&data, 20);
         chThdYield(); // Ensure other threads actually get a chance to run
     }
 }

@@ -9,9 +9,9 @@
 extern "C" {
 #endif
 
-#define MESSAGING_PRODUCER(name, packet_source, packet_source_mask, heap_size) \
+#define MESSAGING_PRODUCER(name, packet_id, heap_size) \
     TELEMETRY_ALLOCATOR(name##_allocator, heap_size) \
-    static message_producer_t name = {packet_source, packet_source_mask, &name##_allocator, NULL};
+    static message_producer_t name = {packet_id, &name##_allocator, NULL};
 
 #ifdef WIN32
 // On windows we don't bother allocating the buffer as it won't be used
@@ -35,7 +35,7 @@ bool messaging_consumer_init(message_consumer_t* consumer);
 
 // Send a mesage from the specified producer
 // A copy of the data will be made, so you can freely modify/release the data after this call
-messaging_send_return_codes messaging_producer_send(message_producer_t* producer, uint16_t tag, message_metadata_t flags, const uint8_t* data, uint16_t length);
+messaging_send_return_codes messaging_producer_send(message_producer_t* producer, message_metadata_t flags, const uint8_t* data, uint16_t length);
 
 // messaging_producer_send is the reccomended method to send packets.
 // This method is intended for predominantely internal use.

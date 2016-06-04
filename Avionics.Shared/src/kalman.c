@@ -95,8 +95,8 @@ float gyro_covariance[3][3] = {
     { 0, 0, 0.1f }
 };
 
-void kalman_init(const float g_ref[3], const float b_ref[3]) {
-    kalman_set_reference_vectors(g_ref, b_ref);
+void kalman_init(const state_estimate_calibration_t* calibration_data) {
+    kalman_set_reference_vectors(calibration_data->accel_bias, calibration_data->mag_bias);
     
     reset_kalman_state(&prior_state);
     reset_quaternion(prior_attitude);

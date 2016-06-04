@@ -14,7 +14,7 @@ typedef struct component_state_update_t {
 
 STATIC_ASSERT(sizeof(component_state_update_t) == 4, component_state_update_invalid_size);
 
-MESSAGING_PRODUCER(messaging_producer, telemetry_source_component_state, telemetry_source_mask_component_state, 128);
+MESSAGING_PRODUCER(messaging_producer, telemetry_id_component_state_update, 128);
 
 static volatile bool is_started = false;
 static volatile bool messaging_enabled = false;
@@ -55,7 +55,7 @@ void component_state_update(avionics_component_t component, avionics_component_s
         packet.state = state;
         packet.line_number = line_number;
 
-        messaging_producer_send(&messaging_producer, telemetry_id_component_state_update, 0, (uint8_t*)&packet, sizeof(component_state_update_t));
+        messaging_producer_send(&messaging_producer, 0, (uint8_t*)&packet, sizeof(component_state_update_t));
     }
 
     if (state == state_error && local_config.error_handler != NULL)
