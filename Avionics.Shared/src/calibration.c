@@ -104,43 +104,50 @@ volatile uint8_t calibration_trust_barometer = 1;
 */
 float state_estimation_p2a_nonzero_lapse(float pressure, int b)
 {
-	float lb = Lb[b];
-	float hb = Hb[b];
-	float pb = Pb[b];
-	float tb = Tb[b];
-	return hb + tb / lb * (powf(pressure / pb, (-Rs*lb) / (g0*M)) - 1.0f);
+    float lb = Lb[b];
+    float hb = Hb[b];
+    float pb = Pb[b];
+    float tb = Tb[b];
+
+    return hb + tb / lb * (powf(pressure / pb, (-Rs*lb) / (g0*M)) - 1.0f);
 }
+
 /* Convert a pressure and an atmospheric level b into an altitude.
 * Reverses the standard equation for zero-lapse regions,
 * P = Pb exp( -g0 M (h-hb) / R* Tb)
 */
 float state_estimation_p2a_zero_lapse(float pressure, int b)
 {
-	float hb = Hb[b];
-	float pb = Pb[b];
-	float tb = Tb[b];
-	return hb + (Rs * tb) / (g0 * M) * (logf(pressure) - logf(pb));
+    float hb = Hb[b];
+    float pb = Pb[b];
+    float tb = Tb[b];
+
+    return hb + (Rs * tb) / (g0 * M) * (logf(pressure) - logf(pb));
 }
 
 float state_estimation_pressure_to_altitude(float pressure)
 {
-	int b;
-	/* For each level of the US Standard Atmosphere 1976, check if the pressure
-	* is inside that level, and use the appropriate conversion based on lapse
-	* rate at that level.
-	*/
-	for (b = 0; b < 6; b++) {
-		if (pressure <= Pb[b] && pressure > Pb[b + 1]) {
-			if (Lb[b] == 0.0f) {
-				return state_estimation_p2a_zero_lapse(pressure, b);
-			}
-			else {
-				return state_estimation_p2a_nonzero_lapse(pressure, b);
-			}
-		}
-	}
-	/* If no levels matched, something is wrong, returning -9999f will cause
-	* this pressure value to be ignored.
-	*/
-	return -9999.0f;
+    int b;
+    /* For each level of the US Standard Atmosphere 1976, check if the pressure
+    * is inside that level, and use the appropriate conversion based on lapse
+    * rate at that level.
+    */
+    if (pressure > Pb[0]) {
+        return state_estimation_p2a_nonzero_lapse(pressure, 0);
+    }
+    for (b = 0; b < 6; b++) {
+        if (pressure <= Pb[b] && pressure > Pb[b + 1]) {
+            if (Lb[b] == 0.0f) {
+                return state_estimation_p2a_zero_lapse(pressure, b);
+            }
+            else {
+                return state_estimation_p2a_nonzero_lapse(pressure, b);
+            }
+        }
+    }
+
+    /* If no levels matched, something is wrong, returning -9999f will cause
+    * this pressure value to be ignored.
+    */
+    return -9999.0f;
 }

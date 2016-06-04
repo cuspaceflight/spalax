@@ -7,15 +7,17 @@
 #include <Rendering/FTWindowSizeNode.h>
 #include <telemetry.h>
 #include <messaging.h>
-#include <ms5611_config.h>
-#include <mpu9250_config.h>
+
 
 extern "C" {
 #include <math_utils.h>
+#include <ms5611_config.h>
+#include <mpu9250_config.h>
+#include <calibration.h>
 }
 
 static StateDetailView* s_instance = nullptr;
-static const int num_labels = 11;
+static const int num_labels = 12;
 float values[num_labels];
 bool has_mpu9250_config = false;
 mpu9250_config_t mpu9250_config;
@@ -32,29 +34,30 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         mpu9250_calibrated_data_t calibrated;
         mpu9250_calibrate_data(&mpu9250_config, data, &calibrated);
 
-        values[2] = calibrated.accel[0];
-        values[3] = calibrated.accel[1];
-        values[4] = calibrated.accel[2];
+        values[3] = calibrated.accel[0];
+        values[4] = calibrated.accel[1];
+        values[5] = calibrated.accel[2];
 
-        values[5] = calibrated.gyro[0];
-        values[6] = calibrated.gyro[1];
-        values[7] = calibrated.gyro[2];
+        values[6] = calibrated.gyro[0];
+        values[7] = calibrated.gyro[1];
+        values[8] = calibrated.gyro[2];
 
-        values[8] = calibrated.magno[0];
-        values[9] = calibrated.magno[1];
-        values[10] = calibrated.magno[2];
+        values[9] = calibrated.magno[0];
+        values[10] = calibrated.magno[1];
+        values[11] = calibrated.magno[2];
     } else if (packet->header.id == telemetry_id_mpu9250_config) {
         mpu9250_config_t* config = (mpu9250_config_t*)packet->payload;
         mpu9250_config = *config;
         has_mpu9250_config = true;
     }
-//    else if (packet->header.id == telemetry_id_ms5611_data) {
-//        FTAssert(packet->header.length == sizeof(ms5611data_t), "Incorrect Packet Size");
-//        auto data = (ms5611data_t*)packet->payload;
-//
-//        values[0] = data->pressure;
-//        values[1] = data->temperature;
-//    }
+    else if (packet->header.id == telemetry_id_ms5611_data) {
+        FTAssert(packet->header.length == sizeof(ms5611data_t), "Incorrect Packet Size");
+        auto data = (ms5611data_t*)packet->payload;
+
+        values[0] = (float)data->pressure;
+        values[1] = state_estimation_pressure_to_altitude((float)data->pressure);
+        values[2] = (float)data->temperature;
+    }
     return true;
 }
 
@@ -67,7 +70,7 @@ StateDetailView::StateDetailView() {
     setCamera(std::make_shared<FTCamera2D>());
 
     static const wchar_t* label_names[num_labels] = { 
-        L"MS5611 Pressure", L"MS5611 Temperature", 
+        L"MS5611 Pressure", L"MS5611 Altitude", L"MS5611 Temperature",
         L"MPU9250 Accel X", L"MPU9250 Accel Y", L"MPU9250 Accel Z", 
         L"MPU9250 Gyro X", L"MPU9250 Gyro Y", L"MPU9250 Gyro Z", 
         L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z"};
