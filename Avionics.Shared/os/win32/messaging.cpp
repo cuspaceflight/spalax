@@ -130,23 +130,23 @@ messaging_send_return_codes messaging_send(telemetry_t* packet, message_metadata
 
 // Send a mesage from the specified producer
 // A copy of the data will be made, so you can freely modify/release the data after this call
-extern "C" messaging_send_return_codes messaging_producer_send(message_producer_t* producer, message_metadata_t flags, const uint8_t* data, uint16_t length) {
+extern "C" messaging_send_return_codes messaging_producer_send(message_producer_t* producer, message_metadata_t flags, const uint8_t* data) {
     if (producer->impl == NULL) {
         COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
         return messaging_send_invalid_producer;
     }
 
-    telemetry_t* packet = telemetry_allocator_alloc(producer->telemetry_allocator, length);
+    telemetry_t* packet = telemetry_allocator_alloc(producer->telemetry_allocator, producer->payload_size);
     if (packet == nullptr) {
         COMPONENT_STATE_UPDATE(avionics_component_messaging, state_error);
         return messaging_send_producer_heap_full;
     }
 
-    memcpy(packet->payload, data, length);
+    memcpy(packet->payload, data, producer->payload_size);
 
     // We have already checked the tag and source don't overlap earlier
     packet->header.id = producer->packet_id;
-    packet->header.length = length;
+    packet->header.length = producer->payload_size;
     packet->header.timestamp = platform_get_counter_value();
     packet->header.origin = local_config.origin;
 

@@ -75,17 +75,14 @@ telemetry_t* telemetry_allocator_alloc(telemetry_allocator_t* allocator, uint32_
         COMPONENT_STATE_UPDATE(avionics_component_telemetry_allocator, state_error);
         return NULL;
     }
-    telemetry_t* ret = chHeapAlloc(&allocator->impl->memory_heap, sizeof(telemetry_t));
-    if (ret == NULL) {
+    uint8_t* memory_block = chHeapAlloc(&allocator->impl->memory_heap, sizeof(telemetry_t) + payload_size);
+    if (memory_block == NULL) {
         COMPONENT_STATE_UPDATE(avionics_component_telemetry_allocator, state_error);
         return NULL;
     }
-    uint8_t* payload = chHeapAlloc(&allocator->impl->memory_heap, payload_size);
-    if (payload == NULL) {
-        chHeapFree(ret);
-        COMPONENT_STATE_UPDATE(avionics_component_telemetry_allocator, state_error);
-        return NULL;
-    }
+    telemetry_t *ret = (telemetry_t*)memory_block;
+    uint8_t* payload = memory_block + sizeof(telemetry_t);
+
     ret->payload = payload;
     return ret;
 }
@@ -95,6 +92,5 @@ void telemetry_allocator_free(telemetry_t* packet) {
     if (packet == NULL)
          return;
     // TODO: Verify that chibios chHeapFree is happy to be called with NULL pointers
-    chHeapFree(packet->payload);
     chHeapFree(packet);
 }

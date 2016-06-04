@@ -14,6 +14,7 @@ typedef struct message_consumer_impl_t message_consumer_impl_t;
 
 typedef struct message_producer_t {
     const uint16_t packet_id;
+    const uint16_t payload_size;
     telemetry_allocator_t* const telemetry_allocator;
     message_producer_impl_t* impl; // Used for implementation specific data
 } message_producer_t;

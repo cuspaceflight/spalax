@@ -361,9 +361,9 @@ void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
     chSysUnlockFromIsr();
 }
 
-MESSAGING_PRODUCER(messaging_producer_data, telemetry_id_mpu9250_data, (sizeof(telemetry_header_t) + sizeof(mpu9250_data_t)) * 40)
+MESSAGING_PRODUCER(messaging_producer_data, telemetry_id_mpu9250_data, sizeof(mpu9250_data_t), 40)
 
-MESSAGING_PRODUCER(messaging_producer_config, telemetry_id_mpu9250_config, (sizeof(telemetry_header_t) + sizeof(mpu9250_config_t)) * 10)
+MESSAGING_PRODUCER(messaging_producer_config, telemetry_id_mpu9250_config, sizeof(mpu9250_config_t), 10)
 
 msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
     const SPIConfig spi_cfg = {
@@ -421,13 +421,13 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
 
         if (send_config_count == mpu9250_send_config_count) {
             // Send config
-            messaging_producer_send(&messaging_producer_config, 0, (const uint8_t*)&mpu9250_config, sizeof(mpu9250_config));
+            messaging_producer_send(&messaging_producer_config, 0, (const uint8_t*)&mpu9250_config);
             send_config_count = 0;
         } else {
             send_config_count++;
         }
 
-        messaging_producer_send(&messaging_producer_data, flags, (const uint8_t*)&data, sizeof(data));
+        messaging_producer_send(&messaging_producer_data, flags, (const uint8_t*)&data);
         chThdYield(); // Ensure other threads actually get a chance to run
     }
 }
