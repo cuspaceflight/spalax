@@ -47,7 +47,7 @@ static void adis16405_write_u8(uint8_t addr_in, uint8_t val) {
     // For example, 0xA11F loads 0x1F into location 0x21
 
     addr_in |= (1 << 7);
-    uint16_t tx = addr_in << 8 | val;
+    uint16_t tx = ((uint16_t)addr_in << 8) | val;
 
     spiSelect(&ADIS16405_SPID);
     spiSend(&ADIS16405_SPID, 1, (void*)&tx);
@@ -69,7 +69,9 @@ static void adis16405_burst_read(uint16_t data_out[12]) {
     uint16_t magic_number = 0x3E00;
     spiSelect(&ADIS16405_SPID);
     spiSend(&ADIS16405_SPID, 1, (void*)&magic_number);
-    spiSend(&ADIS16405_SPID, 12, (void*)&data_out);
+    spiUnselect(&ADIS16405_SPID);
+    spiSelect(&ADIS16405_SPID);
+    spiReceive(&ADIS16405_SPID, 12, (void*)data_out);
     spiUnselect(&ADIS16405_SPID);
 
     for (int i = 0; i < 12; i++) {
@@ -119,8 +121,10 @@ static bool adis16405_self_test(void) {
         chThdSleepMilliseconds(500);
     }
 
+    uint16_t errors = adis16405_read_u16(0x3C);
+
     // Self test - Checks if error found when test run
-    return adis16405_read_u16(0x3C);
+    return errors == 0;
 }
 
 void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
@@ -155,23 +159,23 @@ msg_t adis16405_thread(void *arg) {
 
     palClearPad(GPIOD, GPIOD_CAN1_TX);
 
-    chThdSleepMilliseconds(10);
+    chThdSleepMilliseconds(200);
 
     // This is used as the ~RST line on the adaptor board
     palSetPad(GPIOD, GPIOD_CAN1_TX);
 
-    chThdSleepMilliseconds(100);
+    chThdSleepMilliseconds(200);
 
     // Wait for startup
     while (!adis16405_id_check()) {
-        chThdSleepMilliseconds(50);
+        chThdSleepMilliseconds(100);
     }
 
     // Log that we have passed id check
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
 
     while (!adis16405_self_test()) {
-        chThdSleepMilliseconds(50);
+        chThdSleepMilliseconds(100);
     }
 
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_ok);
