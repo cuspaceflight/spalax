@@ -310,7 +310,7 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
         // Clock rate should be <= 1 MHz for burst mode
         // I believe this sets it to 168000000 / 4 / 64 ~= 1MHz
         // TODO: Verify this
-        SPI_CR1_BR_1 | SPI_CR1_BR_0 | SPI_CR1_CPOL | SPI_CR1_CPHA
+        SPI_CR1_BR_0 | SPI_CR1_CPOL | SPI_CR1_CPHA
     };
 
     chBSemInit(&mpu9250_semaphore, true);

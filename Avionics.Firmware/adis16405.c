@@ -24,14 +24,17 @@ static uint16_t adis16405_read_u16(uint8_t addr_in) {
     addr_in &= ~(1<<7);
     // Shift into position
     uint16_t addr_out = addr_in << 8;
-    uint16_t data_out;
+    uint16_t data_rx;
+    uint16_t data_tx  = 0;
 
     spiSelect(&ADIS16405_SPID);
     spiSend(&ADIS16405_SPID, 1, (void*)&addr_out);
-    spiReceive(&ADIS16405_SPID, 1, (void*)&data_out);
+    spiUnselect(&ADIS16405_SPID);
+    spiSelect(&ADIS16405_SPID);
+    spiExchange(&ADIS16405_SPID, 1, (void*)&data_tx, (void*)&data_rx);
     spiUnselect(&ADIS16405_SPID);
 
-    return data_out;
+    return data_rx;
 }
 
 static void adis16405_write_u8(uint8_t addr_in, uint8_t val) {
@@ -103,8 +106,8 @@ static void adis16405_init(void) {
 }
 
 static bool adis16405_id_check(void) {
-    uint16_t id = adis16405_read_u16(0x7E);
-    return id == 0x4068;
+    uint16_t id = adis16405_read_u16(0x56);
+    return id == 0x4015;
 }
 
 static bool adis16405_self_test(void) {
@@ -150,8 +153,14 @@ msg_t adis16405_thread(void *arg) {
 
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
 
+    palClearPad(GPIOD, GPIOD_CAN1_TX);
+
+    chThdSleepMilliseconds(10);
+
     // This is used as the ~RST line on the adaptor board
     palSetPad(GPIOD, GPIOD_CAN1_TX);
+
+    chThdSleepMilliseconds(100);
 
     // Wait for startup
     while (!adis16405_id_check()) {
