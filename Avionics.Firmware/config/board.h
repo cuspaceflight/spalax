@@ -285,7 +285,7 @@
                                      PIN_ODR_LOW(GPIOA_MPU_IRQ)           |\
                                      PIN_ODR_HIGH(GPIOA_USART2_TX) | \
                                      PIN_ODR_HIGH(GPIOA_USART2_RX) | \
-                                     PIN_ODR_LOW(GPIOA_MPU_NSS) | \
+                                     PIN_ODR_HIGH(GPIOA_MPU_NSS) | \
                                      PIN_ODR_LOW(GPIOA_IMU_SCK) | \
                                      PIN_ODR_LOW(GPIOA_IMU_MISO) | \
                                      PIN_ODR_LOW(GPIOA_IMU_MOSI) | \
@@ -296,7 +296,7 @@
                                      PIN_ODR_HIGH(GPIOA_OTG_DS_DP) | \
                                      PIN_ODR_LOW(GPIOA_SWDIO) | \
                                      PIN_ODR_LOW(GPIOA_SWCLK) | \
-                                     PIN_ODR_LOW(GPIOA_ESPI_NSS))
+                                     PIN_ODR_HIGH(GPIOA_ESPI_NSS))
 #define VAL_GPIOA_AFRL              (PIN_AFIO_AF(GPIOA_PIN0, 0)         |\
                                      PIN_AFIO_AF(GPIOA_MPU_IRQ, 0)         |\
                                      PIN_AFIO_AF(GPIOA_USART2_TX, 7) | \
@@ -390,7 +390,7 @@
                                      PIN_ODR_LOW(GPIOB_PIN9)          |\
                                      PIN_ODR_LOW(GPIOB_PIN10)           |\
                                      PIN_ODR_LOW(GPIOB_PIN11)           |\
-                                     PIN_ODR_LOW(GPIOB_ALT_NSS)        |\
+                                     PIN_ODR_HIGH(GPIOB_ALT_NSS)        |\
                                      PIN_ODR_HIGH(GPIOB_ALT_SCK)       |\
                                      PIN_ODR_HIGH(GPIOB_ALT_MISO)      |\
                                      PIN_ODR_HIGH(GPIOB_ALT_MOSI))
@@ -479,7 +479,7 @@
                                      PIN_ODR_LOW(GPIOC_PIN1)           |\
                                      PIN_ODR_LOW(GPIOC_PIN2)           |\
                                      PIN_ODR_LOW(GPIOC_PIN3)           |\
-                                     PIN_ODR_LOW(GPIOC_ADIS_NSS)      |\
+                                     PIN_ODR_HIGH(GPIOC_ADIS_NSS)      |\
                                      PIN_ODR_LOW(GPIOC_ADIS_IRQ)      |\
                                      PIN_ODR_LOW(GPIOC_PIN6)               |\
                                      PIN_ODR_LOW(GPIOC_PIN7)               |\
