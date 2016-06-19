@@ -7,6 +7,7 @@
 #include <Rendering/FTWindowSizeNode.h>
 #include <telemetry.h>
 #include <messaging.h>
+#include <state_estimate.h>
 
 
 extern "C" {

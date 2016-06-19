@@ -22,3 +22,7 @@ inline void memory_barrier_acquire(void) {
 inline void memory_barrier_release(void) {
     asm volatile("DMB" ::: "memory");
 }
+
+void platform_set_thread_name(const char* name) {
+    chRegSetThreadName("MS5611");
+}

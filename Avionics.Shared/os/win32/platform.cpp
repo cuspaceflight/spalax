@@ -24,3 +24,7 @@ extern "C" void memory_barrier_acquire(void) {
 extern "C" void memory_barrier_release(void) {
     std::atomic_thread_fence(std::memory_order_release);
 }
+
+void platform_set_thread_name(const char* name) {
+    
+}

@@ -26,6 +26,7 @@ typedef enum {
 
     TELEMETRY_SOURCE(telemetry_source_system_state, telemetry_source_all,                   0b00000000000, 4),
     TELEMETRY_SOURCE(telemetry_source_sensor_data, telemetry_source_all,                    0b00010000000, 4),
+    TELEMETRY_SOURCE(telemetry_source_imu_data, telemetry_source_sensor_data,               0b00010000000, 5),
     ///
     // Unique Sources
     ///
@@ -36,20 +37,24 @@ typedef enum {
     
 
     // MS5611
-    TELEMETRY_SOURCE(telemetry_source_ms5611, telemetry_source_sensor_data,                 0b00010000010, 10),
+    TELEMETRY_SOURCE(telemetry_source_ms5611, telemetry_source_imu_data,                    0b00010000010, 10),
     TELEMETRY_ID(telemetry_id_ms5611_config, telemetry_source_ms5611,                       0b00010000010),
     TELEMETRY_ID(telemetry_id_ms5611_data, telemetry_source_ms5611,                         0b00010000011),
 
     // MPU9250
-    TELEMETRY_SOURCE(telemetry_source_mpu9250, telemetry_source_sensor_data,                0b00010000100, 10),
+    TELEMETRY_SOURCE(telemetry_source_mpu9250, telemetry_source_imu_data,                   0b00010000100, 10),
     TELEMETRY_ID(telemetry_id_mpu9250_config, telemetry_source_mpu9250,                     0b00010000100),
     TELEMETRY_ID(telemetry_id_mpu9250_data, telemetry_source_mpu9250,                       0b00010000101),
 
-    //ADIS16405
-    TELEMETRY_SOURCE(telemetry_source_adis16405, telemetry_source_sensor_data,              0b00010000110, 10),
+    // ADIS16405
+    TELEMETRY_SOURCE(telemetry_source_adis16405, telemetry_source_imu_data,                 0b00010000110, 10),
     TELEMETRY_ID(telemetry_id_adis16405_config, telemetry_source_adis16405,                 0b00010000110),
     TELEMETRY_ID(telemetry_id_adis16405_data, telemetry_source_adis16405,                   0b00010000111),
 
+    // State Estimation
+    TELEMETRY_SOURCE(telemetry_source_state_estimation, telemetry_source_all,               0b10000000000, 10),
+    TELEMETRY_ID(telemetry_id_state_estimate_config, telemetry_source_state_estimation,     0b10000000000),
+    TELEMETRY_ID(telemetry_id_state_estimate_data, telemetry_source_state_estimation,       0b10000000001),
 } telemetry_id_t;
 
 typedef enum {
