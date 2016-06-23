@@ -231,7 +231,7 @@ ULIBS =
 RULESPATH = $(CHIBIOS)/os/ports/GCC/ARMCMx
 include $(RULESPATH)/rules.mk
 
-$(OBJS): $(AVIONICS_LIB)
+$(OBJS): build_avionics
 clean: clean_avionics
 
 ##############################################################################
