@@ -1,9 +1,9 @@
 AVIONICS_INCLUDES = \
 	$(AVIONICS)/include \
-	$(AVIONICS)/include/config
+	$(AVIONICS)/messaging/include \
+	$(AVIONICS)/messaging/include/config
 
-AVIONICS_LIB_DIR = $(AVIONICS)/build-fw
-AVIONICS_LIB = $(AVIONICS_LIB_DIR)/libAvionics.a
+AVIONICS_LIB_DIR = $(AVIONICS)/build-fw $(AVIONICS)/build-fw/messaging
 
 ifeq ($(OS),Windows_NT)
 	# This will print a warning if the directory exists - not sure how to suppress this

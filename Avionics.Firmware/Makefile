@@ -199,7 +199,7 @@ DINCDIR =
 DLIBDIR = $(AVIONICS_LIB_DIR)
 
 # List all default libraries here
-DLIBS = -lAvionics -lm
+DLIBS = -lAvionics -lmessaging -lm
 
 #
 # End of default section
