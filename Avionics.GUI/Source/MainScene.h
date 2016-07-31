@@ -8,8 +8,6 @@ extern "C" {
 
 class StateDetailView;
 class State3DRenderer;
-enum KeyName;
-enum KeyState;
 
 class MainScene : public FTScene {
 public:

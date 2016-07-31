@@ -3,7 +3,7 @@
 
 SerialPort::SerialPort(const char* port_name, int baud_rate, COMMTIMEOUTS* timeouts) {
     char port_settings_string[40];
-    FTStringUtil<char>::formatString(port_settings_string, 40, "baud=%i data=8 parity=N stop=1", baud_rate);
+    FTCharUtil::formatString(port_settings_string, 40, "baud=%i data=8 parity=N stop=1", baud_rate);
     port_handle_ = CreateFileA(port_name, GENERIC_READ | GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, 0, nullptr);
     if (port_handle_ == INVALID_HANDLE_VALUE) {
         FTLogError("Unable to open comport %s", port_name);

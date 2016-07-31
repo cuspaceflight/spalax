@@ -10,6 +10,7 @@
 #include <checksum.h>
 #include <component_state.h>
 #include <SerialDriver.h>
+#include <Rendering/Text/FTFont.h>
 
 #ifdef _WIN32
 #define _CRTDBG_MAP_ALLOC
@@ -41,10 +42,12 @@ int main() {
     // We can't check manually as it returns false positives for static variables with custom initializers
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-    if (FTEngine::setup()) {
-        rocket_main();
 
-        auto driver = std::make_unique<SerialDriver>("COM3", 38400);
+    if (FTEngine::setup()) {
+            
+        //rocket_main();
+
+        //auto driver = std::make_unique<SerialDriver>("COM3", 38400);
 
         FTEngine::getFileManager()->addSearchPath("Resources");
 

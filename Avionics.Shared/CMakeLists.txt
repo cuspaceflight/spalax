@@ -31,20 +31,7 @@ add_subdirectory(src)
 # must have been modified and therefore the build system will know to rebuild
 FILE(GLOB_RECURSE CMAKELISTS Source/*CMakeLists.txt)
 
-# Rebuild directory structure within Visual Studio
-foreach(FILE ${SOURCES} ${HEADERS} ${CMAKELISTS})
-  get_filename_component(PARENT_DIR "${FILE}" PATH)
-
-  string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR} "" GROUP "${PARENT_DIR}")
-  string(REPLACE "/" "\\" GROUP "${GROUP}")
-
-  source_group("${GROUP}" FILES "${FILE}")
-endforeach()
-
 add_library(Avionics ${HEADERS} ${SOURCES} ${CMAKELISTS})
-
-set(CMAKE_C_FLAGS ${ADDITIONAL_C_FLAGS})
-
 set_property(TARGET Avionics PROPERTY C_STANDARD 11)
 
 SET (AVIONICS_INCLUDES

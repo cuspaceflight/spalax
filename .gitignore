@@ -195,3 +195,4 @@ install_manifest.txt
 *.kicad_pcb-bak
 *-cache.lib
 Avionics.Shared/build-fw/
+*.idea/

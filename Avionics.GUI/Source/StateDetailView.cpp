@@ -1,21 +1,17 @@
 ﻿#include "StateDetailView.h"
 #include <Rendering/Camera/FTCamera2D.h>
 #include <Rendering/Text/FTLabel.h>
-#include <Rendering/FTDirector.h>
 #include <sstream>
 #include <Util/FTStringUtils.h>
 #include <Rendering/FTWindowSizeNode.h>
 #include <telemetry.h>
 #include <messaging.h>
-#include <state_estimate.h>
-
-
-extern "C" {
-#include <math_utils.h>
 #include <ms5611_config.h>
 #include <mpu9250_config.h>
 #include <calibration.h>
-}
+#include <Rendering/Primitives/FTTexturedPlane.h>
+#include <Rendering/Text/FTFontCache.h>
+
 
 static StateDetailView* s_instance = nullptr;
 static const int num_labels = 12;
@@ -67,8 +63,9 @@ MESSAGING_CONSUMER(messaging_consumer, telemetry_source_all, telemetry_source_al
 StateDetailView::StateDetailView() {
     FTAssert(s_instance == nullptr, "Only one StateDetailView instance can exist at once");
     
-
-    setCamera(std::make_shared<FTCamera2D>());
+    auto camera = std::make_shared<FTCamera2D>();
+    camera->setCullFaceEnabled(false);
+    setCamera(std::move(camera));
 
     static const wchar_t* label_names[num_labels] = { 
         L"MS5611 Pressure", L"MS5611 Altitude", L"MS5611 Temperature",
@@ -80,17 +77,16 @@ StateDetailView::StateDetailView() {
     window_size_node->setAnchorPoint(glm::vec2(0, -1.0f));
     addChild(window_size_node);
 
-    
-    const float y_padding = 25.0f;
+    const float y_padding = 30.0f;
     float y = -y_padding;
     for (int i = 0; i < num_labels; i++) {
-        auto label = std::make_shared<FTLabel>("Fonts/Vera.ttf", label_names[i], 14);
+        auto label = std::make_shared<FTLabel>("Fonts/Vera.ttf", label_names[i], 16);
         window_size_node->addChild(label);
         label->setPosition(glm::vec2(30, y));
         label->setAnchorPoint(glm::vec2(0, 0.5f));
         label->setFillColor(glm::vec3(1, 1, 1));
 
-        label = std::make_shared<FTLabel>("Fonts/Vera.ttf", L"0", 14, true);
+        label = std::make_shared<FTLabel>("Fonts/Vera.ttf", L"0", 16, true);
         window_size_node->addChild(label);
         label->setPosition(glm::vec2(250, y));
         label->setAnchorPoint(glm::vec2(1, 0.5f));
@@ -116,5 +112,5 @@ void StateDetailView::updateDisplay() {
 
     static wchar_t buff[24];
     for (int i = 0; i < num_labels; i++)
-        value_labels_[i]->setString(FTStringUtil<wchar_t>::formatString(buff, 24, L"%.2f", values[i]));
+        value_labels_[i]->setString(FTWCharUtil::formatString(buff, 24, L"%.2f", values[i]));
 }
