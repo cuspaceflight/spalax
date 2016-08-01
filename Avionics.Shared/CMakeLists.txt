@@ -32,6 +32,7 @@ add_subdirectory(src)
 FILE(GLOB_RECURSE CMAKELISTS Source/*CMakeLists.txt)
 
 add_library(Avionics ${HEADERS} ${SOURCES} ${CMAKELISTS})
+set(CMAKE_C_FLAGS ${ADDITIONAL_C_FLAGS})
 set_property(TARGET Avionics PROPERTY C_STANDARD 11)
 
 SET (AVIONICS_INCLUDES

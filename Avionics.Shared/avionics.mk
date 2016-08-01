@@ -3,8 +3,8 @@ AVIONICS_INCLUDES = \
 	$(AVIONICS)/messaging/include \
 	$(AVIONICS)/messaging/include/config
 
-AVIONICS_LIB_DIR = $(AVIONICS)/build-fw $(AVIONICS)/build-fw/messaging
-AVIONICS_LIB = $(AVIONICS_LIB_DIR)/libAvionics.a $(AVIONICS_LIB_DIR)/messaging/libmessaging.a
+AVIONICS_LIB_DIR = $(AVIONICS)/build-fw/lib
+AVIONICS_LIB = libAvionics.a libmessaging.a
 
 ifeq ($(OS),Windows_NT)
 	# This will print a warning if the directory exists - not sure how to suppress this
@@ -28,7 +28,7 @@ MAKEFILE_DIR := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 .PHONY: clean_avionics build_avionics
 
 build_avionics:
-	@ cd $(AVIONICS) \
+	cd $(AVIONICS) \
 	&& $(MAKE_DIR) \
 	$(CONTINUE_EVEN_IF_ERROR_OPERATOR) cd build-fw \
 	&& cmake \
