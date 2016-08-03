@@ -1,18 +1,13 @@
-project(Avionics.GUI)
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required (VERSION 3.2)
+set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
-include(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
-CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
-if (COMPILER_SUPPORTS_CXX11)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-elseif (COMPILER_SUPPORTS_CXX0X)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
-elseif (MSVC)
-    message(STATUS "Warning: MSVC's C++11 support is incomplete but should be sufficient")
-else ()
-    message(FATAL "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
-endif ()
+project(Avionics.GUI)
+
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_C_STANDARD_REQUIRED ON)
 
 add_definitions(-DGLEW_STATIC)
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/install)
@@ -33,18 +28,27 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
 
 set(AVIONICS_OS win32)
 
+# This will create project folders in visual studio for us
+get_filename_component(ROOT ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
+set(FRONTIER_ENGINE_FOLDER_MACRO_DIR ${ROOT} CACHE STRING "Frontier Engine Folder Macro Directory")
+
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Frontier.Engine ${CMAKE_CURRENT_BINARY_DIR}/Frontier.Engine)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Avionics.Shared ${CMAKE_CURRENT_BINARY_DIR}/Avionics.Shared)
 add_subdirectory(Source)
 
-if ("${PROJECT_BINARY_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}")
-    message(FATAL_ERROR
-            "In-source builds are not permitted!  Make a separate folder for"
-            " building, e.g.,"
-            "mkdir build; cd build; cmake .."
-            "Before that, remove the files created by this failed run with"
-            "rm -rf CMakeCache.txt CMakeFiles")
-endif ()
+# We can use GLOB here as in order for a CMakeList to be used a pre-existing one
+# must have been modified and therefore the build system will know to rebuild
+FILE(GLOB_RECURSE CMAKELISTS Source/*CMakeLists.txt)
+
+# Rebuild directory structure within Visual Studio
+foreach(FILE ${SOURCES} ${HEADERS} ${CMAKELISTS})
+  get_filename_component(PARENT_DIR "${FILE}" PATH)
+
+  string(REPLACE ${CMAKE_CURRENT_SOURCE_DIR} "" GROUP "${PARENT_DIR}")
+  string(REPLACE "/" "\\" GROUP "${GROUP}")
+
+  source_group("${GROUP}" FILES "${FILE}")
+endforeach()
 
 add_library(Avionics.GUI ${HEADERS} ${SOURCES} ${CMAKELISTS})
 
