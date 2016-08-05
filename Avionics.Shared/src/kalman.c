@@ -2,6 +2,8 @@
 
 #include "kalman.h"
 #include "math_utils.h"
+#include "math.h"
+#include <logging.h>
 
 typedef struct {
     union {
@@ -71,6 +73,8 @@ float prior_attitude[4];
 float g_reference[3];
 float g_reference_mag;
 float b_reference[3];
+
+// TODO: Actually measure these
 const float process_noise_diag[12] = {
     1e-5f, 1e-5f, 1e-5f, // attitude
     3e-5f, 3e-5f, 3e-5f, // angular velocity
@@ -78,19 +82,15 @@ const float process_noise_diag[12] = {
     1e-7f, 1e-7f, 1e-7f // gyro bias 
 };
 
-float accelerometer_covariance[3][3] = {
+const float accelerometer_covariance[3][3] = {
     {0.25f, 0, 0},
     {0, 0.25f, 0},
     {0,0,0.25f}
 };
 
-float mag_covariance[3][3] = {
-    { 0.1f, 0, 0 },
-    { 0, 0.1f, 0 },
-    { 0, 0, 0.1f }
-};
+const float heading_covariance = 0.5f;
 
-float gyro_covariance[3][3] = {
+const float gyro_covariance[3][3] = {
     { 0.1f, 0, 0 },
     { 0, 0.1f, 0 },
     { 0, 0, 0.1f }
@@ -246,6 +246,16 @@ static void h_gyro_jacobian(kalman_state* state, const float q[4], float J[3][12
     J[2][11] = 1;
 }
 
+float get_heading(const float mag[3]) {
+    if (mag[1] > 0)
+        return PI_2 - atan2f(mag[0], mag[1]);
+    if (mag[1] < 0)
+        return PI_2 * 3.0f - atan2f(mag[0], mag[1]);
+    if (mag[1] == 0 && mag[0] < 0)
+        return PI;
+    return 0;
+}
+
 static void h_mag(kalman_state* state, const float q[4], float h_mag[3]) {
     float q_temp[4];
     float q_prime[4];
@@ -255,22 +265,40 @@ static void h_mag(kalman_state* state, const float q[4], float h_mag[3]) {
     apply_q(q_prime, b_reference, h_mag);
 }
 
-static void h_mag_jacobian(kalman_state* state, const float q[4], float J[3][12]) {
-    float J_3x3[3][3];
+// TODO: Some calculations are performed in both h_mag and h_mag_jacobian
+static void h_mag_jacobian(kalman_state* state, const float q[4], float J[1][12]) {
     float b_prime[3];
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 12; j++)
-            J[i][j] = 0;
+    float v0[3];
+    float v1[3];
+    float mrp_q[4];
 
+
+    
+
+    // Compute the mrp application jacobian with respect to the mrp components
     apply_q(q, b_reference, b_prime);
-    mrp_application_jacobian(state->attitude_err, b_prime, J_3x3);
-    for (int i = 0; i < 3; i++)
+    rodrigues_to_quaternion(state->attitude_err, mrp_q);
+    apply_q(mrp_q, b_prime, v0);
+    float v0_heading = get_heading(v0);
+
+    const float epsilon = 1e-3f;
+
+    for (int i = 0; i < 3; i++) {
+        float altered_mrp_vector[3];
         for (int j = 0; j < 3; j++)
-            J[i][j] = J_3x3[i][j];
+            altered_mrp_vector[j] = state->attitude_err[j];
+        altered_mrp_vector[i] += epsilon;
+        float altered_mrp_q[4];
+        rodrigues_to_quaternion(altered_mrp_vector, altered_mrp_q);
 
+        apply_q(altered_mrp_q, b_prime, v1);
+        float v1_heading = get_heading(v1);
+        J[0][i] = (v1_heading - v0_heading) / epsilon;
+    }
+
+    for (int j = 2; j < 12; j++)
+        J[0][j] = 0;
 }
-
-
 
 void kalman_predict(state_estimate_t* next_estimate, float dt) {
     kalman_state post_state = prior_state;
@@ -308,7 +336,7 @@ void kalman_predict(state_estimate_t* next_estimate, float dt) {
 }
 
 // TODO Large portions of J and K will be zeroes - scope for optimisation here
-static void do_update(const float y[3], float J[3][12], float sensor_covariance[3][3]) {
+static void do_update_3(const float y[3], float J[3][12], const float sensor_covariance[3][3]) {
     float S[3][3];
 
     for (int i = 0; i < 3; i++)
@@ -353,6 +381,40 @@ static void do_update(const float y[3], float J[3][12], float sensor_covariance[
         prior_attitude[i] = post_attitude[i];
 }
 
+// TODO Large portions of J and K will be zeroes - scope for optimisation here
+static void do_update_1(const float y, float J[1][12], float sensor_covariance) {
+    float S = sensor_covariance;
+
+    for (int i = 0; i < 12; i++) {
+        S += J[0][i] * prior_state.covariance_diag[i] * J[0][i];
+    }
+
+    float K[12][1];
+
+    float s_inverse = 1 / S;
+
+    for (int i = 0; i < 12; i++) {
+        K[i][0] = prior_state.covariance_diag[i] * (J[0][i] * s_inverse);
+    }
+
+
+    kalman_state post_state = prior_state;
+    for (int i = 0; i < 12; i++) {
+        post_state.covariance_diag[i] -= prior_state.covariance_diag[i] * (J[0][i] * K[i][0]);
+        post_state.state_vector[i] += K[i][0] * y;
+    }
+
+    float post_attitude[4];
+    update_attitude(&post_state, prior_attitude, post_attitude);
+
+    for (int i = 0; i < 3; i++)
+        post_state.attitude_err[i] = 0;
+
+    prior_state = post_state;
+    for (int i = 0; i < 4; i++)
+        prior_attitude[i] = post_attitude[i];
+}
+
 void kalman_new_accel(const float accel[3]) {
     float accel_mag = vector_mag(accel);
     // If more than half of the acceleration vector is not due to gravity we ignore it
@@ -368,19 +430,22 @@ void kalman_new_accel(const float accel[3]) {
 
     float J[3][12];
     h_accel_jacobian(&prior_state, prior_attitude, J);
-    do_update(y, J, accelerometer_covariance);
+    do_update_3(y, J, accelerometer_covariance);
 }
 
+// TODO: Determine why this doesn't work
 void kalman_new_mag(const float mag[3]) {
-    float predicted_measurement[3];
-    h_mag(&prior_state, prior_attitude, predicted_measurement);
-    float y[3];
-    for (int i = 0; i < 3; i++)
-        y[i] = mag[i] - predicted_measurement[i];
+    float predicted_mag[3];
+    h_mag(&prior_state, prior_attitude, predicted_mag);
 
-    float J[3][12];
+    float actual_heading = get_heading(mag);
+    float predicted_heading = get_heading(predicted_mag);
+
+    float y = actual_heading - predicted_heading;
+
+    float J[1][12];
     h_mag_jacobian(&prior_state, prior_attitude, J);
-    do_update(y, J, mag_covariance);
+    do_update_1(y, J, heading_covariance);
 }
 
 void kalman_new_gyro(const float gyro[3]) {
@@ -392,5 +457,5 @@ void kalman_new_gyro(const float gyro[3]) {
 
     float J[3][12];
     h_gyro_jacobian(&prior_state, prior_attitude, J);
-    do_update(y, J, gyro_covariance);
+    do_update_3(y, J, gyro_covariance);
 }

@@ -109,7 +109,6 @@ static void state_estimate_new_imu_measurement(const float accel[3], const float
         do_prediction_step();
 
         kalman_new_accel(accel);
-        // TODO: Just use the magno to resolve the z axis as trying to do all axes results in rubbish
         //kalman_new_mag(mag);
         kalman_new_gyro(gyro);
 

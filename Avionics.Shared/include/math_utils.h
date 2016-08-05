@@ -1,14 +1,12 @@
 ﻿#ifndef MATH_UTILS_H
 #define MATH_UTILS_H
-#include <float.h>
-#include <math.h>
-#include <logging.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define PI 3.14159265358979323846f
+#define PI_2 1.57079632679489661923f
 
 float mat2x2_det(float mat[2][2]);
 
@@ -47,6 +45,8 @@ void quaternion_to_rodrigues(const float q[4], float mrp[3]);
 void rodrigues_to_quaternion(const float mrp[3], float q[4]);
 
 void quat_mult(const float q1[4], const float q2[4], float out[4]);
+
+void quat_inverse(const float q[4], float out[4]);
 
 float vector_mag(const float v[3]);
 

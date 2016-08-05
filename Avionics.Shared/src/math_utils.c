@@ -1,4 +1,7 @@
 #include "math_utils.h"
+#include "math.h"
+#include "logging.h"
+#include <float.h>
 
 float mat2x2_det(float mat[2][2]) {
     return mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0];
@@ -221,6 +224,14 @@ void quat_mult(const float q1[4], const float q2[4], float out[4]) {
     out[1] = q1[3] * q2[1] - q1[0] * q2[2] + q1[1] * q2[3] + q1[2] * q2[0];
     out[2] = q1[3] * q2[2] + q1[0] * q2[1] - q1[1] * q2[0] + q1[2] * q2[3];
     out[3] = q1[3] * q2[3] - q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2];
+}
+
+void quat_inverse(const float q[4], float out[4]) {
+    float dot = q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3];
+    out[0] = -q[0] / dot;
+    out[1] = -q[1] / dot;
+    out[2] = -q[2] / dot;
+    out[3] =  q[3] / dot;
 }
 
 float vector_mag(const float v[3]) {
