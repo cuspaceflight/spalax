@@ -69,6 +69,7 @@ kalman_state prior_state;
 float prior_attitude[4];
 
 float g_reference[3];
+float g_reference_mag;
 float b_reference[3];
 const float process_noise_diag[12] = {
     1e-5f, 1e-5f, 1e-5f, // attitude
@@ -95,6 +96,15 @@ float gyro_covariance[3][3] = {
     { 0, 0, 0.1f }
 };
 
+
+static void kalman_set_reference_vectors(const float accel_ref[3], const float mag_ref[3]) {
+    for (int i = 0; i < 3; i++) {
+        g_reference[i] = accel_ref[i];
+        b_reference[i] = mag_ref[i];
+    }
+    g_reference_mag = vector_mag(g_reference);
+}
+
 void kalman_init(const state_estimate_calibration_t* calibration_data) {
     kalman_set_reference_vectors(calibration_data->accel_bias, calibration_data->mag_bias);
     
@@ -102,14 +112,8 @@ void kalman_init(const state_estimate_calibration_t* calibration_data) {
     reset_quaternion(prior_attitude);
 }
 
-void kalman_set_reference_vectors(const float accel_ref[3], const float mag_ref[3]) {
-    for (int i = 0; i < 3; i++) {
-        g_reference[i] = accel_ref[i];
-        b_reference[i] = mag_ref[i];
-    }
-}
 
-void predict_attitude(float dt, kalman_state* state, float attitude[4]) {
+static void predict_attitude(float dt, kalman_state* state, float attitude[4]) {
     float omega_mag = vector_mag(state->ang_vel);
     
     if (omega_mag > 1e-8f) {
@@ -128,13 +132,13 @@ void predict_attitude(float dt, kalman_state* state, float attitude[4]) {
     }
 }
 
-void update_attitude(kalman_state* state, const float attitude[4], float attitude_out[4]) {
+static void update_attitude(kalman_state* state, const float attitude[4], float attitude_out[4]) {
     float q_temp[4];
     rodrigues_to_quaternion(state->attitude_err, q_temp);
     quat_mult(q_temp, attitude, attitude_out);
 }
 
-void mrp_application_jacobian(const float mrp_vector[3], const float target_vector[3], float J[3][3]) {
+static void mrp_application_jacobian(const float mrp_vector[3], const float target_vector[3], float J[3][3]) {
     // This isn't numerically stable
     // TODO: do this properly
     float v0[3];
@@ -158,7 +162,7 @@ void mrp_application_jacobian(const float mrp_vector[3], const float target_vect
     }
 }
 
-void q_target_jacobian(const float q[4], const float target_vector[3], float J[3][3]) {
+static void q_target_jacobian(const float q[4], const float target_vector[3], float J[3][3]) {
     // This isn't numerically stable
     // TODO: do this properly
     float v0[3];
@@ -177,7 +181,7 @@ void q_target_jacobian(const float q[4], const float target_vector[3], float J[3
     }
 }
 
-void h_accel(kalman_state* state, const float q[4], float h_accel[3]) {
+static void h_accel(kalman_state* state, const float q[4], float h_accel[3]) {
     float q_temp[4];
     float q_actual[4];
     rodrigues_to_quaternion(state->attitude_err, q_temp);
@@ -185,7 +189,7 @@ void h_accel(kalman_state* state, const float q[4], float h_accel[3]) {
     apply_q(q_actual, g_reference, h_accel);
 }
 
-void h_accel_jacobian(kalman_state* state, const float q[4], float J[3][12]) {
+static void h_accel_jacobian(kalman_state* state, const float q[4], float J[3][12]) {
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 12; j++)
             J[i][j] = 0;
@@ -199,7 +203,7 @@ void h_accel_jacobian(kalman_state* state, const float q[4], float J[3][12]) {
             J[i][j] = J_3x3[i][j];
 }
 
-void h_gyro(kalman_state* state, const float q[4], float h_gyro[3]) {
+static void h_gyro(kalman_state* state, const float q[4], float h_gyro[3]) {
     float q_temp[4];
     float q_prime[4];
     rodrigues_to_quaternion(state->attitude_err, q_temp);
@@ -210,7 +214,7 @@ void h_gyro(kalman_state* state, const float q[4], float h_gyro[3]) {
         h_gyro[i] += state->gyro_bias[i];
 }
 
-void h_gyro_jacobian(kalman_state* state, const float q[4], float J[3][12]) {
+static void h_gyro_jacobian(kalman_state* state, const float q[4], float J[3][12]) {
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 12; j++)
             J[i][j] = 0;
@@ -242,7 +246,7 @@ void h_gyro_jacobian(kalman_state* state, const float q[4], float J[3][12]) {
     J[2][11] = 1;
 }
 
-void h_mag(kalman_state* state, const float q[4], float h_mag[3]) {
+static void h_mag(kalman_state* state, const float q[4], float h_mag[3]) {
     float q_temp[4];
     float q_prime[4];
     rodrigues_to_quaternion(state->attitude_err, q_temp);
@@ -251,7 +255,7 @@ void h_mag(kalman_state* state, const float q[4], float h_mag[3]) {
     apply_q(q_prime, b_reference, h_mag);
 }
 
-void h_mag_jacobian(kalman_state* state, const float q[4], float J[3][12]) {
+static void h_mag_jacobian(kalman_state* state, const float q[4], float J[3][12]) {
     float J_3x3[3][3];
     float b_prime[3];
     for (int i = 0; i < 3; i++)
@@ -292,6 +296,9 @@ void kalman_predict(state_estimate_t* next_estimate, float dt) {
         prior_attitude[i] = next_estimate->orientation_q[i];
     }
 
+    // TODO: Determine why this is needed, without it the orientation is backwards in the x and y axes
+    next_estimate->orientation_q[0] *= -1;
+    next_estimate->orientation_q[1] *= -1;
 
     prior_state = post_state;
     
@@ -301,7 +308,7 @@ void kalman_predict(state_estimate_t* next_estimate, float dt) {
 }
 
 // TODO Large portions of J and K will be zeroes - scope for optimisation here
-void do_update(const float y[3], float J[3][12], float sensor_covariance[3][3]) {
+static void do_update(const float y[3], float J[3][12], float sensor_covariance[3][3]) {
     float S[3][3];
 
     for (int i = 0; i < 3; i++)
@@ -347,6 +354,12 @@ void do_update(const float y[3], float J[3][12], float sensor_covariance[3][3]) 
 }
 
 void kalman_new_accel(const float accel[3]) {
+    float accel_mag = vector_mag(accel);
+    // If more than half of the acceleration vector is not due to gravity we ignore it
+    // We aren't going to get anything meaningful from it
+    if (accel_mag > 1.5f * g_reference_mag || accel_mag < 0.5f * g_reference_mag)
+        return;
+
     float predicted_measurement[3];
     h_accel(&prior_state, prior_attitude, predicted_measurement);
     float y[3];

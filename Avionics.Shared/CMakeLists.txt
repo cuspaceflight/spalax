@@ -33,7 +33,9 @@ add_subdirectory(src)
 
 # We can use GLOB here as in order for a CMakeList to be used a pre-existing one
 # must have been modified and therefore the build system will know to rebuild
-FILE(GLOB_RECURSE CMAKELISTS Source/*CMakeLists.txt)
+FILE(GLOB_RECURSE CMAKELISTS1 src/*CMakeLists.txt)
+FILE(GLOB_RECURSE CMAKELISTS2 include/*CMakeLists.txt)
+set(CMAKELISTS ${CMAKELISTS1} ${CMAKELISTS2})
 
 # Rebuild directory structure within Visual Studio
 foreach(FILE ${SOURCES} ${HEADERS} ${CMAKELISTS})

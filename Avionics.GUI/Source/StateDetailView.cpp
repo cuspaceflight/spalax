@@ -11,6 +11,7 @@
 #include <calibration.h>
 #include <Rendering/Primitives/FTTexturedPlane.h>
 #include <Rendering/Text/FTFontCache.h>
+#include <state_estimate.h>
 
 
 static StateDetailView* s_instance = nullptr;
@@ -43,6 +44,8 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[10] = calibrated.magno[1];
         values[11] = calibrated.magno[2];
     } else if (packet->header.id == telemetry_id_mpu9250_config) {
+        if (has_mpu9250_config)
+            return true;
         mpu9250_config_t* config = (mpu9250_config_t*)packet->payload;
         mpu9250_config = *config;
         has_mpu9250_config = true;
@@ -88,7 +91,7 @@ StateDetailView::StateDetailView() {
 
         label = std::make_shared<FTLabel>("Fonts/Vera.ttf", L"0", 16, true);
         window_size_node->addChild(label);
-        label->setPosition(glm::vec2(250, y));
+        label->setPosition(glm::vec2(300, y));
         label->setAnchorPoint(glm::vec2(1, 0.5f));
         label->setFillColor(glm::vec3(1, 1, 1));
 

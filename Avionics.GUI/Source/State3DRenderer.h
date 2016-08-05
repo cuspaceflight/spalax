@@ -11,6 +11,7 @@ public:
     ~State3DRenderer();
 
     void nextStateEstimate(state_estimate_t& current_state);
+    void updateDisplay();
 
 protected:
     std::shared_ptr<RocketRenderer> rocket_renderer_;

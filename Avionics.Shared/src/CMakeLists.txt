@@ -4,6 +4,7 @@ set (SOURCES ${SOURCES}
 	${CMAKE_CURRENT_SOURCE_DIR}/kalman.c
 	${CMAKE_CURRENT_SOURCE_DIR}/logging.c
 	${CMAKE_CURRENT_SOURCE_DIR}/state_estimate.c
+	${CMAKE_CURRENT_SOURCE_DIR}/math_utils.c
     PARENT_SCOPE)
 
 set (HEADERS ${HEADERS}

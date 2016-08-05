@@ -16,7 +16,7 @@
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 // Use for debugging allocations
-//static int breakAlloc = (_crtBreakAlloc = 162);
+//static int breakAlloc = (_crtBreakAlloc = 283);
 #endif
 
 void error_handler(avionics_component_t component, int line) {
@@ -45,9 +45,9 @@ int main() {
 
     if (FTEngine::setup()) {
             
-        //rocket_main();
+        rocket_main();
 
-        //auto driver = std::make_unique<SerialDriver>("COM3", 38400);
+        auto driver = std::make_unique<SerialDriver>("COM5", 38400);
 
         FTEngine::getFileManager()->addSearchPath("Resources");
 

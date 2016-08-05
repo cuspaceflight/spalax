@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <math.h> // for self-test
 #include <machine/endian.h>
+#include "mpu9250_config.h"
 
 #include "ch.h"
 #include "chprintf.h"

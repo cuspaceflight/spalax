@@ -8,7 +8,6 @@
 #define MS5611_H
 
 #include <ch.h>
-#include "ms5611_config.h"
 
 /* The main thread. Run this. */
 msg_t ms5611_thread(void *arg);

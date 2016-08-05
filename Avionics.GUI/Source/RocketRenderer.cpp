@@ -11,7 +11,7 @@ static const glm::vec3 colors[6] = {
 RocketRenderer::RocketRenderer() : FTCube(colors) {
     setPosition(glm::vec3(0, 0, 0));
     //setRotationDegrees(glm::vec3(0, 0, 0));
-    setScale(glm::vec3(1, 10, 1));
+    setScale(glm::vec3(1, 1, 10));
     setAnchorPoint(glm::vec3(0.5f, 0.5f, 0.5f));
 }
 

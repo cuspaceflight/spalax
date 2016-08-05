@@ -7,6 +7,7 @@
 
 
 #include "ms5611.h"
+#include "ms5611_config.h"
 #include "hal.h"
 #include "chprintf.h"
 #include "badthinghandler.h"
