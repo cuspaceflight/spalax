@@ -8,9 +8,3 @@ set -xe
 
 cd Avionics.Firmware
 make all VERBOSE=1
-
-cd ../Avionics.GUI
-mkdir build
-cd build
-cmake -G "Unix Makefiles" ..
-make Avionics.GUI.Launcher VERBOSE=1
