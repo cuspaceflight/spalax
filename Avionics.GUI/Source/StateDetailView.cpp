@@ -15,7 +15,7 @@
 
 
 static StateDetailView* s_instance = nullptr;
-static const int num_labels = 12;
+static const int num_labels = 29;
 float values[num_labels];
 bool has_mpu9250_config = false;
 mpu9250_config_t mpu9250_config;
@@ -57,6 +57,35 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[0] = (float)data->pressure;
         values[1] = state_estimation_pressure_to_altitude((float)data->pressure);
         values[2] = (float)data->temperature;
+    } else if (packet->header.id == telemetry_id_state_estimate_data) {
+        FTAssert(packet->header.length == sizeof(state_estimate_t), "Incorrect Packet Size");
+        auto estimate = (state_estimate_t*)packet->payload;
+
+        glm::vec3 rot = glm::eulerAngles(glm::quat(estimate->orientation_q[3], estimate->orientation_q[0], estimate->orientation_q[1], estimate->orientation_q[2]));
+        values[12] = rot.x;
+        values[13] = rot.y;
+        values[14] = rot.z;
+
+        values[15] = estimate->angular_velocity[0];
+        values[16] = estimate->angular_velocity[1];
+        values[17] = estimate->angular_velocity[2];
+
+        values[18] = estimate->pos[0];
+        values[19] = estimate->pos[1];
+        values[20] = estimate->pos[2];
+
+        values[21] = estimate->vel[0];
+        values[22] = estimate->vel[1];
+        values[23] = estimate->vel[2];
+
+        values[24] = estimate->accel[0];
+        values[25] = estimate->accel[1];
+        values[26] = estimate->accel[2];
+    } else if (packet->header.id == telemetry_id_state_estimate_status) {
+        FTAssert(packet->header.length == sizeof(state_estimate_status_t), "Incorrect Packet Size");
+        auto status = (state_estimate_status_t*)packet->payload;
+        values[27] = (float)status->number_prediction_steps / status->sample_time;
+        values[28] = (float)status->number_update_steps / status->sample_time;
     }
     return true;
 }
@@ -74,7 +103,13 @@ StateDetailView::StateDetailView() {
         L"MS5611 Pressure", L"MS5611 Altitude", L"MS5611 Temperature",
         L"MPU9250 Accel X", L"MPU9250 Accel Y", L"MPU9250 Accel Z", 
         L"MPU9250 Gyro X", L"MPU9250 Gyro Y", L"MPU9250 Gyro Z", 
-        L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z"};
+        L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z",
+        L"Estimate Rotation X", L"Estimate Rotation Y", L"Estimate Rotation Z",
+        L"Estimate Ang. Velocity X", L"Estimate Ang. Velocity Y", L"Estimate Ang. Velocity Z", 
+        L"Estimate Position X", L"Estimate Position Y", L"Estimate Position Z",
+        L"Estimate Velocity X", L"Estimate Velocity Y", L"Estimate Velocity Z",
+        L"Estimate Accel X", L"Estimate Accel Y", L"Estimate Accel Z",
+        L"Estimate Prediction Rate", L"Estimate Update Rate"};
 
     auto window_size_node = std::make_shared<FTWindowSizeNode>();
     window_size_node->setAnchorPoint(glm::vec2(0, -1.0f));
@@ -91,7 +126,7 @@ StateDetailView::StateDetailView() {
 
         label = std::make_shared<FTLabel>("Fonts/Vera.ttf", L"0", 16, true);
         window_size_node->addChild(label);
-        label->setPosition(glm::vec2(300, y));
+        label->setPosition(glm::vec2(350, y));
         label->setAnchorPoint(glm::vec2(1, 0.5f));
         label->setFillColor(glm::vec3(1, 1, 1));
 

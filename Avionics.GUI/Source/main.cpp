@@ -44,7 +44,9 @@ int main() {
 
 
     if (FTEngine::setup()) {
-            
+        
+        FTEngine::setWindowsSize(glm::tvec2<int>(1024, 1024));
+
         rocket_main();
 
         auto driver = std::make_unique<SerialDriver>("COM5", 38400);

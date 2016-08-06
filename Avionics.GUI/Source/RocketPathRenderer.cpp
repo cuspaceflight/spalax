@@ -18,6 +18,9 @@ void RocketPathRenderer::nextStateEstimate(state_estimate_t& current_state) {
     vertex.position_.x = current_state.pos[0];
     vertex.position_.y = current_state.pos[1];
     vertex.position_.z = current_state.pos[2];
+    if (vertices_.back() == vertex)
+        return;
+
     addVertex(vertex);
 }
 
@@ -27,6 +30,6 @@ void RocketPathRenderer::addVertex(const FTVertex<glm::vec3>& vertex) {
         modifyVertices(num_vertices_, 1, &vertex);
     else {
         resizeVertexBuffer(max_num_vertices_ * 2, nullptr);
-        modifyVertices(0, vertices_.size(), vertices_.data());
+        modifyVertices(0, (GLuint)vertices_.size(), vertices_.data());
     }
 }

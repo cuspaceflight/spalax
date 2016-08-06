@@ -14,31 +14,35 @@
 // Number of seconds to compute average sensor bias over
 #define CALIBRATION_TIME 5.0f
 
+#define STATUS_TIME 1.0f
+
 // The minimum amount of time before another prediction step
 #define PREDICTION_THRESHOLD 0.0005f // Half the desired update rate
 
-bool is_calibrated = false;
-uint32_t calibration_start_time = 0;
-state_estimate_calibration_t calibration_data;
+static bool is_calibrated = false;
+static uint32_t calibration_start_time = 0;
+static state_estimate_calibration_t calibration_data;
 
-float calibration_mag_sum[3] = { 0, 0, 0 };
-uint16_t calibration_mag_samples = 0;
+static float calibration_mag_sum[3] = { 0, 0, 0 };
+static uint16_t calibration_mag_samples = 0;
 
-float calibration_accel_sum[3] = { 0, 0, 0 };
-uint16_t calibration_accel_samples = 0;
+static float calibration_accel_sum[3] = { 0, 0, 0 };
+static uint16_t calibration_accel_samples = 0;
 
-float calibration_gyro_sum[3] = { 0, 0, 0 };
-uint16_t calibration_gyro_samples = 0;
+static float calibration_gyro_sum[3] = { 0, 0, 0 };
+static uint16_t calibration_gyro_samples = 0;
 
-float calibration_alt_sum = 0;
-uint16_t calibration_alt_samples = 0;
+static float calibration_alt_sum = 0;
+static uint16_t calibration_alt_samples = 0;
 
 MESSAGING_PRODUCER(state_estimate_producer_config, telemetry_id_state_estimate_config, sizeof(state_estimate_calibration_t), 2);
 MESSAGING_PRODUCER(state_estimate_producer_data, telemetry_id_state_estimate_data, sizeof(state_estimate_t), 40);
+MESSAGING_PRODUCER(state_estimate_producer_status, telemetry_id_state_estimate_status, sizeof(state_estimate_status_t), 2);
 
-
-state_estimate_t current_state;
-uint32_t last_prediction_time = 0;
+static state_estimate_t current_state;
+static state_estimate_status_t current_status;
+static uint32_t last_prediction_time = 0;
+static uint32_t last_status_time = 0;
 
 
 bool has_mpu9250_config = false;
@@ -71,6 +75,11 @@ static void calibrate(float sample_time) {
 
     kalman_init(&calibration_data);
 
+    last_status_time = platform_get_counter_value();
+    current_status.sample_time = 0;
+    current_status.number_prediction_steps = 0;
+    current_status.number_update_steps = 0;
+
     is_calibrated = true;
 
     send_calibration_data();
@@ -101,7 +110,25 @@ static void do_prediction_step(void) {
 
     kalman_predict(&current_state, dt);
 
+    current_status.number_prediction_steps++;
+
     last_prediction_time = current_time;
+}
+
+static void send_current_status(void) {
+    uint32_t current_time = platform_get_counter_value();
+
+    float dt = (float)(clocks_between(last_status_time, current_time)) / CLOCK_FREQUENCY;
+
+    if (dt < STATUS_TIME)
+        return;
+
+    current_status.sample_time = dt;
+    messaging_producer_send(&state_estimate_producer_status, 0, (const uint8_t*)&current_status);
+    current_status.sample_time = 0;
+    current_status.number_prediction_steps = 0;
+    current_status.number_update_steps = 0;
+    last_status_time = platform_get_counter_value();
 }
 
 static void state_estimate_new_imu_measurement(const float accel[3], const float mag[3], const float gyro[3]) {
@@ -112,7 +139,11 @@ static void state_estimate_new_imu_measurement(const float accel[3], const float
         //kalman_new_mag(mag);
         kalman_new_gyro(gyro);
 
+        current_status.number_update_steps++;
+
+
         send_state_estimate();
+        send_current_status();
     } else {
         calibration_accel_sum[0] += accel[0];
         calibration_accel_sum[1] += accel[1];
@@ -186,6 +217,7 @@ int32_t state_estimate_thread(void *arg) {
 
     messaging_producer_init(&state_estimate_producer_config);
     messaging_producer_init(&state_estimate_producer_data);
+    messaging_producer_init(&state_estimate_producer_status);
 
     messaging_consumer_init(&messaging_consumer);
 
