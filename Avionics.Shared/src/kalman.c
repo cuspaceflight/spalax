@@ -256,6 +256,11 @@ float get_heading(const float mag[3]) {
     return 0;
 }
 
+// Returns a - b handling for the discontinuity at heading 0
+float get_heading_delta(float a, float b) {
+    return atan2f(sinf(a - b), cosf(a - b));
+}
+
 static void h_mag(kalman_state* state, const float q[4], float h_mag[3]) {
     float q_temp[4];
     float q_prime[4];
@@ -293,7 +298,7 @@ static void h_mag_jacobian(kalman_state* state, const float q[4], float J[1][12]
 
         apply_q(altered_mrp_q, b_prime, v1);
         float v1_heading = get_heading(v1);
-        J[0][i] = (v1_heading - v0_heading) / epsilon;
+        J[0][i] = get_heading_delta(v1_heading, v0_heading) / epsilon;
     }
 
     for (int j = 2; j < 12; j++)
@@ -441,7 +446,7 @@ void kalman_new_mag(const float mag[3]) {
     float actual_heading = get_heading(mag);
     float predicted_heading = get_heading(predicted_mag);
 
-    float y = actual_heading - predicted_heading;
+    float y = get_heading_delta(actual_heading, predicted_heading);
 
     float J[1][12];
     h_mag_jacobian(&prior_state, prior_attitude, J);

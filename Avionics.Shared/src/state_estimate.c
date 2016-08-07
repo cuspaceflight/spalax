@@ -136,7 +136,7 @@ static void state_estimate_new_imu_measurement(const float accel[3], const float
         do_prediction_step();
 
         kalman_new_accel(accel);
-        //kalman_new_mag(mag);
+        kalman_new_mag(mag);
         kalman_new_gyro(gyro);
 
         current_status.number_update_steps++;
