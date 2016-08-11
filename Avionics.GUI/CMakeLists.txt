@@ -81,3 +81,5 @@ endif ()
 add_custom_command(TARGET Avionics.GUI.Launcher POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/Resources ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Resources)
+		
+add_subdirectory(Tests)

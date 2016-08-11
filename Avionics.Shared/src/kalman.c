@@ -88,7 +88,7 @@ const float accelerometer_covariance[3][3] = {
     {0,0,0.25f}
 };
 
-const float heading_covariance = 0.5f;
+const float heading_covariance = 0.25f;
 
 const float gyro_covariance[3][3] = {
     { 0.1f, 0, 0 },
@@ -119,13 +119,17 @@ static void predict_attitude(float dt, kalman_state* state, float attitude[4]) {
     if (omega_mag > 1e-8f) {
         float omega_norm[3];
         float omega_q[4];
-        for (int i = 0; i < 3; i++)
-            omega_norm[i] = state->ang_vel[i] / omega_mag;
-        axis_angle_to_quat(omega_norm, omega_mag*dt, omega_q);
+        vector_normalize(state->ang_vel, omega_norm);
+
+        // The orientation stored in the kalman state is actually inverted
+        // To understand why imagine a ship travelling north. North will be at a reference of 0
+        // If it rotates 5 degrees clockwise, north will now be at a reference of 355 
+        // This estimator tracks reference vectors which as shown above rotate in the opposite direction
+        // To the actual rotation of the body
+        axis_angle_to_quat(omega_norm, -omega_mag*dt, omega_q);
 
         float attitude_temp[4];
-
-        quat_mult(omega_q, attitude, attitude_temp);
+        quat_mult(attitude, omega_q, attitude_temp);
 
         for (int i = 0; i < 4; i++)
             attitude[i] = attitude_temp[i];
@@ -162,7 +166,7 @@ static void mrp_application_jacobian(const float mrp_vector[3], const float targ
     }
 }
 
-static void q_target_jacobian(const float q[4], const float target_vector[3], float J[3][3]) {
+static void q_target_jacobian(const float target_vector[3], const float q[4], float J[3][3]) {
     // This isn't numerically stable
     // TODO: do this properly
     float v0[3];
@@ -226,21 +230,18 @@ static void h_gyro_jacobian(kalman_state* state, const float q[4], float J[3][12
     float q_temp[4];
     float q_actual[4];
 
-    rodrigues_to_quaternion(state->attitude_err, q_temp);
-    quat_mult(q_temp, q, q_actual);
-    q_target_jacobian(q_actual, state->ang_vel, J_3x3);
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            J[i][j+3] = J_3x3[i][j];
-
     mrp_application_jacobian(state->attitude_err, omega_prime, J_3x3);
     for (int i = 0; i < 3; i++)
         for (int j = 0; j < 3; j++)
             J[i][j] = J_3x3[i][j];
 
+    rodrigues_to_quaternion(state->attitude_err, q_temp);
+    quat_mult(q_temp, q, q_actual);
+    q_target_jacobian(state->ang_vel, q_actual, J_3x3);
     for (int i = 0; i < 3; i++)
-        for (int j = 9; j < 12; j++)
-            J[i][j] = 0;
+        for (int j = 0; j < 3; j++)
+            J[i][j + 3] = J_3x3[i][j];
+
     J[0][9] = 1;
     J[1][10] = 1;
     J[2][11] = 1;
@@ -276,9 +277,6 @@ static void h_mag_jacobian(kalman_state* state, const float q[4], float J[1][12]
     float v0[3];
     float v1[3];
     float mrp_q[4];
-
-
-    
 
     // Compute the mrp application jacobian with respect to the mrp components
     apply_q(q, b_reference, b_prime);
@@ -319,9 +317,9 @@ void kalman_predict(state_estimate_t* next_estimate, float dt) {
         post_state.covariance_diag[i] += dt * process_noise_diag[i];
     }
 
-    post_state.covariance_diag[3] += dt2 * prior_state.covariance_diag[6];
-    post_state.covariance_diag[4] += dt2 * prior_state.covariance_diag[7];
-    post_state.covariance_diag[5] += dt2 * prior_state.covariance_diag[8];
+    post_state.covariance_diag[3] += dt2 * prior_state.covariance_diag[3];
+    post_state.covariance_diag[4] += dt2 * prior_state.covariance_diag[4];
+    post_state.covariance_diag[5] += dt2 * prior_state.covariance_diag[5];
     
     predict_attitude(dt, &prior_state, prior_attitude);
     update_attitude(&prior_state, prior_attitude, next_estimate->orientation_q);
@@ -329,12 +327,10 @@ void kalman_predict(state_estimate_t* next_estimate, float dt) {
         prior_attitude[i] = next_estimate->orientation_q[i];
     }
 
-    // TODO: Determine why this is needed, without it the orientation is backwards in the x and y axes
-    next_estimate->orientation_q[0] *= -1;
-    next_estimate->orientation_q[1] *= -1;
-
     prior_state = post_state;
     
+    quat_invert(next_estimate->orientation_q, next_estimate->orientation_q);
+
     for (int i = 0; i < 3; i++) {
         next_estimate->angular_velocity[i] = prior_state.ang_vel[i];
     }
@@ -358,7 +354,6 @@ static void do_update_3(const float y[3], float J[3][12], const float sensor_cov
 
     float K[12][3];
 
-    // TODO use method that isn't vulnerable to singularities
     float s_inverse[3][3];
     mat3x3_inv(S, s_inverse);
 
@@ -438,7 +433,6 @@ void kalman_new_accel(const float accel[3]) {
     do_update_3(y, J, accelerometer_covariance);
 }
 
-// TODO: Determine why this doesn't work
 void kalman_new_mag(const float mag[3]) {
     float predicted_mag[3];
     h_mag(&prior_state, prior_attitude, predicted_mag);

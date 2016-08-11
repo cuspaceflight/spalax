@@ -1,9 +1,10 @@
 ﻿#pragma once
-#include <Rendering/Primitives/FTCube.h>
+#include <state_estimate_config.h>
+#include <Rendering/Primitives/FTCuboid.h>
 
-class RocketRenderer : public FTCube {
+class RocketRenderer : public FTNode {
 public:
     RocketRenderer();
     ~RocketRenderer();
-
+    void nextStateEstimate(const state_estimate_t& current_state);
 };

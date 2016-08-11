@@ -13,7 +13,7 @@ RocketPathRenderer::~RocketPathRenderer() {
     
 }
 
-void RocketPathRenderer::nextStateEstimate(state_estimate_t& current_state) {
+void RocketPathRenderer::nextStateEstimate(const state_estimate_t& current_state) {
     FTVertex<glm::vec3> vertex;
     vertex.position_.x = current_state.pos[0];
     vertex.position_.y = current_state.pos[1];

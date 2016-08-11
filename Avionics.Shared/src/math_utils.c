@@ -8,10 +8,15 @@ float mat2x2_det(float mat[2][2]) {
 }
 
 void mat2x2_inv(float mat[2][2], float out[2][2]) {
-    out[0][0] = mat[1][1];
-    out[1][1] = mat[0][0];
-    out[0][1] = -mat[0][1];
-    out[1][0] = -mat[1][0];
+    float invdet = 1 / mat2x2_det(mat);
+    if (invdet != invdet) {
+        PRINT("2x2 inverse Nan Error!\n");
+        return;
+    }
+    out[0][0] = mat[1][1] * invdet;
+    out[1][1] = mat[0][0] * invdet;
+    out[0][1] = -mat[0][1] * invdet;
+    out[1][0] = -mat[1][0] * invdet;
 }
 
 float mat3x3_det(float mat[3][3]) {
@@ -50,48 +55,89 @@ void mat3x3_mult(float a[3][3], float b[3][3], float out[3][3]) {
 }
 
 float mat4x4_det(float m[4][4]) {
-    return m[0][3] * m[1][2] * m[2][1] * m[3][0] - m[0][2] * m[1][3] * m[2][1] * m[3][0] - m[0][3] * m[1][1] * m[2][2] * m[3][0] + m[0][1] * m[1][3] * m[2][2] * m[3][0] +
-        m[0][2] * m[1][1] * m[2][3] * m[3][0] - m[0][1] * m[1][2] * m[2][3] * m[3][0] - m[0][3] * m[1][2] * m[2][0] * m[3][1] + m[0][2] * m[1][3] * m[2][0] * m[3][1] +
-        m[0][3] * m[1][0] * m[2][2] * m[3][1] - m[0][0] * m[1][3] * m[2][2] * m[3][1] - m[0][2] * m[1][0] * m[2][3] * m[3][1] + m[0][0] * m[1][2] * m[2][3] * m[3][1] +
-        m[0][3] * m[1][1] * m[2][0] * m[3][2] - m[0][1] * m[1][3] * m[2][0] * m[3][2] - m[0][3] * m[1][0] * m[2][1] * m[3][2] + m[0][0] * m[1][3] * m[2][1] * m[3][2] +
-        m[0][1] * m[1][0] * m[2][3] * m[3][2] - m[0][0] * m[1][1] * m[2][3] * m[3][2] - m[0][2] * m[1][1] * m[2][0] * m[3][3] + m[0][1] * m[1][2] * m[2][0] * m[3][3] +
-        m[0][2] * m[1][0] * m[2][1] * m[3][3] - m[0][0] * m[1][2] * m[2][1] * m[3][3] - m[0][1] * m[1][0] * m[2][2] * m[3][3] + m[0][0] * m[1][1] * m[2][2] * m[3][3];
+    // Based on code from glm
+    float SubFactor00 = m[2][2] * m[3][3] - m[2][3] * m[3][2];
+    float SubFactor01 = m[1][2] * m[3][3] - m[1][3] * m[3][2];
+    float SubFactor02 = m[1][2] * m[2][3] - m[1][3] * m[2][2];
+    float SubFactor03 = m[0][2] * m[3][3] - m[0][3] * m[3][2];
+    float SubFactor04 = m[0][2] * m[2][3] - m[0][3] * m[2][2];
+    float SubFactor05 = m[0][2] * m[1][3] - m[0][3] * m[1][2];
+
+    float DetCof[4] = {
+        +(m[1][1] * SubFactor00 - m[2][1] * SubFactor01 + m[3][1] * SubFactor02),
+        -(m[0][1] * SubFactor00 - m[2][1] * SubFactor03 + m[3][1] * SubFactor04),
+        +(m[0][1] * SubFactor01 - m[1][1] * SubFactor03 + m[3][1] * SubFactor05),
+        -(m[0][1] * SubFactor02 - m[1][1] * SubFactor04 + m[2][1] * SubFactor05)
+    };
+
+    return m[0][0] * DetCof[0] + m[1][0] * DetCof[1] + m[2][0] * DetCof[2] + m[3][0] * DetCof[3];
 }
 
 void mat4x4_inv(float m[4][4], float out[4][4]) {
-    float invdet = 1 / mat4x4_det(m);
-    if (invdet != invdet) {
-        PRINT("4x4 inverse Nan Error!\n");
-        for (int i = 0; i < 4; i++)
-            for (int j = 0; j < 4; j++)
-            PRINT("%f\n", m[i][j]);
-        return;
-    } else if (invdet == FP_INFINITE) {
-        PRINT("4x4 inverse Infinity Error!\n");
-        for (int i = 0; i < 4; i++)
-            for (int j = 0; j < 4; j++)
-            PRINT("%f\n", m[i][j]);
-        return;
+    // Based on code from glm
+    float Coef00 = m[2][2] * m[3][3] - m[2][3] * m[3][2];
+    float Coef02 = m[2][1] * m[3][3] - m[2][3] * m[3][1];
+    float Coef03 = m[2][1] * m[3][2] - m[2][2] * m[3][1];
+
+    float Coef04 = m[1][2] * m[3][3] - m[1][3] * m[3][2];
+    float Coef06 = m[1][1] * m[3][3] - m[1][3] * m[3][1];
+    float Coef07 = m[1][1] * m[3][2] - m[1][2] * m[3][1];
+
+    float Coef08 = m[1][2] * m[2][3] - m[1][3] * m[2][2];
+    float Coef10 = m[1][1] * m[2][3] - m[1][3] * m[2][1];
+    float Coef11 = m[1][1] * m[2][2] - m[1][2] * m[2][1];
+
+    float Coef12 = m[0][2] * m[3][3] - m[0][3] * m[3][2];
+    float Coef14 = m[0][1] * m[3][3] - m[0][3] * m[3][1];
+    float Coef15 = m[0][1] * m[3][2] - m[0][2] * m[3][1];
+
+    float Coef16 = m[0][2] * m[2][3] - m[0][3] * m[2][2];
+    float Coef18 = m[0][1] * m[2][3] - m[0][3] * m[2][1];
+    float Coef19 = m[0][1] * m[2][2] - m[0][2] * m[2][1];
+
+    float Coef20 = m[0][2] * m[1][3] - m[0][3] * m[1][2];
+    float Coef22 = m[0][1] * m[1][3] - m[0][3] * m[1][1];
+    float Coef23 = m[0][1] * m[1][2] - m[0][2] * m[1][1];
+
+    float Fac0[4] = { Coef00, Coef00, Coef02, Coef03 };
+    float Fac1[4] = { Coef04, Coef04, Coef06, Coef07 };
+    float Fac2[4] = { Coef08, Coef08, Coef10, Coef11 };
+    float Fac3[4] = { Coef12, Coef12, Coef14, Coef15 };
+    float Fac4[4] = { Coef16, Coef16, Coef18, Coef19 };
+    float Fac5[4] = { Coef20, Coef20, Coef22, Coef23 };
+
+    float Vec0[4] = { m[0][1], m[0][0], m[0][0], m[0][0] };
+    float Vec1[4] = { m[1][1], m[1][0], m[1][0], m[1][0] };
+    float Vec2[4] = { m[2][1], m[2][0], m[2][0], m[2][0] };
+    float Vec3[4] = { m[3][1], m[3][0], m[3][0], m[3][0] };
+
+    float Inv0[4];
+    for (int i = 0; i < 4; i++)
+        Inv0[i] = Vec1[i] * Fac0[i] - Vec2[i] * Fac1[i] + Vec3[i] * Fac2[i];
+
+    float Inv1[4];
+    for (int i = 0; i < 4; i++)
+        Inv1[i] = Vec0[i] * Fac0[i] - Vec2[i] * Fac3[i] + Vec3[i] * Fac4[i];
+    
+    float Inv2[4];
+    for (int i = 0; i < 4; i++)
+        Inv2[i] = Vec0[i] * Fac1[i] - Vec1[i] * Fac3[i] + Vec3[i] * Fac5[i];
+
+    float Inv3[4];
+    for (int i = 0; i < 4; i++)
+        Inv3[i] = (Vec0[i] * Fac2[i] - Vec1[i] * Fac4[i] + Vec2[i] * Fac5[i]);
+
+    float SignA[4] = { +1, -1, +1, -1 };
+    float SignB[4] = { -1, +1, -1, +1 };
+
+    float OneOverDeterminant = 1 / mat4x4_det(m);
+    
+    for (int i = 0; i < 4; i++) {
+        out[i][0] = Inv0[i] * SignA[i] * OneOverDeterminant;
+        out[i][1] = Inv1[i] * SignB[i] * OneOverDeterminant;
+        out[i][2] = Inv2[i] * SignA[i] * OneOverDeterminant;
+        out[i][3] = Inv3[i] * SignB[i] * OneOverDeterminant;
     }
-
-    PRINT("%f\n", invdet);
-
-    out[0][0] = (m[1][2] * m[2][3] * m[3][1] - m[1][3] * m[2][2] * m[3][1] + m[1][3] * m[2][1] * m[3][2] - m[1][1] * m[2][3] * m[3][2] - m[1][2] * m[2][1] * m[3][3] + m[1][1] * m[2][2] * m[3][3]) * invdet;
-    out[0][1] = (m[0][3] * m[2][2] * m[3][1] - m[0][2] * m[2][3] * m[3][1] - m[0][3] * m[2][1] * m[3][2] + m[0][1] * m[2][3] * m[3][2] + m[0][2] * m[2][1] * m[3][3] - m[0][1] * m[2][2] * m[3][3]) * invdet;
-    out[0][2] = (m[0][2] * m[1][3] * m[3][1] - m[0][3] * m[1][2] * m[3][1] + m[0][3] * m[1][1] * m[3][2] - m[0][1] * m[1][3] * m[3][2] - m[0][2] * m[1][1] * m[3][3] + m[0][1] * m[1][2] * m[3][3]) * invdet;
-    out[0][3] = (m[0][3] * m[1][2] * m[2][1] - m[0][2] * m[1][3] * m[2][1] - m[0][3] * m[1][1] * m[2][2] + m[0][1] * m[1][3] * m[2][2] + m[0][2] * m[1][1] * m[2][3] - m[0][1] * m[1][2] * m[2][3]) * invdet;
-    out[1][0] = (m[1][3] * m[2][2] * m[3][0] - m[1][2] * m[2][3] * m[3][0] - m[1][3] * m[2][0] * m[3][2] + m[1][0] * m[2][3] * m[3][2] + m[1][2] * m[2][0] * m[3][3] - m[1][0] * m[2][2] * m[3][3]) * invdet;
-    out[1][1] = (m[0][2] * m[2][3] * m[3][0] - m[0][3] * m[2][2] * m[3][0] + m[0][3] * m[2][0] * m[3][2] - m[0][0] * m[2][3] * m[3][2] - m[0][2] * m[2][0] * m[3][3] + m[0][0] * m[2][2] * m[3][3]) * invdet;
-    out[1][2] = (m[0][3] * m[1][2] * m[3][0] - m[0][2] * m[1][3] * m[3][0] - m[0][3] * m[1][0] * m[3][2] + m[0][0] * m[1][3] * m[3][2] + m[0][2] * m[1][0] * m[3][3] - m[0][0] * m[1][2] * m[3][3]) * invdet;
-    out[1][3] = (m[0][2] * m[1][3] * m[2][0] - m[0][3] * m[1][2] * m[2][0] + m[0][3] * m[1][0] * m[2][2] - m[0][0] * m[1][3] * m[2][2] - m[0][2] * m[1][0] * m[2][3] + m[0][0] * m[1][2] * m[2][3]) * invdet;
-    out[2][0] = (m[1][1] * m[2][3] * m[3][0] - m[1][3] * m[2][1] * m[3][0] + m[1][3] * m[2][0] * m[3][1] - m[1][0] * m[2][3] * m[3][1] - m[1][1] * m[2][0] * m[3][3] + m[1][0] * m[2][1] * m[3][3]) * invdet;
-    out[2][1] = (m[0][3] * m[2][1] * m[3][0] - m[0][1] * m[2][3] * m[3][0] - m[0][3] * m[2][0] * m[3][1] + m[0][0] * m[2][3] * m[3][1] + m[0][1] * m[2][0] * m[3][3] - m[0][0] * m[2][1] * m[3][3]) * invdet;
-    out[2][2] = (m[0][1] * m[1][3] * m[3][0] - m[0][3] * m[1][1] * m[3][0] + m[0][3] * m[1][0] * m[3][1] - m[0][0] * m[1][3] * m[3][1] - m[0][1] * m[1][0] * m[3][3] + m[0][0] * m[1][1] * m[3][3]) * invdet;
-    out[2][3] = (m[0][3] * m[1][1] * m[2][0] - m[0][1] * m[1][3] * m[2][0] - m[0][3] * m[1][0] * m[2][1] + m[0][0] * m[1][3] * m[2][1] + m[0][1] * m[1][0] * m[2][3] - m[0][0] * m[1][1] * m[2][3]) * invdet;
-    out[3][0] = (m[1][2] * m[2][1] * m[3][0] - m[1][1] * m[2][2] * m[3][0] - m[1][2] * m[2][0] * m[3][1] + m[1][0] * m[2][2] * m[3][1] + m[1][1] * m[2][0] * m[3][2] - m[1][0] * m[2][1] * m[3][2]) * invdet;
-    out[3][1] = (m[0][1] * m[2][2] * m[3][0] - m[0][2] * m[2][1] * m[3][0] + m[0][2] * m[2][0] * m[3][1] - m[0][0] * m[2][2] * m[3][1] - m[0][1] * m[2][0] * m[3][2] + m[0][0] * m[2][1] * m[3][2]) * invdet;
-    out[3][2] = (m[0][2] * m[1][1] * m[3][0] - m[0][1] * m[1][2] * m[3][0] - m[0][2] * m[1][0] * m[3][1] + m[0][0] * m[1][2] * m[3][1] + m[0][1] * m[1][0] * m[3][2] - m[0][0] * m[1][1] * m[3][2]) * invdet;
-    out[3][3] = (m[0][1] * m[1][2] * m[2][0] - m[0][2] * m[1][1] * m[2][0] + m[0][2] * m[1][0] * m[2][1] - m[0][0] * m[1][2] * m[2][1] - m[0][1] * m[1][0] * m[2][2] + m[0][0] * m[1][1] * m[2][2]) * invdet;
 }
 
 void mat4x4_mult(float a[4][4], float b[4][4], float out[4][4]) {
@@ -123,67 +169,29 @@ void vector_cross(const float a[3], const float b[3], float out[3]) {
     out[2] = a[0] * b[1] - a[1] * b[0];
 }
 
+float vector_mag(const float v[3]) {
+    return sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+}
+
 float vector_cross_mag(const float a[3], const float b[3]) {
-    float x = a[1] * b[2] - a[2] * b[1];
-    float y = a[2] * b[0] - a[0] * b[2];
-    float z = a[0] * b[1] - a[1] * b[0];
-
-    return sqrtf(x * x + y * y + z * z);
+    float v[3];
+    vector_cross(a, b, v);
+    return vector_mag(v);
 }
 
-void axis_angle_to_euler(const float axis[3], const float angle, float out[3]) {
-    float s = sinf(angle);
-    float c = cosf(angle);
-    float t = 1 - c;
-
-    float x = axis[0];
-    float y = axis[1];
-    float z = axis[2];
-
-    float singularity_test = (x * y * t - z * s);
-
-    if (singularity_test > 0.998) {
-        return;
-    }
-    if (singularity_test < -0.998) {
-        return;
-    }
-
-    out[0] = atan2f(y * s - x * z * t, 1 - (y * y + z * z) * t);
-    out[1] = asinf(x * y * t + z * s);
-    out[2] = atan2f(x * s - y * z * t, 1 - (x * x + z * z) * t);
-}
-
-void quat_to_euler(const float q[4], float xyz[3]) {
-    xyz[0] = -atan2f(2 * (q[1] * q[2] - q[0] * q[3]), 1 - 2 * (q[0] * q[0] + q[1] * q[1]));
-    xyz[1] = asinf(2 * (q[0] * q[2] + q[1] * q[3]));
-    xyz[2] = -atan2f(2 * (q[0] * q[1] - q[2] * q[3]), 1 - 2 * (q[1] * q[1] + q[2] * q[2]));
-
-
-    /*xyz[0] = atan2f(2.0f * (q[1] * q[2] + q[3] * q[0]), q[3] * q[3] - q[0] * q[0] - q[1] * q[1] + q[2] * q[2]);
-    xyz[1] = asinf(-2.0f * (q[0] * q[2] - q[3] * q[1]));
-    xyz[2] = atan2f(2.0f * (q[0] * q[1] + q[3] * q[2]), q[3] * q[3] + q[0] * q[0] - q[1] * q[1] - q[2] * q[2]);*/
+void vector_normalize(const float v[3], float out[3]) {
+    float v_mag = vector_mag(v);
+    for (int i = 0; i < 3; i++)
+        out[i] = v[i] / v_mag;
 }
 
 void axis_angle_to_quat(const float axis[3], const float angle, float q[4]) {
     float s = sinf(angle / 2.0f);
-    float x = axis[0];
-    float y = axis[1];
-    float z = axis[2];
-    float w = cosf(angle / 2.0f);
 
-    float axis_norm = sqrtf(x * x + y * y + z * z);
-    float mult = s / axis_norm;
-
-    x *= mult;
-    y *= mult;
-    z *= mult;
-
-    float norm = sqrtf(x * x + y * y + z * z + w * w);
-    q[0] = x / norm;
-    q[1] = y / norm;
-    q[2] = z / norm;
-    q[3] = w / norm;
+    q[0] = axis[0] * s;
+    q[1] = axis[1] * s;
+    q[2] = axis[2] * s;
+    q[3] = cosf(angle / 2.0f);
 }
 
 void quaternion_to_rodrigues(const float q[4], float mrp[3]) {
@@ -226,16 +234,12 @@ void quat_mult(const float q1[4], const float q2[4], float out[4]) {
     out[3] = q1[3] * q2[3] - q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2];
 }
 
-void quat_inverse(const float q[4], float out[4]) {
+void quat_invert(const float q[4], float out[4]) {
     float dot = q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3];
     out[0] = -q[0] / dot;
     out[1] = -q[1] / dot;
     out[2] = -q[2] / dot;
-    out[3] =  q[3] / dot;
-}
-
-float vector_mag(const float v[3]) {
-    return sqrtf(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    out[3] = q[3] / dot;
 }
 
 void quat_rotate(const float q[4], const float v[3], float out[3]) {
@@ -258,10 +262,4 @@ void apply_q(const float q[4], const float v[3], float out[3]) {
         return;
     }
     quat_rotate(q, v, out);
-}
-
-void normalize(const float v[3], float out[3]) {
-    float v_mag = vector_mag(v);
-    for (int i = 0; i < 3; i++)
-        out[i] = v[i] / v_mag;
 }

@@ -8,6 +8,7 @@ set (SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/StateDetailView.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/SerialPort.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/SerialDriver.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/VectorRenderer.cpp
     PARENT_SCOPE)
 
 set (HEADERS ${HEADERS}
@@ -18,4 +19,5 @@ set (HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/StateDetailView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/SerialDriver.h
 	${CMAKE_CURRENT_SOURCE_DIR}/SerialPort.h
+	${CMAKE_CURRENT_SOURCE_DIR}/VectorRenderer.h
     PARENT_SCOPE)
