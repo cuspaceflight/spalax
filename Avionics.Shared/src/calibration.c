@@ -39,8 +39,6 @@ static bool mpu9250_bias_data(const telemetry_t* packet, uint16_t metadata) {
 
     static bool has_config = false;
     static mpu9250_config_t config;
-    static float min_accel[3];
-    static float max_accel[3];
     static float min_magno[3];
     static float max_magno[3];
     
@@ -52,13 +50,15 @@ static bool mpu9250_bias_data(const telemetry_t* packet, uint16_t metadata) {
         mpu9250_calibrate_data(&config, data, &calibrated);
 
         for (int i = 0; i < 3; i++) {
-            min_accel[i] = fmin(min_accel[i], calibrated.accel[i]);
-            max_accel[i] = fmax(max_accel[i], calibrated.accel[i]);
             min_magno[i] = fmin(min_magno[i], calibrated.magno[i]);
             max_magno[i] = fmax(max_magno[i], calibrated.magno[i]);
 
-            calibration_data.data[0][i] = (max_accel[i] + min_accel[i]) / 2.0f;
+            // Magno SF
+            calibration_data.data[0][i] = 1.0f / ((max_magno[i] - min_magno[i]) / 2.0f);
+
+            // Magno Bias
             calibration_data.data[1][i] = (max_magno[i] + min_magno[i]) / 2.0f;
+            
         }
 
     } else if (packet->header.id == telemetry_id_mpu9250_config) {
@@ -67,7 +67,7 @@ static bool mpu9250_bias_data(const telemetry_t* packet, uint16_t metadata) {
         has_config = true;
         config = *(mpu9250_config_t*)packet->payload;
         for (int i = 0; i < 3; i++) {
-            config.accel_bias[i] = 0;
+            config.magno_sf[i] = 1;
             config.magno_bias[i] = 0;
         }
     }

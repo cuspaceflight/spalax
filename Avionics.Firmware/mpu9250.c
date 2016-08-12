@@ -316,11 +316,6 @@ static void mpu9250_init(mpu9250_config_t* config) {
     mpu9250_write_u8(MPU9250_REG_I2C_SLV0_REG, AK8963_REG_ST1);
     mpu9250_write_u8(MPU9250_REG_I2C_SLV0_CTRL, 0b10001000); // Read 8 bytes (we must read ST1 and ST2)
 
-    // Read Axis Adjustment values
-
-    config->mag_sensitivity_adjustment[0] = mpu9250_i2c_read_u8(AK8963_REG_ASAX);
-    config->mag_sensitivity_adjustment[1] = mpu9250_i2c_read_u8(AK8963_REG_ASAY);
-    config->mag_sensitivity_adjustment[2] = mpu9250_i2c_read_u8(AK8963_REG_ASAZ);
 
     ///
     // Self Tests
@@ -355,18 +350,25 @@ static void mpu9250_init(mpu9250_config_t* config) {
 
     config->accel_sf =  16.0f * 9.8f / 32767.0f;
     config->gyro_sf = 500.0f * 0.01745329251f / 32767.0f;
-    config->magno_sf = 0.15f;
 
-    // TODO: Populate these bias values
+    config->magno_sf[0] = 0.003559f;
+    config->magno_sf[1] = 0.003571f;
+    config->magno_sf[2] = 0.002981f;
 
-    config->accel_bias[0] = 0;
-    config->accel_bias[1] = 0;
-    config->accel_bias[2] = 0;
+    config->magno_bias[0] = -225.000000f;
+    config->magno_bias[1] = -115.000000f;
+    config->magno_bias[2] = -335.500000f;
 
+    // float mag_sensitivity_adjustment[3];
+    //
+    // mag_sensitivity_adjustment[0] = mpu9250_i2c_read_u8(AK8963_REG_ASAX);
+    // mag_sensitivity_adjustment[1] = mpu9250_i2c_read_u8(AK8963_REG_ASAY);
+    // mag_sensitivity_adjustment[2] = mpu9250_i2c_read_u8(AK8963_REG_ASAZ);
 
-    config->magno_bias[0] = -27.968262f;
-    config->magno_bias[1] = -51.433594f;
-    config->magno_bias[2] = 58.423828f;
+    // for (int i = 0; i < 3; i++) {
+    //     float sensitivity_adjustment = (float)(config->mag_sensitivity_adjustment[i] -  128) * 0.5f / 128.0f + 1;
+    //     config->magno_sf[i] *= sensitivity_adjustment[i];
+    // }
 }
 
 void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {

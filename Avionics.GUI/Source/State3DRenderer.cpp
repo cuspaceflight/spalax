@@ -47,7 +47,7 @@ State3DRenderer::~State3DRenderer() {
 bool State3DRenderer::handlePacket(const telemetry_t* packet) const {
     if (packet->header.id == telemetry_id_state_estimate_data) {
         auto data = (state_estimate_t*)packet->payload;
-        //rocket_renderer_->nextStateEstimate(*data);
+        rocket_renderer_->nextStateEstimate(*data);
         rocket_path_renderer_->nextStateEstimate(*data);
     } else if (packet->header.id == telemetry_id_mpu9250_data) {
         auto data = (mpu9250_data_t*)packet->payload;

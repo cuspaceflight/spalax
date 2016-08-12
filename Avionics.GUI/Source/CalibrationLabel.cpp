@@ -33,7 +33,7 @@ CalibrationLabel::~CalibrationLabel() {
 
 void CalibrationLabel::handleCalibrationData(const calibration_data_t* data) {
     if (data->procedure == calibration_procedure_mpu9250_bias) {
-        FTLOG("Accel Bias: {%ff, %ff, %ff}", data->data[0][0], data->data[0][1], data->data[0][2]);
+        FTLOG("Magno SF: {%ff, %ff, %ff}", data->data[0][0], data->data[0][1], data->data[0][2]);
         FTLOG("Magno Bias: {%ff, %ff, %ff}", data->data[1][0], data->data[1][1], data->data[1][2]);
     }
 }

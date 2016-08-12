@@ -32,7 +32,8 @@ float vector_cross_mag(const float a[3], const float b[3]);
 
 float vector_mag(const float v[3]);
 
-void vector_normalize(const float v[3], float out[3]);
+// Returns the magnitude of the non-normalized vector
+float vector_normalize(const float v[3], float out[3]);
 
 void axis_angle_to_quat(const float axis[3], const float angle, float q[4]);
 

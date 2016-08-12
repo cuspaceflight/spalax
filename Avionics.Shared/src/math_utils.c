@@ -179,10 +179,11 @@ float vector_cross_mag(const float a[3], const float b[3]) {
     return vector_mag(v);
 }
 
-void vector_normalize(const float v[3], float out[3]) {
+float vector_normalize(const float v[3], float out[3]) {
     float v_mag = vector_mag(v);
     for (int i = 0; i < 3; i++)
         out[i] = v[i] / v_mag;
+    return v_mag;
 }
 
 void axis_angle_to_quat(const float axis[3], const float angle, float q[4]) {

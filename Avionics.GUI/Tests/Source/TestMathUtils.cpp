@@ -255,7 +255,7 @@ TEST(TestMathUtils, TestQuaternion) {
         quat_mult(q_arr, q2_arr, temp);
         expect_quat_eq(q * q2, temp);
 
-        quat_inverse(q_arr, temp);
+        quat_invert(q_arr, temp);
         expect_quat_eq(glm::inverse(q), temp);
 
         glm::vec3 vector(get_rand(), get_rand(), get_rand());

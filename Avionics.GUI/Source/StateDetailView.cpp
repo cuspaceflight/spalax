@@ -12,6 +12,7 @@
 #include <Rendering/Primitives/FTTexturedPlane.h>
 #include <Rendering/Text/FTFontCache.h>
 #include <state_estimate.h>
+#include <math_utils.h>
 
 
 static StateDetailView* s_instance = nullptr;
@@ -43,6 +44,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[9] = calibrated.magno[0];
         values[10] = calibrated.magno[1];
         values[11] = calibrated.magno[2];
+
     } else if (packet->header.id == telemetry_id_mpu9250_config) {
         if (has_mpu9250_config)
             return true;
