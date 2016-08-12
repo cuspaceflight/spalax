@@ -55,7 +55,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         auto data = (ms5611data_t*)packet->payload;
 
         values[0] = (float)data->pressure;
-        values[1] = state_estimation_pressure_to_altitude((float)data->pressure);
+        values[1] = ms5611_get_altitude((float)data->pressure);
         values[2] = (float)data->temperature;
     } else if (packet->header.id == telemetry_id_state_estimate_data) {
         FTAssert(packet->header.length == sizeof(state_estimate_t), "Incorrect Packet Size");
@@ -115,6 +115,8 @@ StateDetailView::StateDetailView() {
     window_size_node->setAnchorPoint(glm::vec2(0, -1.0f));
     addChild(window_size_node);
 
+    
+
     const float y_padding = 30.0f;
     float y = -y_padding;
     for (int i = 0; i < num_labels; i++) {
@@ -136,6 +138,10 @@ StateDetailView::StateDetailView() {
         values[i] = 0;
     }
 
+    calibration_label_ = std::make_shared<CalibrationLabel>();
+    calibration_label_->setFillColor(glm::vec3(1, 1, 1));
+    addChild(calibration_label_);
+
     messaging_consumer_init(&messaging_consumer);
 
     s_instance = this;
@@ -151,4 +157,6 @@ void StateDetailView::updateDisplay() {
     static wchar_t buff[24];
     for (int i = 0; i < num_labels; i++)
         value_labels_[i]->setString(FTWCharUtil::formatString(buff, 24, L"%.2f", values[i]));
+
+    calibration_label_->updateDisplay();
 }

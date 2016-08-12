@@ -102,6 +102,7 @@ SerialDriver::SerialDriver(const char* port_name, int baud_rate) {
         s_port = serial_port_.get();
 
         messaging_consumer_init(&messaging_consumer);
+        serial_interface_init(&serial_interface);
 
         writer_thread_ = std::thread(writer_thread, this);
         reader_thread_ = std::thread(reader_thread, this);

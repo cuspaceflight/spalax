@@ -55,6 +55,7 @@ void usb_telemetry_start(void) {
     usbConnectBus(serusbcfg.usbp);
 
     messaging_consumer_init(&usb_telemetry_messaging_consumer);
+    serial_interface_init(&serial_interface);
     messaging_pause_consumer(&usb_telemetry_messaging_consumer, true);
 
     memory_barrier_release();

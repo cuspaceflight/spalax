@@ -6,17 +6,22 @@
 extern "C" {
 #endif
 
-#define GRAVITY 9.80665f
+    typedef enum {
+        calibration_procedure_none,
+        calibration_procedure_mpu9250_bias,
+    } calibration_procedure_t;
 
-void calibrate_accel(const int16_t in[3], float out[3]);
+    typedef struct {
+        calibration_procedure_t procedure;
+        float data[3][3];
+    } calibration_data_t;
 
-void calibrate_mag(const int16_t in[3], float out[3]);
+    typedef struct {
+        calibration_procedure_t procedure;
+    } calibration_control_t;
+    
 
-void calibrate_gyro(const int16_t in[3], float out[3]);
-
-float state_estimation_pressure_to_altitude(float pressure);
-
-extern volatile uint8_t calibration_trust_barometer;
+    int32_t calibration_thread(void* arg);
 
 #ifdef __cplusplus
 }
