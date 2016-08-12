@@ -83,21 +83,21 @@ const float process_noise_diag[12] = {
 };
 
 const float accelerometer_covariance[3][3] = {
-    {0.25f, 0, 0},
-    {0, 0.25f, 0},
-    {0,0,0.25f}
+    { 0.001f, 0, 0},
+    {0, 0.001f, 0},
+    {0,0,0.001f }
 };
 
 const float mag_covariance[3][3] = {
-    { 0.25f, 0, 0 },
-    { 0, 0.25f, 0 },
-    { 0, 0, 0.25f }
+    { 0.00001f, 0, 0 },
+    { 0, 0.00001f, 0 },
+    { 0, 0, 0.00001f }
 };
 
 const float gyro_covariance[3][3] = {
-    { 0.1f, 0, 0 },
-    { 0, 0.1f, 0 },
-    { 0, 0, 0.1f }
+    { 0.00001f, 0, 0 },
+    { 0, 0.00001f, 0 },
+    { 0, 0, 0.00001f }
 };
 
 
