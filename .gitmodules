@@ -1,10 +1,9 @@
-[submodule "Frontier.Engine"]
-	path = Frontier.Engine
+[submodule "external/Frontier.Engine"]
+	path = external/Frontier.Engine
 	url = https://github.com/Tustvold/Frontier.Engine.git
-[submodule "ChibiOS-RT"]
-	path = ChibiOS-RT
+[submodule "external/ChibiOS"]
+	path = external/ChibiOS
 	url = https://github.com/ChibiOS/ChibiOS.git
-	branch = stable_2.6.x
-[submodule "Avionics.Shared/messaging"]
-	path = Avionics.Shared/messaging
+[submodule "external/cusf-messaging"]
+	path = external/cusf-messaging
 	url = https://github.com/cuspaceflight/cusf-messaging.git

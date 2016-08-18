@@ -196,3 +196,4 @@ install_manifest.txt
 *-cache.lib
 Avionics.Shared/build-fw/
 *.idea/
+shared/build-fw/
