@@ -26,12 +26,13 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
 
-set(SPALAX_OS win32)
+set(SPALAX_OS std)
 
 # This will create project folders in visual studio for us
 get_filename_component(ROOT ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
 set(FRONTIER_ENGINE_FOLDER_MACRO_DIR ${ROOT} CACHE STRING "Frontier Engine Folder Macro Directory")
 
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../external/serial ${CMAKE_CURRENT_BINARY_DIR}/serial)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../external/Frontier.Engine ${CMAKE_CURRENT_BINARY_DIR}/Frontier.Engine)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../shared ${CMAKE_CURRENT_BINARY_DIR}/shared)
 add_subdirectory(Source)
@@ -56,6 +57,7 @@ target_include_directories(spalax.gui PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Source
         ${SPALAX_SHARED_INCLUDES}
         ${FRONTIER_ENGINE_INCLUDES}
+		../external/serial/include
         )
 
 ADD_EXECUTABLE(spalax.gui.launcher Source/main.cpp)
@@ -64,6 +66,7 @@ TARGET_LINK_LIBRARIES(spalax.gui.launcher
         spalax.gui
         spalax.shared
         ${FRONTIER_ENGINE_LIBS}
+		serial
         )
 
 add_custom_command(TARGET spalax.gui.launcher POST_BUILD

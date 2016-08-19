@@ -6,7 +6,6 @@ set (SOURCES ${SOURCES}
     ${CMAKE_CURRENT_SOURCE_DIR}/RocketRenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/State3DRenderer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/StateDetailView.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/SerialPort.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/SerialDriver.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/VectorRenderer.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/CalibrationLabel.cpp
@@ -19,7 +18,6 @@ set (HEADERS ${HEADERS}
     ${CMAKE_CURRENT_SOURCE_DIR}/State3DRenderer.h
     ${CMAKE_CURRENT_SOURCE_DIR}/StateDetailView.h
 	${CMAKE_CURRENT_SOURCE_DIR}/SerialDriver.h
-	${CMAKE_CURRENT_SOURCE_DIR}/SerialPort.h
 	${CMAKE_CURRENT_SOURCE_DIR}/VectorRenderer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/CalibrationLabel.h
     PARENT_SCOPE)

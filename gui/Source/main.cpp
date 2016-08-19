@@ -39,9 +39,11 @@ void rocket_main() {
 
 int main() {
     int ret = -1;
+
+#ifdef _WIN32
     // We can't check manually as it returns false positives for static variables with custom initializers
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-
+#endif
 
     if (FTEngine::setup()) {
         

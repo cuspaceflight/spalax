@@ -10,3 +10,9 @@ cd firmware.spalax
 make all VERBOSE=1
 cd ../firmware.m3imu
 make all VERBOSE=1
+cd ../gui
+mkdir build
+cd build
+cmake .. -G "Unix Makefiles"
+cmake --build . --target spalax.gui.launcher
+cmake --build . --target spalax.gui.tests

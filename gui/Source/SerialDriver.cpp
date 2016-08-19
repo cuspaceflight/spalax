@@ -1,9 +1,9 @@
 ﻿#include "SerialDriver.h"
 #include "serial_interface.h"
-#include <atomic>
 #include "messaging.h"
 #include <avionics_config.h>
 #include "messaging_config.h"
+#include <serial/serial.h>
 
 #define READ_BUFFER_SIZE 255
 #define WRITE_BUFFER_SIZE 255
@@ -17,7 +17,7 @@ static uint8_t write_buffer[WRITE_BUFFER_SIZE];
 
 static bool is_initialised = false;
 static SerialDriver* s_instance = nullptr;
-static SerialPort* s_port = nullptr;
+static serial::Serial* s_port = nullptr;
 
 static uint8_t stream_get() {
     while (read_buffer_index >= read_buffer_limit) {
@@ -79,23 +79,13 @@ SerialDriver::SerialDriver(const char* port_name, int baud_rate) {
     FTAssert(!is_initialised, "Only one serial driver can be active at once");
    
 
-    COMMTIMEOUTS port_timeouts;
-
-    // Read operations will return if it has been more than 5ms since the last byte
-    port_timeouts.ReadIntervalTimeout = 10;
-    port_timeouts.ReadTotalTimeoutMultiplier = 0;
-    port_timeouts.ReadTotalTimeoutConstant = 0;
-
-    // We don't set timeouts for write operations
-    port_timeouts.WriteTotalTimeoutMultiplier = 0;
-    port_timeouts.WriteTotalTimeoutConstant = 0;
-
-    serial_port_ = std::make_unique<SerialPort>(port_name, baud_rate, &port_timeouts);
+    serial::Timeout timeout(0, 10, 0, 0, 0);
+    serial_port_ = std::make_unique<serial::Serial>(port_name, baud_rate, timeout);
 
     read_buffer_index = 0;
     write_buffer_index = 0;
 
-    if (serial_port_->portIsOpen()) {
+    if (serial_port_->isOpen()) {
         s_instance = this;
 
         is_initialised = true;

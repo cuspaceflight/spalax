@@ -50,8 +50,8 @@ static bool mpu9250_bias_data(const telemetry_t* packet, uint16_t metadata) {
         mpu9250_calibrate_data(&config, data, &calibrated);
 
         for (int i = 0; i < 3; i++) {
-            min_magno[i] = fmin(min_magno[i], calibrated.magno[i]);
-            max_magno[i] = fmax(max_magno[i], calibrated.magno[i]);
+            min_magno[i] = fminf(min_magno[i], calibrated.magno[i]);
+            max_magno[i] = fmaxf(max_magno[i], calibrated.magno[i]);
 
             // Magno SF
             calibration_data.data[0][i] = 1.0f / ((max_magno[i] - min_magno[i]) / 2.0f);
