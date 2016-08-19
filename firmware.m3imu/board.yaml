@@ -12,3 +12,22 @@ pins:
     NJTRST: pb4, af0, pullup
     CAN_RX: pb8, af9
     CAN_TX: pb9, af9
+
+    MPU_IRQ: pb11
+    MPU_CS: pb12, output
+
+    ADIS_IRQ: pc5
+    ADIS_CS: pa2, output
+    ADIS_NRST: pa3, output
+
+    IMU_SCLK: pb13, af5
+    IMU_MISO: pb14, af5
+    IMU_MOSI: pb15, af5
+
+    BARO_CS: pc4, output
+    BARO_SCLK: pa5, af5
+    BARO_SDO: pa6, af5
+    BARO_SDI: pa7, af5
+
+    LED_RED: pc6, output, startlow
+    LED_GREEN: pc7, output, startlow

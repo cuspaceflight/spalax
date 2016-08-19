@@ -7,3 +7,6 @@
 [submodule "external/cusf-messaging"]
 	path = external/cusf-messaging
 	url = https://github.com/cuspaceflight/cusf-messaging.git
+[submodule "external/gen_board"]
+	path = external/gen_board
+	url = https://github.com/cuspaceflight/gen-board.h.git

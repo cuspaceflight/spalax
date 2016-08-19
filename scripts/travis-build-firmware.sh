@@ -8,3 +8,5 @@ set -xe
 
 cd firmware.spalax
 make all VERBOSE=1
+cd ../firmware.m3imu
+make all VERBOSE=1

@@ -153,12 +153,11 @@ void adis16405_thread(void *arg) {
 
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
 
-    palClearPad(GPIOD, GPIOD_CAN1_TX);
+    palClearPad(ADIS16405_NRST_PORT, ADIS16405_NRST_PIN);
 
     chThdSleepMilliseconds(200);
 
-    // This is used as the ~RST line on the adaptor board
-    palSetPad(GPIOD, GPIOD_CAN1_TX);
+    palSetPad(ADIS16405_NRST_PORT, ADIS16405_NRST_PIN);
 
     chThdSleepMilliseconds(200);
 

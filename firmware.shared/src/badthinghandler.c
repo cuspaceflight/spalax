@@ -44,8 +44,9 @@ void bthandler_thread(void* arg) {
                 has_initializing = true;
             }
         }
-
+#if BAD_THIND_HANDLER_HAS_SENSOR_LEDS
         setSensorOk(!(component_states[avionics_component_adis16405] == state_error || component_states[avionics_component_mpu9250] == state_error || component_states[avionics_component_ms5611] == state_error));
+#endif
 
         if (has_error) {
             palClearPad(BAD_THING_HANDLER_OK_LED_PORT, BAD_THING_HANDLER_OK_LED_PIN);
