@@ -1,7 +1,6 @@
 
 #include <stdlib.h>
 #include "ch.h"
-#include "chprintf.h"
 #include "adis16405.h"
 #include "badthinghandler.h"
 
@@ -9,7 +8,7 @@
 #define ADIS16405_SPI_CS_PORT  GPIOA
 #define ADIS16405_SPI_CS_PIN   GPIOA_ESPI_NSS
 
-static BinarySemaphore adis16405_semaphore;
+static binary_semaphore_t adis16405_semaphore;
 
 static uint16_t adis16405_read_u16(uint8_t addr_in) {
     // All transfers are 16 bits
@@ -131,12 +130,12 @@ void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
     (void)extp;
     (void)channel;
 
-    chSysLockFromIsr();
+    chSysLockFromISR();
     chBSemSignalI(&adis16405_semaphore);
-    chSysUnlockFromIsr();
+    chSysUnlockFromISR();
 }
 
-msg_t adis16405_thread(void *arg) {
+void adis16405_thread(void *arg) {
     (void)arg;
     const SPIConfig spi_cfg = {
         NULL,
@@ -149,7 +148,7 @@ msg_t adis16405_thread(void *arg) {
         SPI_CR1_BR_1 | SPI_CR1_BR_0 | SPI_CR1_CPOL | SPI_CR1_CPHA | SPI_CR1_DFF
     };
 
-    chBSemInit(&adis16405_semaphore, true);
+    chBSemObjectInit(&adis16405_semaphore, true);
 
     chRegSetThreadName("ADIS16405");
 

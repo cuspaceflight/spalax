@@ -12,11 +12,11 @@
 extern SerialUSBDriver SDU1;
 
 static uint8_t stream_get(void) {
-    return sdGet(&SDU1);
+    return chnGetTimeout(&SDU1, TIME_INFINITE);
 }
 
 static bool stream_put(uint8_t byte) {
-    return sdPutTimeout(&SDU1, byte, TIME_IMMEDIATE) == Q_OK;
+    return chnPutTimeout(&SDU1, byte, TIME_IMMEDIATE) == Q_OK;
 }
 
 SERIAL_INTERFACE(serial_interface, stream_get, stream_put, NULL, 1024);
@@ -62,7 +62,7 @@ void usb_telemetry_start(void) {
     is_initialised = true;
 }
 
-int32_t usb_telemetry_transmit_thread(void *arg) {
+void usb_telemetry_transmit_thread(void *arg) {
     (void)arg;
     chRegSetThreadName("USB Telemetry Transmit");
     // Wait for setup
@@ -90,7 +90,7 @@ int32_t usb_telemetry_transmit_thread(void *arg) {
     }
 }
 
-int32_t usb_telemetry_receive_thread(void* arg) {
+void usb_telemetry_receive_thread(void* arg) {
     (void)arg;
     chRegSetThreadName("USB Telemetry Receive");
     // Wait for setup

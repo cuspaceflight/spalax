@@ -9,7 +9,6 @@
 #include "ms5611.h"
 #include "ms5611_config.h"
 #include "hal.h"
-#include "chprintf.h"
 #include "badthinghandler.h"
 #include "messaging.h"
 
@@ -207,7 +206,7 @@ MESSAGING_PRODUCER(messaging_producer_config, telemetry_id_ms5611_config, sizeof
  * Resets the MS5611, reads cal data, then reads a pressure and temperature
  * in a loop.
  */
-msg_t ms5611_thread(void *arg){
+void ms5611_thread(void *arg){
 	(void)arg;
     chRegSetThreadName("MS5611");
 	static MS5611CalData cal_data;

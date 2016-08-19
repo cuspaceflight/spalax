@@ -22,7 +22,7 @@ static bool control_packet(const telemetry_t* packet, message_metadata_t metadat
 
     if (packet->header.id != telemetry_id_calibration_control)
         return true;
-    
+
     calibration_control_t* control = (calibration_control_t*)packet->payload;
 
     if (current_producedure == calibration_procedure_none) {
@@ -41,7 +41,7 @@ static bool mpu9250_bias_data(const telemetry_t* packet, uint16_t metadata) {
     static mpu9250_config_t config;
     static float min_magno[3];
     static float max_magno[3];
-    
+
     if (packet->header.id == telemetry_id_mpu9250_data) {
         if (!has_config)
             return true;
@@ -58,7 +58,7 @@ static bool mpu9250_bias_data(const telemetry_t* packet, uint16_t metadata) {
 
             // Magno Bias
             calibration_data.data[1][i] = (max_magno[i] + min_magno[i]) / 2.0f;
-            
+
         }
 
     } else if (packet->header.id == telemetry_id_mpu9250_config) {
@@ -82,7 +82,7 @@ static bool data_packet(const telemetry_t* packet, message_metadata_t metadata) 
 }
 
 
-int32_t calibration_thread(void* arg) {
+void calibration_thread(void* arg) {
     (void)arg;
 
     platform_set_thread_name("Calibration");
@@ -90,7 +90,7 @@ int32_t calibration_thread(void* arg) {
     messaging_consumer_init(&consumer_control);
     messaging_consumer_init(&consumer_data);
     messaging_producer_init(&data_producer);
-   
+
 
     while (true) {
         COMPONENT_STATE_UPDATE(avionics_component_calibration, state_ok);

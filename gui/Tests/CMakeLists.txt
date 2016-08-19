@@ -5,8 +5,8 @@ SET(HEADERS)
 
 add_subdirectory(Source)
 
-add_executable(Avionics.GUI.Tests ${SOURCES} ${HEADERS})
-target_include_directories(Avionics.GUI.Tests PUBLIC
+add_executable(spalax.gui.tests ${SOURCES} ${HEADERS})
+target_include_directories(spalax.gui.tests PUBLIC
         Source)
 
 		
@@ -23,13 +23,13 @@ foreach (FILE ${SOURCES} ${HEADERS} ${CMAKELISTS})
 endforeach ()
 
 
-target_link_libraries(Avionics.GUI.Tests
+target_link_libraries(spalax.gui.tests
         Frontier.Engine
         freetype-gl
         freetype
         glfwmock
         glewmock
         glmock
-        Avionics
-        Avionics.GUI
+        spalax.shared
+        spalax.gui
         )

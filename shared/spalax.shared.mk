@@ -1,9 +1,9 @@
-AVIONICS_INCLUDES = \
-	$(AVIONICS)/include \
-	$(AVIONICS)/messaging/include \
-	$(AVIONICS)/messaging/include/config
+SPALAX_SHARED_INCLUDES = \
+	$(SPALAX_SHARED)/include \
+	$(MESSAGING)/include \
+	$(MESSAGING)/include/config
 
-AVIONICS_LIB_DIR = $(AVIONICS)/build-fw/lib
+SPALAX_SHARED_LIB_DIR = $(SPALAX_SHARED)/build-fw/lib
 
 ifeq ($(OS),Windows_NT)
 	# This will print a warning if the directory exists - not sure how to suppress this
@@ -24,23 +24,23 @@ endif
 # We get the directory of the root makefile - so we can patch up relative paths
 MAKEFILE_DIR := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
-.PHONY: clean_avionics build_avionics
+.PHONY: clean_spalax_shared build_spalax_shared
 
-build_avionics:
-	@ cd $(AVIONICS) \
+build_spalax_shared:
+	@cd $(SPALAX_SHARED) \
 	&& $(MAKE_DIR) \
 	$(CONTINUE_EVEN_IF_ERROR_OPERATOR) cd build-fw \
 	&& cmake \
 		-G$(MAKEFILES) \
 		-DCMAKE_TOOLCHAIN_FILE=Toolchain-arm-none-eabi.cmake \
-		-DAVIONICS_OS=chibios \
+		-DSPALAX_OS=chibios \
 		-DADDITIONAL_C_FLAGS="$(MCFLAGS) $(OPT) $(COPT) $(CWARN) -mthumb -mno-thumb-interwork $(subst -I, -I$(MAKEFILE_DIR),$(IINCDIR))" \
 		.. \
 	&& $(MAKE)
 
-all : build_avionics $(OBJS) $(OUTFILES) MAKE_ALL_RULE_HOOK
+all : PRE_MAKE_ALL_RULE_HOOK build_spalax_shared $(OBJS) $(OUTFILES) POST_MAKE_ALL_RULE_HOOK
 
 
-clean_avionics:
-	@cd $(AVIONICS) \
+clean_spalax_shared:
+	@cd $(SPALAX_SHARED) \
 	&& $(DEL_DIR)

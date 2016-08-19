@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-int32_t state_estimate_thread(void *arg);
+void state_estimate_thread(void *arg);
 
 #ifdef __cplusplus
 }

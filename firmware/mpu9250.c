@@ -4,7 +4,6 @@
 #include "mpu9250_config.h"
 
 #include "ch.h"
-#include "chprintf.h"
 #include "mpu9250.h"
 #include "badthinghandler.h"
 #include "compilermacros.h"
@@ -16,7 +15,7 @@
 #define MPU9250_SPI_CS_PORT  GPIOA
 #define MPU9250_SPI_CS_PIN   GPIOA_MPU_NSS
 
-static BinarySemaphore mpu9250_semaphore;
+static binary_semaphore_t mpu9250_semaphore;
 
 #define I2C_MST_DLY 10
 
@@ -375,16 +374,16 @@ void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
     (void)extp;
     (void)channel;
 
-    chSysLockFromIsr();
+    chSysLockFromISR();
     chBSemSignalI(&mpu9250_semaphore);
-    chSysUnlockFromIsr();
+    chSysUnlockFromISR();
 }
 
 MESSAGING_PRODUCER(messaging_producer_data, telemetry_id_mpu9250_data, sizeof(mpu9250_data_t), 40)
 
 MESSAGING_PRODUCER(messaging_producer_config, telemetry_id_mpu9250_config, sizeof(mpu9250_config_t), 10)
 
-msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
+void mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
     const SPIConfig spi_cfg = {
         NULL,
         MPU9250_SPI_CS_PORT,
@@ -398,7 +397,7 @@ msg_t mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
 
     mpu9250_config_t mpu9250_config;
 
-    chBSemInit(&mpu9250_semaphore, true);
+    chBSemObjectInit(&mpu9250_semaphore, true);
 
     chRegSetThreadName("MPU9250");
 

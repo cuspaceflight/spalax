@@ -19,9 +19,9 @@ extern "C" {
     typedef struct {
         calibration_procedure_t procedure;
     } calibration_control_t;
-    
 
-    int32_t calibration_thread(void* arg);
+
+    void calibration_thread(void* arg);
 
 #ifdef __cplusplus
 }

@@ -208,7 +208,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
 
 MESSAGING_CONSUMER(messaging_consumer, telemetry_source_imu_data, telemetry_source_imu_data_mask, 0, 0, getPacket, 1024);
 
-int32_t state_estimate_thread(void *arg) {
+void state_estimate_thread(void *arg) {
     (void)arg;
 
     platform_set_thread_name("State Estimation");

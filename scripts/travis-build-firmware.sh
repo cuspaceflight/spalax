@@ -6,5 +6,5 @@ set -xe
 # Test-builds the firmware on Travis.
 # Required packages: gcc-arm-none-eabi libnewlib-arm-none-eabi
 
-cd Avionics.Firmware
+cd firmware
 make all VERBOSE=1

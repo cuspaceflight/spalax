@@ -13,20 +13,17 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
 
-if (NOT DEFINED AVIONICS_OS)
-	message(FATAL_ERROR "AVIONICS_OS not defined")
-elseif (${AVIONICS_OS} STREQUAL win32)
-    set(MESSAGING_OS ${AVIONICS_OS})
-elseif (${AVIONICS_OS} STREQUAL chibios)
-    set(MESSAGING_OS ${AVIONICS_OS})
-else (NOT DEFINED AVIONICS_OS)
-    message(FATAL_ERROR "Unrecognised AVIONICS_OS")
-endif (NOT DEFINED AVIONICS_OS)
+if (NOT DEFINED SPALAX_OS)
+	message(FATAL_ERROR "SPALAX_OS not defined")
+elseif (${SPALAX_OS} STREQUAL win32)
+    set(MESSAGING_OS ${SPALAX_OS})
+elseif (${SPALAX_OS} STREQUAL chibios)
+    set(MESSAGING_OS ${SPALAX_OS})
+else (NOT DEFINED SPALAX_OS)
+    message(FATAL_ERROR "Unrecognised SPALAX_OS")
+endif (NOT DEFINED SPALAX_OS)
 
-add_subdirectory(messaging)
-
-
-
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../external/cusf-messaging ${CMAKE_CURRENT_BINARY_DIR}/cusf-messaging)
 add_subdirectory(include)
 add_subdirectory(src)
 
@@ -47,23 +44,23 @@ foreach(FILE ${SOURCES} ${HEADERS} ${CMAKELISTS})
   source_group("${GROUP}" FILES "${FILE}")
 endforeach()
 
-add_library(Avionics ${HEADERS} ${SOURCES} ${CMAKELISTS})
+add_library(spalax.shared ${HEADERS} ${SOURCES} ${CMAKELISTS})
 set(CMAKE_C_FLAGS ${ADDITIONAL_C_FLAGS})
-set_property(TARGET Avionics PROPERTY C_STANDARD 11)
+set_property(TARGET spalax.shared PROPERTY C_STANDARD 11)
 
-SET (AVIONICS_INCLUDES
+SET (SPALAX_SHARED_INCLUDES
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 	${MESSAGING_INCLUDES}
 )
 
 get_directory_property(hasParent PARENT_DIRECTORY)
 if (hasParent)
-	SET(AVIONICS_INCLUDES ${AVIONICS_INCLUDES} PARENT_SCOPE)
+	SET(SPALAX_SHARED_INCLUDES ${SPALAX_SHARED_INCLUDES} PARENT_SCOPE)
 endif()
 
-target_include_directories ( Avionics PUBLIC
-    ${AVIONICS_INCLUDES}
+target_include_directories ( spalax.shared PUBLIC
+    ${SPALAX_SHARED_INCLUDES}
 	${OS_INCLUDES}
 )
 
-target_link_libraries( Avionics PUBLIC messaging)
+target_link_libraries( spalax.shared PUBLIC messaging)

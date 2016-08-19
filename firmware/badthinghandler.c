@@ -32,7 +32,7 @@ static void setSensorOk(bool ok) {
     }
 }
 
-msg_t bthandler_thread(void* arg) {
+void bthandler_thread(void* arg) {
     (void)arg;
     chRegSetThreadName("BadThingHandler");
     const volatile uint8_t* component_states = component_state_get_states();

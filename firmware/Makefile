@@ -3,9 +3,19 @@
 # NOTE: Can be overridden externally.
 #
 
+.DEFAULT_GOAL := all
+
+ifeq ($(OS),Windows_NT)
+PRE_MAKE_ALL_RULE_HOOK:
+	mkdir .dep &
+	mkdir build &
+	mkdir build\obj &
+	mkdir build\lst &
+endif
+
 # Compiler options here.
 ifeq ($(USE_OPT),)
-  USE_OPT = -O0 -ggdb -fomit-frame-pointer -falign-functions=16 -std=gnu99
+  USE_OPT = -O2 -ggdb -fomit-frame-pointer -falign-functions=16 -std=gnu99
 endif
 
 # C specific options here (added to USE_OPT).
@@ -25,12 +35,12 @@ endif
 
 # Linker extra options here.
 ifeq ($(USE_LDOPT),)
-  USE_LDOPT =
+  USE_LDOPT = 
 endif
 
 # Enable this if you want link time optimizations (LTO)
 ifeq ($(USE_LTO),)
-  USE_LTO = no
+  USE_LTO = yes
 endif
 
 # If enabled, this option allows to compile the application in THUMB mode.
@@ -43,6 +53,17 @@ ifeq ($(USE_VERBOSE_COMPILE),)
   USE_VERBOSE_COMPILE = no
 endif
 
+# If enabled, this option makes the build process faster by not compiling
+# modules not used in the current configuration.
+ifeq ($(USE_SMART_BUILD),)
+ifeq ($(OS),Windows_NT)
+# Smart build doesn't work on windows as it uses 'cat'
+  USE_SMART_BUILD = no
+else
+  USE_SMART_BUILD = yes
+endif
+endif
+
 #
 # Build global options
 ##############################################################################
@@ -50,6 +71,18 @@ endif
 ##############################################################################
 # Architecture or project specific options
 #
+
+# Stack size to be allocated to the Cortex-M process stack. This stack is
+# the stack used by the main() thread.
+ifeq ($(USE_PROCESS_STACKSIZE),)
+  USE_PROCESS_STACKSIZE = 0x400
+endif
+
+# Stack size to the allocated to the Cortex-M main/exceptions stack. This
+# stack is used for processing interrupts and exceptions.
+ifeq ($(USE_EXCEPTIONS_STACKSIZE),)
+  USE_EXCEPTIONS_STACKSIZE = 0x400
+endif
 
 # Enables the use of FPU on Cortex-M4 (no, softfp, hard).
 ifeq ($(USE_FPU),)
@@ -64,48 +97,46 @@ endif
 # Project, sources and paths
 #
 
-.PHONY: all
-.DEFAULT_GOAL := all
-
 # Define project name here
-PROJECT = IMU
+PROJECT = spalax
 
 # Imported source files and paths
-CHIBIOS = ../ChibiOS-RT
-include config/board.mk
-include $(CHIBIOS)/os/hal/platforms/STM32F4xx/platform.mk
+CHIBIOS = ../external/ChibiOS
+# Startup files.
+include $(CHIBIOS)/os/common/ports/ARMCMx/compilers/GCC/mk/startup_stm32f4xx.mk
+# HAL-OSAL files (optional).
 include $(CHIBIOS)/os/hal/hal.mk
-include $(CHIBIOS)/os/ports/GCC/ARMCMx/STM32F4xx/port.mk
-include $(CHIBIOS)/os/kernel/kernel.mk
-include $(CHIBIOS)/test/test.mk
+include $(CHIBIOS)/os/hal/ports/STM32/STM32F4xx/platform.mk
+include $(CHIBIOS)/os/hal/osal/rt/osal.mk
+# RTOS files (optional).
+include $(CHIBIOS)/os/rt/rt.mk
+include $(CHIBIOS)/os/rt/ports/ARMCMx/compilers/GCC/mk/port_v7m.mk
+# Other files (optional).
+include $(CHIBIOS)/test/rt/test.mk
 
-AVIONICS = ../Avionics.Shared
-include $(AVIONICS)/avionics.mk
+MESSAGING = ../external/cusf-messaging
+SPALAX_SHARED = ../shared
+include $(SPALAX_SHARED)/spalax.shared.mk
+
+BOARDSRC=config/board.c
+BOARDINC=
 
 # Define linker script file here
-LDSCRIPT= config/STM32F407xG_CCM.ld
-
-# Override fatfs.mk to use local (in-repository) fatfs source
-FATFSSRC = ${CHIBIOS}/os/various/fatfs_bindings/fatfs_diskio.c \
-           ${CHIBIOS}/os/various/fatfs_bindings/fatfs_syscall.c \
-           fatfs/src/ff.c fatfs/src/option/ccsbcs.c
-FATFSINC = fatfs/src
+LDSCRIPT= config/STM32F407xG.ld
 
 # C sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
-CSRC = $(PORTSRC) \
+CSRC = $(STARTUPSRC) \
        $(KERNSRC) \
-       $(TESTSRC) \
+       $(PORTSRC) \
+       $(OSALSRC) \
        $(HALSRC) \
        $(PLATFORMSRC) \
        $(BOARDSRC) \
-       $(FATFSSRC) \
-       $(CHIBIOS)/os/various/memstreams.c \
-       $(CHIBIOS)/os/various/chprintf.c \
-       $(CHIBIOS)/os/various/syscalls.c \
-       $(CHIBIOS)/os/various/shell.c \
+       $(TESTSRC) \
        main.c adis16405.c badthinghandler.c mpu9250.c ms5611.c \
-       config/usbcfg.c serialconsole.c usb_telemetry.c
+       config/usbcfg.c usb_telemetry.c
+
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -132,13 +163,11 @@ TCSRC =
 TCPPSRC =
 
 # List ASM source files here
-ASMSRC = $(PORTASM)
+ASMSRC = $(STARTUPASM) $(PORTASM) $(OSALASM)
 
-INCDIR = $(PORTINC) $(KERNINC) $(TESTINC) \
-         $(HALINC) $(PLATFORMINC) $(BOARDINC) \
-         $(CHIBIOS)/os/various $(FATFSINC) config $(AVIONICS_INCLUDES)
-
-LDFLAGS = -g
+INCDIR = $(STARTUPINC) $(KERNINC) $(PORTINC) $(OSALINC) \
+         $(HALINC) $(PLATFORMINC) $(BOARDINC) $(TESTINC) \
+         $(CHIBIOS)/os/various config ${SPALAX_SHARED_INCLUDES} .
 
 #
 # Project, sources and paths
@@ -161,6 +190,7 @@ LD   = $(TRGT)gcc
 #LD   = $(TRGT)g++
 CP   = $(TRGT)objcopy
 AS   = $(TRGT)gcc -x assembler-with-cpp
+AR   = $(TRGT)ar
 OD   = $(TRGT)objdump
 SZ   = $(TRGT)size
 HEX  = $(CP) -O ihex
@@ -173,36 +203,13 @@ AOPT =
 TOPT = -mthumb -DTHUMB
 
 # Define C warning options here
-CWARN = -Wall -Wextra -Wstrict-prototypes
+CWARN = -Wall -Wextra -Wundef -Wstrict-prototypes
 
 # Define C++ warning options here
-CPPWARN = -Wall -Wextra
+CPPWARN = -Wall -Wextra -Wundef
 
 #
 # Compiler settings
-##############################################################################
-
-##############################################################################
-# Start of default section
-#
-
-# List all default C defines here, like -D_DEBUG=1
-DDEFS =
-
-# List all default ASM defines here, like -D_DEBUG=1
-DADEFS =
-
-# List all default directories to look for include files here
-DINCDIR =
-
-# List the default directory to look for the libraries here
-DLIBDIR = $(AVIONICS_LIB_DIR)
-
-# List all default libraries here
-DLIBS = -lAvionics -lmessaging -lm
-
-#
-# End of default section
 ##############################################################################
 
 ##############################################################################
@@ -219,59 +226,37 @@ UADEFS =
 UINCDIR =
 
 # List the user directory to look for the libraries here
-ULIBDIR =
+ULIBDIR = $(SPALAX_SHARED_LIB_DIR)
 
 # List all user libraries here
-ULIBS =
+ULIBS = -lspalax.shared -lmessaging -lm -lrdimon
 
 #
 # End of user defines
 ##############################################################################
 
-RULESPATH = $(CHIBIOS)/os/ports/GCC/ARMCMx
+RULESPATH = $(CHIBIOS)/os/common/ports/ARMCMx/compilers/GCC
 include $(RULESPATH)/rules.mk
 
-$(OBJS): build_avionics
-clean: clean_avionics
-
 ##############################################################################
-# Black Magic Probe flashing via GDB
+# M3Debug flashing via GDB
 #
-ifeq ($(OS),Windows_NT)
-    EXTENDED_REMOTE := COM4
-else
-    EXTENDED_REMOTE := /dev/ttyACM0
-endif
-
-
-flash: all
+BMP_PORT = $(wildcard /dev/serial/by-id/usb-Black_Sphere_Technologies_Black_Magic_Probe_*-if00)
+JTAG_SCAN = python3 ../../shared/jtag_scan/jtag_scan.py
+flash: build/$(PROJECT).elf $(OUTFILES)
 	arm-none-eabi-gdb --batch \
-                      -ex 'target extended-remote $(EXTENDED_REMOTE)' \
-                      -ex 'monitor version' \
-                      -ex 'monitor swdp_scan' \
-                      -ex 'attach 1' \
-                      -ex 'load build/$(PROJECT).elf'
+		              -ex 'target extended-remote $(BMP_PORT)' \
+					  -ex 'monitor version' \
+					  -ex 'monitor jtag_scan' \
+					  -ex "attach $(shell $(JTAG_SCAN) --find $(PROJECT))" \
+					  -ex 'load' \
+					  -ex 'compare-sections' build/$(PROJECT).elf
 
-debug: all
-	arm-none-eabi-gdb -ex 'target extended-remote $(EXTENDED_REMOTE)' \
-                      -ex 'monitor swdp_scan' \
-                      -ex 'attach 1' \
-                      -ex 'file build/$(PROJECT).elf'
-power:
-	arm-none-eabi-gdb --batch \
-                      -ex 'target extended-remote $(EXTENDED_REMOTE)' \
-                      -ex 'monitor tpwr enable'
-unpower:
-	arm-none-eabi-gdb --batch \
-                      -ex 'target extended-remote $(EXTENDED_REMOTE)' \
-                      -ex 'monitor tpwr disable'
-
-run:
-	arm-none-eabi-gdb --batch \
-                      -ex 'target extended-remote $(EXTENDED_REMOTE)' \
-                      -ex 'monitor swdp_scan' \
-                      -ex 'attach 1' \
-                      -ex 'run'
+debug: build/$(PROJECT).elf $(OUTFILES)
+	arm-none-eabi-gdb -ex 'target extended-remote $(BMP_PORT)' \
+		              -ex 'monitor jtag_scan' \
+					  -ex "attach $(shell $(JTAG_SCAN) --find $(PROJECT))" \
+					  -ex "file build/$(PROJECT).elf"
 
 #
 # End BMP flashing

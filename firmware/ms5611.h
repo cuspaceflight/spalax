@@ -10,6 +10,6 @@
 #include <ch.h>
 
 /* The main thread. Run this. */
-msg_t ms5611_thread(void *arg);
+void ms5611_thread(void *arg);
 
 #endif /* MS5611_H */

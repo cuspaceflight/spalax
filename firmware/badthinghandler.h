@@ -6,6 +6,6 @@
 #include "component_state.h"
 #include <stdbool.h>
 
-msg_t bthandler_thread(void* arg);
+void bthandler_thread(void* arg);
 
 #endif /* BAD_THING_HANDLER_H*/

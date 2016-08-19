@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.2)
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
-project(Avionics.GUI)
+project(spalax)
 
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -26,14 +26,14 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/bin)
 
-set(AVIONICS_OS win32)
+set(SPALAX_OS win32)
 
 # This will create project folders in visual studio for us
 get_filename_component(ROOT ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY)
 set(FRONTIER_ENGINE_FOLDER_MACRO_DIR ${ROOT} CACHE STRING "Frontier Engine Folder Macro Directory")
 
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Frontier.Engine ${CMAKE_CURRENT_BINARY_DIR}/Frontier.Engine)
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../Avionics.Shared ${CMAKE_CURRENT_BINARY_DIR}/Avionics.Shared)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../external/Frontier.Engine ${CMAKE_CURRENT_BINARY_DIR}/Frontier.Engine)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/../shared ${CMAKE_CURRENT_BINARY_DIR}/shared)
 add_subdirectory(Source)
 
 # We can use GLOB here as in order for a CMakeList to be used a pre-existing one
@@ -50,35 +50,35 @@ foreach(FILE ${SOURCES} ${HEADERS} ${CMAKELISTS})
   source_group("${GROUP}" FILES "${FILE}")
 endforeach()
 
-add_library(Avionics.GUI ${HEADERS} ${SOURCES} ${CMAKELISTS})
+add_library(spalax.gui ${HEADERS} ${SOURCES} ${CMAKELISTS})
 
-target_include_directories(Avionics.GUI PUBLIC
+target_include_directories(spalax.gui PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Source
-        ${AVIONICS_INCLUDES}
+        ${SPALAX_SHARED_INCLUDES}
         ${FRONTIER_ENGINE_INCLUDES}
         )
 
-ADD_EXECUTABLE(Avionics.GUI.Launcher Source/main.cpp)
+ADD_EXECUTABLE(spalax.gui.launcher Source/main.cpp)
 
-TARGET_LINK_LIBRARIES(Avionics.GUI.Launcher
-        Avionics.GUI
-        Avionics
+TARGET_LINK_LIBRARIES(spalax.gui.launcher
+        spalax.gui
+        spalax.shared
         ${FRONTIER_ENGINE_LIBS}
         )
 
-add_custom_command(TARGET Avionics.GUI.Launcher POST_BUILD
+add_custom_command(TARGET spalax.gui.launcher POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/Resources ${CMAKE_CURRENT_BINARY_DIR}/Resources)
 
 # MSVC by default runs programs with project's directory as the working directory
 # So we need to copy resources there also
 if (MSVC)
-    add_custom_command(TARGET Avionics.GUI.Launcher POST_BUILD
+    add_custom_command(TARGET spalax.gui.launcher POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory
             ${CMAKE_CURRENT_SOURCE_DIR}/Resources ${CMAKE_CURRENT_BINARY_DIR}/Resources)
 endif ()
 
-add_custom_command(TARGET Avionics.GUI.Launcher POST_BUILD
+add_custom_command(TARGET spalax.gui.launcher POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/Resources ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Resources)
 		

@@ -32,7 +32,7 @@
 /*
  * MCU type as defined in the ST header.
  */
-#define STM32F40_41xxx
+#define STM32F405xx
 
 /*
  * Disable MCU's VBUS sensing. (Otherwise VBUS would have to be wired to PA9.)
