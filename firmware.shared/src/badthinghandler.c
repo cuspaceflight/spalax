@@ -1,36 +1,32 @@
 #include "ch.h"
 #include "hal.h"
 #include "badthinghandler.h"
-
-#define NO_BEEPING
+#include "spalaxconf.h"
 
 static inline void beep_start(void) {
-    #ifndef NO_BEEPING
-    palSetPad(GPIOE, GPIOE_STAT_BUZZER);
+    #if BAD_THING_HANDLER_BEEP_ENABLED
+    palSetPad(BAD_THING_HANDLER_BUZZER_PORT, BAD_THING_HANDLER_BUZZER_PIN);
     #endif
 }
 
 static inline void beep_stop(void) {
-    #ifndef NO_BEEPING
-    palClearPad(GPIOE, GPIOE_STAT_BUZZER);
+    #if BAD_THING_HANDLER_BEEP_ENABLED
+    palClearPad(BAD_THING_HANDLER_BUZZER_PORT, BAD_THING_HANDLER_BUZZER_PIN);
     #endif
 }
 
-
+#if BAD_THIND_HANDLER_HAS_SENSOR_LEDS
 static void setSensorOk(bool ok) {
     if (ok) {
-        // Set GPIOB_STAT_SENSORS
-        // Turn off GPIOE_STAT_NSENSORS
-        palSetPad(GPIOB, GPIOB_STAT_SENSORS);
-        palClearPad(GPIOE, GPIOE_STAT_NSENSORS);
+        palSetPad(BAD_THING_HANDLER_SENSOR_OK_LED_PORT, BAD_THING_HANDLER_SENSOR_OK_LED_PIN);
+        palClearPad(BAD_THING_HANDLER_SENSOR_NOK_LED_PORT, BAD_THING_HANDLER_SENSOR_NOK_LED_PIN);
     }
     else {
-        // SET GPIOE_STAT_NSENSORS
-        // Turn off GPIOB_STAT_SENSORS
-        palClearPad(GPIOB, GPIOB_STAT_SENSORS);
-        palSetPad(GPIOE, GPIOE_STAT_NSENSORS);
+        palClearPad(BAD_THING_HANDLER_SENSOR_OK_LED_PORT, BAD_THING_HANDLER_SENSOR_OK_LED_PIN);
+        palSetPad(BAD_THING_HANDLER_SENSOR_NOK_LED_PORT, BAD_THING_HANDLER_SENSOR_NOK_LED_PIN);
     }
 }
+#endif
 
 void bthandler_thread(void* arg) {
     (void)arg;
@@ -52,29 +48,29 @@ void bthandler_thread(void* arg) {
         setSensorOk(!(component_states[avionics_component_adis16405] == state_error || component_states[avionics_component_mpu9250] == state_error || component_states[avionics_component_ms5611] == state_error));
 
         if (has_error) {
-            palClearPad(GPIOE, GPIOE_STAT_IMU);
-            palSetPad(GPIOE, GPIOE_STAT_NIMU);
+            palClearPad(BAD_THING_HANDLER_OK_LED_PORT, BAD_THING_HANDLER_OK_LED_PIN);
+            palSetPad(BAD_THING_HANDLER_NOK_LED_PORT, BAD_THING_HANDLER_NOK_LED_PIN);
             beep_start();
             chThdSleepMilliseconds(500);
-            palClearPad(GPIOE, GPIOE_STAT_NIMU);
+            palClearPad(BAD_THING_HANDLER_NOK_LED_PORT, BAD_THING_HANDLER_NOK_LED_PIN);
             beep_stop();
             chThdSleepMilliseconds(500);
-            palClearPad(GPIOE, GPIOE_STAT_NIMU);
+            palClearPad(BAD_THING_HANDLER_NOK_LED_PORT, BAD_THING_HANDLER_NOK_LED_PIN);
         } else if (has_initializing) {
-            palSetPad(GPIOE, GPIOE_STAT_IMU);
-            palSetPad(GPIOE, GPIOE_STAT_NIMU);
+            palSetPad(BAD_THING_HANDLER_OK_LED_PORT, BAD_THING_HANDLER_OK_LED_PIN);
+            palSetPad(BAD_THING_HANDLER_NOK_LED_PORT, BAD_THING_HANDLER_NOK_LED_PIN);
             beep_start();
             chThdSleepMilliseconds(500);
             beep_stop();
             chThdSleepMilliseconds(500);
         } else {
-            palSetPad(GPIOE, GPIOE_STAT_IMU);
-            palClearPad(GPIOE, GPIOE_STAT_NIMU);
+            palSetPad(BAD_THING_HANDLER_OK_LED_PORT, BAD_THING_HANDLER_OK_LED_PIN);
+            palClearPad(BAD_THING_HANDLER_NOK_LED_PORT, BAD_THING_HANDLER_NOK_LED_PIN);
             beep_start();
             chThdSleepMilliseconds(20);
             beep_stop();
             chThdSleepMilliseconds(480);
-            palClearPad(GPIOE, GPIOE_STAT_IMU);
+            palClearPad(BAD_THING_HANDLER_OK_LED_PORT, BAD_THING_HANDLER_OK_LED_PIN);
             chThdSleepMilliseconds(500);
         }
     }

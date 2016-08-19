@@ -116,13 +116,14 @@ include $(CHIBIOS)/test/rt/test.mk
 
 MESSAGING = ../external/cusf-messaging
 SPALAX_SHARED = ../shared
-include $(SPALAX_SHARED)/spalax.shared.mk
+SPALAX_FIRMWARE_SHARED = ../firmware.shared
+include $(SPALAX_FIRMWARE_SHARED)/spalax.firmware.shared.mk
 
-BOARDSRC=config/board.c
+BOARDSRC=board.c
 BOARDINC=
 
 # Define linker script file here
-LDSCRIPT= config/STM32F407xG.ld
+LDSCRIPT= STM32F405xG.ld
 
 # C sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.
@@ -133,9 +134,7 @@ CSRC = $(STARTUPSRC) \
        $(HALSRC) \
        $(PLATFORMSRC) \
        $(BOARDSRC) \
-       $(TESTSRC) \
-       main.c adis16405.c badthinghandler.c mpu9250.c ms5611.c \
-       config/usbcfg.c usb_telemetry.c
+       $(TESTSRC)
 
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -167,7 +166,7 @@ ASMSRC = $(STARTUPASM) $(PORTASM) $(OSALASM)
 
 INCDIR = $(STARTUPINC) $(KERNINC) $(PORTINC) $(OSALINC) \
          $(HALINC) $(PLATFORMINC) $(BOARDINC) $(TESTINC) \
-         $(CHIBIOS)/os/various config ${SPALAX_SHARED_INCLUDES} .
+         $(CHIBIOS)/os/various ${SPALAX_FIRMWARE_SHARED_INCLUDES} .
 
 #
 # Project, sources and paths
@@ -226,10 +225,10 @@ UADEFS =
 UINCDIR =
 
 # List the user directory to look for the libraries here
-ULIBDIR = $(SPALAX_SHARED_LIB_DIR)
+ULIBDIR = $(SPALAX_FIRMWARE_SHARED_LIB_DIR)
 
 # List all user libraries here
-ULIBS = -lspalax.shared -lmessaging -lm -lrdimon
+ULIBS = -lspalax.firmware.shared -lspalax.shared -lmessaging -lm -lrdimon
 
 #
 # End of user defines

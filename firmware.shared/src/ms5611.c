@@ -11,11 +11,7 @@
 #include "hal.h"
 #include "badthinghandler.h"
 #include "messaging.h"
-
-
-#define MS5611_SPID        SPID2
-#define MS5611_SPI_CS_PORT GPIOB
-#define MS5611_SPI_CS_PIN  GPIOB_ALT_NSS
+#include "spalaxconf.h"
 
 
 static void ms5611_spi_start(void);

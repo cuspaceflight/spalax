@@ -3,10 +3,7 @@
 #include "ch.h"
 #include "adis16405.h"
 #include "badthinghandler.h"
-
-#define ADIS16405_SPID         SPID3
-#define ADIS16405_SPI_CS_PORT  GPIOA
-#define ADIS16405_SPI_CS_PIN   GPIOA_ESPI_NSS
+#include "spalaxconf.h"
 
 static binary_semaphore_t adis16405_semaphore;
 

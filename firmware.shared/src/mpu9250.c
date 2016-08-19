@@ -10,10 +10,7 @@
 #include "mpu9250-reg.h"
 #include "messaging.h"
 #include <string.h>
-
-#define MPU9250_SPID         SPID1
-#define MPU9250_SPI_CS_PORT  GPIOA
-#define MPU9250_SPI_CS_PIN   GPIOA_MPU_NSS
+#include "spalaxconf.h"
 
 static binary_semaphore_t mpu9250_semaphore;
 
