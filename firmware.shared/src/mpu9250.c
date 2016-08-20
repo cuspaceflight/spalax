@@ -12,6 +12,9 @@
 #include <string.h>
 #include "spalaxconf.h"
 
+static const uint32_t mpu9250_send_over_usb_count = 100; // Will send 1 in every 100 samples
+static const uint32_t mpu9250_send_config_count = 5000; // Will resend config every 1000 samples
+
 static binary_semaphore_t mpu9250_semaphore;
 
 #define I2C_MST_DLY 10
@@ -354,17 +357,6 @@ static void mpu9250_init(mpu9250_config_t* config) {
     config->magno_bias[0] = -225.000000f;
     config->magno_bias[1] = -115.000000f;
     config->magno_bias[2] = -335.500000f;
-
-    // float mag_sensitivity_adjustment[3];
-    //
-    // mag_sensitivity_adjustment[0] = mpu9250_i2c_read_u8(AK8963_REG_ASAX);
-    // mag_sensitivity_adjustment[1] = mpu9250_i2c_read_u8(AK8963_REG_ASAY);
-    // mag_sensitivity_adjustment[2] = mpu9250_i2c_read_u8(AK8963_REG_ASAZ);
-
-    // for (int i = 0; i < 3; i++) {
-    //     float sensitivity_adjustment = (float)(config->mag_sensitivity_adjustment[i] -  128) * 0.5f / 128.0f + 1;
-    //     config->magno_sf[i] *= sensitivity_adjustment[i];
-    // }
 }
 
 void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {

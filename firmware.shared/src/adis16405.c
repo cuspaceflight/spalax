@@ -3,12 +3,15 @@
 #include "ch.h"
 #include "adis16405.h"
 #include "adis16405-reg.h"
+#include "adis16405_config.h"
 #include "badthinghandler.h"
 #include "spalaxconf.h"
 #include "math_utils.h"
+#include "messaging.h"
 
 static binary_semaphore_t adis16405_semaphore;
-
+static const uint32_t adis16405_send_over_usb_count = 100; // Will send 1 in every 100 samples
+static const uint32_t adis16405_send_config_count = 5000; // Will resend config every 1000 samples
 
 static uint16_t adis16405_read_u16(uint8_t addr_in) {
     // All transfers are 16 bits
@@ -74,7 +77,7 @@ static int16_t sign_extend(uint16_t val, int bits) {
 
 
 
-static bool adis16405_burst_read(int16_t data_out[12]) {
+static bool adis16405_burst_read(int16_t data_out[10]) {
     // Burst mode data collection is a more efficient way of reading the sensor data
     // We write the value 0x3E00
     // Then for the next 12 clock periods the sensor module will write back the sensor data
@@ -95,7 +98,7 @@ static bool adis16405_burst_read(int16_t data_out[12]) {
         tx_buff[i] = 0xBEEF;
     }
 
-    adis16405_read_multiple(0x02, 12, (uint16_t*)data_out, (uint16_t*)tx_buff);
+    adis16405_read_multiple(0x02, 10, (uint16_t*)data_out, (uint16_t*)tx_buff);
     for (int i = 0; i < 12; i++) {
         data_out[i] = adis16405_read_u16(0x02 + 2*i);
         if((data_out[i] & 0x4000) == 1)
@@ -127,7 +130,7 @@ static bool adis16405_burst_read(int16_t data_out[12]) {
     return true;
 }
 
-static void adis16405_init(void) {
+static void adis16405_init(adis16405_config_t* config) {
 
     // Reset calibration to factory defaults
     adis16405_write_u16(ADIS16405_REG_GLOB_CMD, 0x0001);
@@ -157,6 +160,16 @@ static void adis16405_init(void) {
         component_state_update(avionics_component_adis16405, state_error, errors);
     }
 
+    config->accel_sf = 3.33f/1000.0f*9.8f;
+    config->gyro_sf = 0.05f*PI/180.0f;
+
+    config->magno_sf[0] = 1;
+    config->magno_sf[1] = 1;
+    config->magno_sf[2] = 1;
+
+    config->magno_bias[0] = 0.0f;
+    config->magno_bias[1] = 0.0f;
+    config->magno_bias[2] = 0.0f;
 }
 
 static bool adis16405_id_check(void) {
@@ -187,6 +200,9 @@ void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
     chBSemSignalI(&adis16405_semaphore);
     chSysUnlockFromISR();
 }
+
+MESSAGING_PRODUCER(messaging_producer_data, telemetry_id_adis16405_data, sizeof(adis16405_data_t), 40)
+MESSAGING_PRODUCER(messaging_producer_config, telemetry_id_adis16405_config, sizeof(adis16405_config_t), 10)
 
 void adis16405_thread(void *arg) {
     (void)arg;
@@ -237,7 +253,9 @@ void adis16405_thread(void *arg) {
     // Log that we have passed the error check
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
 
-    adis16405_init();
+    adis16405_config_t adis16405_config;
+
+    adis16405_init(&adis16405_config);
 
     while (!adis16405_self_test()) {
         chThdSleepMilliseconds(100);
@@ -250,39 +268,41 @@ void adis16405_thread(void *arg) {
         return;
     }
 
+    messaging_producer_init(&messaging_producer_data);
+    messaging_producer_init(&messaging_producer_config);
+
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_ok);
 
+    adis16405_data_t data;
 
-
-    int16_t raw_data[12];
-    float gyro[3],accel[3],magno[3], temperature;
-
+    uint32_t send_over_usb_count = adis16405_send_over_usb_count;
+    uint32_t send_config_count = adis16405_send_config_count;
     while(TRUE) {
         chSysLock();
         chBSemWaitTimeoutS(&adis16405_semaphore, 100);
         chSysUnlock();
 
-        if (!adis16405_burst_read(raw_data))
+        if (!adis16405_burst_read((int16_t*)&data))
             continue;
 
-        // TODO check these
-        // Factor on data sheet 3.33mg
-        // Factor of 0.0125 is for when operating with 75 degrees/sec
-        // Factor of 0.05 is for when operating with 300 degrees/sec
-        for (int i = 0;i<3;i++)
-            gyro[i] = 0.05f*PI/180.0f*(raw_data[i+1]);
+        message_metadata_t flags = 0;
 
-        // Acceleration scale is 3.33,measured in mg
-        for (int i = 0;i<3;i++)
-            accel[i] = 3.33f/1000.0f*9.8f*(raw_data[i+4]);
+        if (send_over_usb_count == adis16405_send_over_usb_count)
+            send_over_usb_count = 0;
+        else {
+            flags |= message_flags_dont_send_over_usb;
+            send_over_usb_count++;
+        }
 
-        // Magno data in mgauss
-        for (int i = 0;i<3;i++)
-            magno[i] = 0.5f*(raw_data[i+7]);
+        if (send_config_count == adis16405_send_config_count) {
+            // Send config
+            messaging_producer_send(&messaging_producer_config, 0, (const uint8_t*)&adis16405_config);
+            send_config_count = 0;
+        } else {
+            send_config_count++;
+        }
 
-        // Temperature scale 0.14 degrees, temp is measured in degrees
-        temperature = 0.14f*raw_data[10];
+        messaging_producer_send(&messaging_producer_data, flags, (const uint8_t*)&data);
 
-        // TODO: Send off sensor data
     }
 }
