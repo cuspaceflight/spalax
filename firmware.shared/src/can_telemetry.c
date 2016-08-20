@@ -28,6 +28,18 @@ static bool transmit_packet(const telemetry_t* packet, message_metadata_t metada
     if (serusbcfg.usbp->state != USB_ACTIVE)
         return false;
     if (packet->header.origin == local_config.origin) {
+        can_packet_t can_packet;
+        if (packet->header.length <= 4) {
+            uint32_t* payload_ptr = packet->payload;
+            can_packet.data = payload_ptr[0];
+            transmit_can_packet(&can_packet, packet->id);
+        }
+
+        if ((metadata & message_flags_may_split_packet) == 0) {
+            COMPONENT_STATE_UPDATE(avionics_component_can_telemetry, state_error);
+            return true;
+        }
+
         int num_multiples = (packet->header.length + 3) / 4 + 1;
         // The multiple tagging overlaps with the actual id!
         // NB: This is a crude check and may miss ids with trailing 0s
