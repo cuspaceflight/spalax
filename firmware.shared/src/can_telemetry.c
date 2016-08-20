@@ -28,7 +28,7 @@ static bool transmit_packet(const telemetry_t* packet, message_metadata_t metada
     if (serusbcfg.usbp->state != USB_ACTIVE)
         return false;
     if (packet->header.origin == local_config.origin) {
-        int num_multiples = (packet->header.length + 3) / 4;
+        int num_multiples = (packet->header.length + 3) / 4 + 1;
         // The multiple tagging overlaps with the actual id!
         // NB: This is a crude check and may miss ids with trailing 0s
         if (num_multiples & packet->id != 0) {
@@ -38,7 +38,7 @@ static bool transmit_packet(const telemetry_t* packet, message_metadata_t metada
 
         can_packet_t can_packet;
         uint32_t* payload_ptr = packet->payload;
-        for (int i = 0; i < num_multiples; i++) {
+        for (int i = 1; i < num_multiples; i++) {
             can_packet.data = payload_ptr[i];
             transmit_can_packet(&can_packet, packet->id | i);
         }
