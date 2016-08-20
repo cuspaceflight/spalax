@@ -98,7 +98,7 @@ endif
 #
 
 # Define project name here
-PROJECT = spalax
+PROJECT = m3imu
 
 # Imported source files and paths
 CHIBIOS = ../external/ChibiOS
