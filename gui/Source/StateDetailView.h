@@ -15,4 +15,6 @@ public:
 protected:
     std::vector<FTLabel*> value_labels_;
     std::shared_ptr<CalibrationLabel> calibration_label_;
+
+	void toggleDetails();
 };
