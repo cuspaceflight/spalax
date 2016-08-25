@@ -1,5 +1,7 @@
 #ifndef _SPALAXCONF_H_
 #define _SPALAXCONF_H_
+#include "ch.h"
+#include "hal.h"
 
 #define ADIS16405_SPID         SPID3
 #define ADIS16405_SPI_CS_PORT  GPIOA
@@ -30,6 +32,6 @@
 #define BAD_THING_HANDLER_SENSOR_NOK_LED_PORT GPIOE
 #define BAD_THING_HANDLER_SENSOR_NOK_LED_PIN GPIOE_STAT_NSENSORS
 
-
+extern const EXTConfig extcfg;
 
 #endif /* _SPALAXCONF_H_ */

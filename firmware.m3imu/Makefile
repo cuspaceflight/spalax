@@ -15,7 +15,7 @@ endif
 
 # Compiler options here.
 ifeq ($(USE_OPT),)
-  USE_OPT = -O2 -ggdb -fomit-frame-pointer -falign-functions=16 -std=gnu99
+  USE_OPT = -O0 -ggdb -fomit-frame-pointer -falign-functions=16 -std=gnu99
 endif
 
 # C specific options here (added to USE_OPT).
@@ -35,7 +35,7 @@ endif
 
 # Linker extra options here.
 ifeq ($(USE_LDOPT),)
-  USE_LDOPT = 
+  USE_LDOPT =
 endif
 
 # Enable this if you want link time optimizations (LTO)
@@ -134,7 +134,8 @@ CSRC = $(STARTUPSRC) \
        $(HALSRC) \
        $(PLATFORMSRC) \
        $(BOARDSRC) \
-       $(TESTSRC)
+       $(TESTSRC) \
+	   spalaxconf.c
 
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -241,7 +242,7 @@ include $(RULESPATH)/rules.mk
 # M3Debug flashing via GDB
 #
 BMP_PORT = $(wildcard /dev/serial/by-id/usb-Black_Sphere_Technologies_Black_Magic_Probe_*-if00)
-JTAG_SCAN = python3 ../../shared/jtag_scan/jtag_scan.py
+JTAG_SCAN = python3 ../external/jtag_scan/jtag_scan.py
 flash: build/$(PROJECT).elf $(OUTFILES)
 	arm-none-eabi-gdb --batch \
 		              -ex 'target extended-remote $(BMP_PORT)' \

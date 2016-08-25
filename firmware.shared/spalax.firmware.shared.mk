@@ -1,5 +1,5 @@
 SPALAX_FIRMWARE_SHARED_INCLUDES = \
-	$(SPALAX_FIRMWARE_SHARED)/include \
+	$(SPALAX_FIRMWARE_SHARED)/src \
 	$(SPALAX_SHARED)/include \
 	$(MESSAGING)/include \
 	$(MESSAGING)/include/config
@@ -26,11 +26,11 @@ endif
 MAKEFILE_DIR := $(dir $(abspath $(firstword $(MAKEFILE_LIST))))
 
 .PHONY: clean_spalax_shared build_spalax_shared
-	
+
 clean_spalax_shared:
 	@cd $(SPALAX_FIRMWARE_SHARED) \
 	&& $(DEL_DIR)
-	
+
 build_spalax_shared :
 	@cd $(SPALAX_FIRMWARE_SHARED) \
 	&& $(MAKE_DIR) \
@@ -49,6 +49,6 @@ endif
 ifeq ($(BUILDDIR),.)
   BUILDDIR = build
 endif
-	
+
 # Every build must perform this to update the libraries
 $(BUILDDIR)/$(PROJECT).elf : build_spalax_shared
