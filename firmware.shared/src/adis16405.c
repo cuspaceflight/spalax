@@ -8,10 +8,12 @@
 #include "spalaxconf.h"
 #include "math_utils.h"
 #include "messaging.h"
+#include "platform.h"
 
 static binary_semaphore_t adis16405_semaphore;
 static const uint32_t adis16405_send_over_usb_count = 100; // Will send 1 in every 100 samples
 static const uint32_t adis16405_send_config_count = 5000; // Will resend config every 1000 samples
+static volatile bool adis16405_initialized = false;
 
 static uint16_t adis16405_read_u16(uint8_t addr_in) {
     // All transfers are 16 bits
@@ -35,14 +37,18 @@ static uint16_t adis16405_read_u16(uint8_t addr_in) {
     return data_rx;
 }
 
-static void adis16405_read_multiple(int base_addr, int num, uint16_t* rx_buff, uint16_t* tx_buff) {
-    for (int i = 0; i < num; i++) {
-        tx_buff[i] =  (uint16_t)((base_addr + 2*i) & 0x7F) << 8;
-    }
+static void adis16405_read_multiple(int base_addr, int num, uint16_t* rx_buff) {
+    for (int i = 0; i < num; i++)
+        rx_buff[i] = adis16405_read_u16(base_addr + i * 2);
+}
+
+static void adis16405_write_u8(uint8_t addr, uint8_t val) {
+    uint16_t txbuf[1] = {
+        ((((uint16_t)addr | 0x80) << 8) | val)
+    };
+
     spiSelect(&ADIS16405_SPID);
-    spiSend(&ADIS16405_SPID, 1, (void*)&tx_buff[0]);
-    spiExchange(&ADIS16405_SPID, num - 1, (void*)&tx_buff[1], (void*)rx_buff);
-    spiReceive(&ADIS16405_SPID, 1, (void*)&tx_buff[num-1]);
+    spiSend(&ADIS16405_SPID, 1, (void*)txbuf);
     spiUnselect(&ADIS16405_SPID);
 }
 
@@ -56,8 +62,8 @@ static void adis16405_write_u16(uint8_t addr, uint16_t val) {
     // For example, 0xA11F loads 0x1F into location 0x21
 
     uint16_t txbuf[2] = {
-        ((((uint16_t)addr | 0x80) << 8) | (val & 0xFF)),
-		((((uint16_t)(addr+1) | 0x80) << 8) | ((val >> 8) & 0xFF))
+        ((((uint16_t)(addr+1) | 0x80) << 8) | ((val >> 8) & 0xFF)),
+        ((((uint16_t)addr | 0x80) << 8) | (val & 0xFF))
     };
 
     spiSelect(&ADIS16405_SPID);
@@ -77,7 +83,7 @@ static int16_t sign_extend(uint16_t val, int bits) {
 
 
 
-static bool adis16405_burst_read(int16_t data_out[10]) {
+static bool adis16405_burst_read(int16_t rx_buff[10]) {
     // Burst mode data collection is a more efficient way of reading the sensor data
     // We write the value 0x3E00
     // Then for the next 12 clock periods the sensor module will write back the sensor data
@@ -89,43 +95,32 @@ static bool adis16405_burst_read(int16_t data_out[10]) {
     // The MSB (bit 15) is the ND flag - it is 1 if this data hasn't been read before
     // Bit 14 is the EA flag - it is 1 if there is an error flag in the DIAG_STAT register
 
-    // The burst read doesn't seem to work so resorted to full duplex read instead
+    // The burst read doesn't seem to work so resorted to trying to get full duplex
+    // read to work. This also didn't work, so eventually just resorted to reading
+    // Each register manually
 
-    uint16_t tx_buff[12];
-
-    // Temporary
-    for (int i = 0; i < 12; i++) {
-        tx_buff[i] = 0xBEEF;
-    }
-
-    adis16405_read_multiple(0x02, 10, (uint16_t*)data_out, (uint16_t*)tx_buff);
-    for (int i = 0; i < 12; i++) {
-        data_out[i] = adis16405_read_u16(0x02 + 2*i);
-        if((data_out[i] & 0x4000) == 1)
+    adis16405_read_multiple(0x02, 10, (uint16_t*)rx_buff);
+    for (int i = 0; i < 10; i++) {
+        if((rx_buff[i] & 0x4000) == 1)
         {
           uint16_t errors = adis16405_read_u16(0x3C);
           COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_error);
           component_state_update(avionics_component_adis16405, state_error, errors);
           return false;
         }
-        // if((data_out[i] & 0x8000) == 0)
-        // {
-        //    // Data has already been read
-        //    return false;
-        // }
     }
-    data_out[0] = sign_extend(data_out[0] & 0x3fff, 14);
-    data_out[1] = sign_extend(data_out[1] & 0x3fff, 14);
-    data_out[2] = sign_extend(data_out[2] & 0x3fff, 14);
-    data_out[3] = sign_extend(data_out[3] & 0x3fff, 14);
-    data_out[4] = sign_extend(data_out[4] & 0x3fff, 14);
-    data_out[5] = sign_extend(data_out[5] & 0x3fff, 14);
-    data_out[6] = sign_extend(data_out[6] & 0x3fff, 14);
-    data_out[7] = sign_extend(data_out[7] & 0x3fff, 14);
-    data_out[8] = sign_extend(data_out[8] & 0x3fff, 14);
-    data_out[9] = sign_extend(data_out[9] & 0x3fff, 14);
-    data_out[10] = sign_extend(data_out[10] & 0x3fff, 12);
-    data_out[11] = data_out[11] & 0x0fff;
+    rx_buff[0] = sign_extend(rx_buff[0] & 0x3fff, 14);
+    rx_buff[1] = sign_extend(rx_buff[1] & 0x3fff, 14);
+    rx_buff[2] = sign_extend(rx_buff[2] & 0x3fff, 14);
+    rx_buff[3] = sign_extend(rx_buff[3] & 0x3fff, 14);
+    rx_buff[4] = sign_extend(rx_buff[4] & 0x3fff, 14);
+    rx_buff[5] = sign_extend(rx_buff[5] & 0x3fff, 14);
+    rx_buff[6] = sign_extend(rx_buff[6] & 0x3fff, 14);
+    rx_buff[7] = sign_extend(rx_buff[7] & 0x3fff, 14);
+    rx_buff[8] = sign_extend(rx_buff[8] & 0x3fff, 14);
+    rx_buff[9] = sign_extend(rx_buff[9] & 0x3fff, 14);
+    //rx_buff[10] = sign_extend(rx_buff[10] & 0x3fff, 12);
+    //rx_buff[11] = rx_buff[11] & 0x0fff;
 
     return true;
 }
@@ -148,11 +143,15 @@ static void adis16405_init(adis16405_config_t* config) {
     adis16405_write_u16(ADIS16405_REG_GPIO_CTRL, 0x0000);
     chThdSleepMilliseconds(50);
     // Enable data ready interrupt
-    adis16405_write_u16(ADIS16405_REG_MSC_CTRL, 0x0006);
+    adis16405_write_u16(ADIS16405_REG_MSC_CTRL, 0x00C6);
     chThdSleepMilliseconds(50);
     // Disable Alarms
     adis16405_write_u16(ADIS16405_REG_ALM_CTRL, 0x0000);
     chThdSleepMilliseconds(50);
+
+    // Write to flash
+    // adis16405_write_u16(ADIS16405_REG_GLOB_CMD, 0x0008);
+    // chThdSleepMilliseconds(100);
 
     uint16_t errors = adis16405_read_u16(0x3C);
     if (errors != 0) {
@@ -170,6 +169,9 @@ static void adis16405_init(adis16405_config_t* config) {
     config->magno_bias[0] = 0.0f;
     config->magno_bias[1] = 0.0f;
     config->magno_bias[2] = 0.0f;
+
+    adis16405_initialized = true;
+    memory_barrier_release();
 }
 
 static bool adis16405_id_check(void) {
@@ -179,10 +181,10 @@ static bool adis16405_id_check(void) {
 
 static bool adis16405_self_test(void) {
     // Self tests - using the internal testing routine - do all self test
-    adis16405_write_u16(ADIS16405_REG_MSC_CTRL,0x0400);
+    adis16405_write_u8(ADIS16405_REG_MSC_CTRL+1,0x04);
 
     // Self test - Checks if bit has been cleared
-    while ((adis16405_read_u16(ADIS16405_REG_MSC_CTRL) & 0x0400)) {
+    while ((adis16405_read_u16(ADIS16405_REG_MSC_CTRL) & 0x0400) != 0) {
         chThdSleepMilliseconds(500);
     }
 
@@ -195,6 +197,10 @@ static bool adis16405_self_test(void) {
 void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
     (void)extp;
     (void)channel;
+
+    memory_barrier_acquire();
+    if (adis16405_initialized == false)
+        return;
 
     chSysLockFromISR();
     chBSemSignalI(&adis16405_semaphore);
@@ -214,7 +220,7 @@ void adis16405_thread(void *arg) {
         // Clock rate should be <= 1 MHz for burst mode
         // I believe this sets it to 168000000 / 4 / 64 ~= 1MHz
         // TODO: Verify this
-        SPI_CR1_BR_2 | SPI_CR1_CPOL | SPI_CR1_CPHA | SPI_CR1_DFF
+        SPI_CR1_BR_2 | SPI_CR1_BR_0 | SPI_CR1_CPOL | SPI_CR1_CPHA | SPI_CR1_DFF
     };
 
     chBSemObjectInit(&adis16405_semaphore, true);
@@ -255,11 +261,10 @@ void adis16405_thread(void *arg) {
 
     adis16405_config_t adis16405_config;
 
-    adis16405_init(&adis16405_config);
-
     while (!adis16405_self_test()) {
         chThdSleepMilliseconds(100);
     }
+
 
     errors = adis16405_read_u16(0x3C);
     if (errors != 0) {
@@ -267,6 +272,10 @@ void adis16405_thread(void *arg) {
         component_state_update(avionics_component_adis16405, state_error, errors);
         return;
     }
+
+    COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
+
+    adis16405_init(&adis16405_config);
 
     messaging_producer_init(&messaging_producer_data);
     messaging_producer_init(&messaging_producer_config);
@@ -279,7 +288,7 @@ void adis16405_thread(void *arg) {
     uint32_t send_config_count = adis16405_send_config_count;
     while(TRUE) {
         chSysLock();
-        chBSemWaitTimeoutS(&adis16405_semaphore, 100);
+        chBSemWaitS(&adis16405_semaphore);
         chSysUnlock();
 
         if (!adis16405_burst_read((int16_t*)&data))

@@ -28,7 +28,7 @@ static THD_WORKING_AREA(waUSBReceive, 512);
  * Set up pin change interrupts for the various sensors that react to them.
  */
 static const EXTConfig extcfg = { {
-					  { EXT_CH_MODE_DISABLED, NULL }, /* Pin 0 */
+					  { EXT_CH_MODE_AUTOSTART | EXT_CH_MODE_RISING_EDGE | EXT_MODE_GPIOE, adis16405_wakeup}, /* Pin 0 */
 					  { EXT_CH_MODE_AUTOSTART | EXT_CH_MODE_RISING_EDGE | EXT_MODE_GPIOA, mpu9250_wakeup }, /* Pin 1 */
 					  { EXT_CH_MODE_DISABLED, NULL }, /* Pin 2 */
 					  { EXT_CH_MODE_DISABLED, NULL }, /* Pin 3 */
@@ -65,6 +65,8 @@ int main(void) {
 	telemetry_allocator_start();
 	messaging_start();
 
+	extStart(&EXTD1, &extcfg);
+
 	chThdCreateStatic(waBadThing, sizeof(waBadThing), NORMALPRIO, bthandler_thread, NULL);
 	chThdCreateStatic(waMPU, sizeof(waMPU), NORMALPRIO, mpu9250_thread, NULL);
 	chThdCreateStatic(waMS5611, sizeof(waMS5611), NORMALPRIO, ms5611_thread, NULL);
@@ -76,8 +78,6 @@ int main(void) {
 
     chThdCreateStatic(waUSBReceive, sizeof(waUSBReceive), NORMALPRIO, usb_telemetry_receive_thread, NULL);
     chThdCreateStatic(waUSBTransmit, sizeof(waUSBTransmit), NORMALPRIO, usb_telemetry_transmit_thread, NULL);
-
-	extStart(&EXTD1, &extcfg);
 
 	while (true) {
 		chThdSleepMilliseconds(TIME_INFINITE);

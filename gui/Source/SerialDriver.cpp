@@ -106,10 +106,12 @@ SerialDriver::SerialDriver(const char* port_name, int baud_rate) {
 SerialDriver::~SerialDriver() {
 	if (!is_initialised)
 		return; // If initialisation failed we don't have anything to clean up
+
 	is_initialised = false;
 	s_port = nullptr;
 	s_instance = nullptr;
-
+	serial_port_->close();
+	serial_port_.reset();
 	writer_thread_.join();
 	reader_thread_.join();
 }

@@ -16,7 +16,7 @@
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 // Use for debugging allocations
-//static int breakAlloc = (_crtBreakAlloc = 283);
+//static int breakAlloc = (_crtBreakAlloc = 157);
 #endif
 
 void error_handler(avionics_component_t component, int line) {

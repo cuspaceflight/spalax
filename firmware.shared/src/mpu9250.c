@@ -411,7 +411,7 @@ void mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
     uint32_t send_config_count = mpu9250_send_config_count;
     while(TRUE) {
         chSysLock();
-        chBSemWaitTimeoutS(&mpu9250_semaphore, 100);
+        chBSemWaitS(&mpu9250_semaphore);
         chSysUnlock();
 
         mpu9250_read_accel_temp_gyro((uint16_t*)&data);
