@@ -15,6 +15,28 @@ static const uint32_t adis16405_send_over_usb_count = 100; // Will send 1 in eve
 static const uint32_t adis16405_send_config_count = 5000; // Will resend config every 1000 samples
 static volatile bool adis16405_initialized = false;
 
+static const SPIConfig spi_cfg = {
+    NULL,
+    ADIS16405_SPI_CS_PORT,
+    ADIS16405_SPI_CS_PIN,
+    // CPOL, CPHA, MSB First, 16-bit frame
+    // Clock rate should be <= 1 MHz for burst mode
+    // I believe this sets it to 168000000 / 4 / 64 ~= 1MHz
+    // TODO: Verify this
+    SPI_CR1_BR_2 | SPI_CR1_BR_0 | SPI_CR1_CPOL | SPI_CR1_CPHA | SPI_CR1_DFF
+};
+
+static uint16_t internal_adis16405_read_u16(uint8_t addr_in) {
+    uint16_t addr_out = (uint16_t)(addr_in & 0x7F) << 8;
+    uint16_t data_rx;
+
+    spiSelect(&ADIS16405_SPID);
+    spiSend(&ADIS16405_SPID, 1, (void*)&addr_out);
+    spiReceive(&ADIS16405_SPID, 1, (void*)&data_rx);
+    spiUnselect(&ADIS16405_SPID);
+    return data_rx;
+}
+
 static uint16_t adis16405_read_u16(uint8_t addr_in) {
     // All transfers are 16 bits
     // Addresses are 7 bits
@@ -26,20 +48,25 @@ static uint16_t adis16405_read_u16(uint8_t addr_in) {
 
     // Clear write bit
     // Shift into position
-    uint16_t addr_out = (uint16_t)(addr_in & 0x7F) << 8;
-    uint16_t data_rx;
 
-    spiSelect(&ADIS16405_SPID);
-    spiSend(&ADIS16405_SPID, 1, (void*)&addr_out);
-    spiReceive(&ADIS16405_SPID, 1, (void*)&data_rx);
-    spiUnselect(&ADIS16405_SPID);
+
+    spiAcquireBus(&ADIS16405_SPID);
+    spiStart(&ADIS16405_SPID, &spi_cfg);
+
+    uint16_t data_rx = internal_adis16405_read_u16(addr_in);
+
+    spiReleaseBus(&ADIS16405_SPID);
 
     return data_rx;
 }
 
 static void adis16405_read_multiple(int base_addr, int num, uint16_t* rx_buff) {
+    spiAcquireBus(&ADIS16405_SPID);
+    spiStart(&ADIS16405_SPID, &spi_cfg);
     for (int i = 0; i < num; i++)
-        rx_buff[i] = adis16405_read_u16(base_addr + i * 2);
+        rx_buff[i] = internal_adis16405_read_u16(base_addr + i * 2);
+
+    spiReleaseBus(&ADIS16405_SPID);
 }
 
 static void adis16405_write_u8(uint8_t addr, uint8_t val) {
@@ -47,9 +74,14 @@ static void adis16405_write_u8(uint8_t addr, uint8_t val) {
         ((((uint16_t)addr | 0x80) << 8) | val)
     };
 
+    spiAcquireBus(&ADIS16405_SPID);
+    spiStart(&ADIS16405_SPID, &spi_cfg);
+
     spiSelect(&ADIS16405_SPID);
     spiSend(&ADIS16405_SPID, 1, (void*)txbuf);
     spiUnselect(&ADIS16405_SPID);
+
+    spiReleaseBus(&ADIS16405_SPID);
 }
 
 static void adis16405_write_u16(uint8_t addr, uint16_t val) {
@@ -66,12 +98,17 @@ static void adis16405_write_u16(uint8_t addr, uint16_t val) {
         ((((uint16_t)addr | 0x80) << 8) | (val & 0xFF))
     };
 
+    spiAcquireBus(&ADIS16405_SPID);
+    spiStart(&ADIS16405_SPID, &spi_cfg);
+
     spiSelect(&ADIS16405_SPID);
     spiSend(&ADIS16405_SPID, 1, (void*)txbuf);
     spiUnselect(&ADIS16405_SPID);
     spiSelect(&ADIS16405_SPID);
     spiSend(&ADIS16405_SPID, 1, (void*)&txbuf[1]);
     spiUnselect(&ADIS16405_SPID);
+
+    spiReleaseBus(&ADIS16405_SPID);
 }
 
 static int16_t sign_extend(uint16_t val, int bits) {
@@ -212,22 +249,10 @@ MESSAGING_PRODUCER(messaging_producer_config, telemetry_id_adis16405_config, siz
 
 void adis16405_thread(void *arg) {
     (void)arg;
-    const SPIConfig spi_cfg = {
-        NULL,
-        ADIS16405_SPI_CS_PORT,
-        ADIS16405_SPI_CS_PIN,
-        // CPOL, CPHA, MSB First, 16-bit frame
-        // Clock rate should be <= 1 MHz for burst mode
-        // I believe this sets it to 168000000 / 4 / 64 ~= 1MHz
-        // TODO: Verify this
-        SPI_CR1_BR_2 | SPI_CR1_BR_0 | SPI_CR1_CPOL | SPI_CR1_CPHA | SPI_CR1_DFF
-    };
 
     chBSemObjectInit(&adis16405_semaphore, true);
 
     chRegSetThreadName("ADIS16405");
-
-    spiStart(&ADIS16405_SPID, &spi_cfg);
 
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
 

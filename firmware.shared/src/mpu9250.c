@@ -48,6 +48,17 @@ static bool mpu9250_self_test_gyro(void);
 // true iff the self-test passed.
 static bool mpu9250_self_test_accel(void);
 
+static const SPIConfig spi_cfg = {
+    NULL,
+    MPU9250_SPI_CS_PORT,
+    MPU9250_SPI_CS_PIN,
+    // CPOL, CPHA, MSB First, 8-bit frame
+    // Clock rate should be <= 1 MHz for burst mode
+    // I believe this sets it to 168000000 / 4 / 64 ~= 1MHz
+    // TODO: Verify this
+    SPI_CR1_BR_0 | SPI_CR1_CPOL | SPI_CR1_CPHA
+};
+
 //// INTERNAL FUNCTIONS ////
 
 // mpu9250_self_test_to_factory_trim takes self-test register values and
@@ -71,10 +82,15 @@ static void mpu9250_read_multiple(uint8_t addr, uint8_t* buf, int num) {
     // Set the read bit
     addr |= (1 << 7);
 
+    spiAcquireBus(&MPU9250_SPID);
+    spiStart(&MPU9250_SPID, &spi_cfg);
+
     spiSelect(&MPU9250_SPID);
     spiSend(&MPU9250_SPID, 1, (void*)&addr);
     spiReceive(&MPU9250_SPID, num, (void*)buf);
     spiUnselect(&MPU9250_SPID);
+
+    spiReleaseBus(&MPU9250_SPID);
 }
 
 static void mpu9250_write_u8(uint8_t addr, uint8_t val) {
@@ -85,9 +101,14 @@ static void mpu9250_write_u8(uint8_t addr, uint8_t val) {
     tx_buff[0] = addr;
     tx_buff[1] = val;
 
+    spiAcquireBus(&MPU9250_SPID);
+    spiStart(&MPU9250_SPID, &spi_cfg);
+
     spiSelect(&MPU9250_SPID);
     spiSend(&MPU9250_SPID, 2, (void*)&tx_buff);
     spiUnselect(&MPU9250_SPID);
+
+    spiReleaseBus(&MPU9250_SPID);
 }
 
 
@@ -373,24 +394,13 @@ MESSAGING_PRODUCER(messaging_producer_data, telemetry_id_mpu9250_data, sizeof(mp
 MESSAGING_PRODUCER(messaging_producer_config, telemetry_id_mpu9250_config, sizeof(mpu9250_config_t), 10)
 
 void mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
-    const SPIConfig spi_cfg = {
-        NULL,
-        MPU9250_SPI_CS_PORT,
-        MPU9250_SPI_CS_PIN,
-        // CPOL, CPHA, MSB First, 8-bit frame
-        // Clock rate should be <= 1 MHz for burst mode
-        // I believe this sets it to 168000000 / 4 / 64 ~= 1MHz
-        // TODO: Verify this
-        SPI_CR1_BR_0 | SPI_CR1_CPOL | SPI_CR1_CPHA
-    };
+
 
     mpu9250_config_t mpu9250_config;
 
     chBSemObjectInit(&mpu9250_semaphore, true);
 
     chRegSetThreadName("MPU9250");
-
-    spiStart(&MPU9250_SPID, &spi_cfg);
 
     COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
 
