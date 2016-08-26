@@ -135,7 +135,10 @@ CSRC = $(STARTUPSRC) \
        $(PLATFORMSRC) \
        $(BOARDSRC) \
        $(TESTSRC) \
-	   spalaxconf.c
+	   spalaxconf.c \
+	   can_telemetry.c \
+	   ../external/m3can/m3can.c \
+       ../external/m3status/m3status.c
 
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -217,13 +220,14 @@ CPPWARN = -Wall -Wextra -Wundef
 #
 
 # List all user C define here, like -D_DEBUG=1
-UDEFS =
+GITVERSION := $(shell git describe --abbrev=8 --always)
+UDEFS = -DFIRMWARE_VERSION=\"$(GITVERSION)\"
 
 # Define ASM defines here
 UADEFS =
 
 # List all user directories here
-UINCDIR =
+UINCDIR = ../external/m3can/ ../external/m3status/
 
 # List the user directory to look for the libraries here
 ULIBDIR = $(SPALAX_FIRMWARE_SHARED_LIB_DIR)

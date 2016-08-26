@@ -4,8 +4,6 @@
 
 void can_telemetry_start(void);
 
-void can_telemetry_receive_thread(void *arg);
-
 void can_telemetry_transmit_thread(void* arg);
 
 #endif /* CAN_TELEMETRY_H */
