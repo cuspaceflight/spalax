@@ -432,13 +432,13 @@ void mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
         if (send_over_usb_count == mpu9250_send_over_usb_count)
             send_over_usb_count = 0;
         else {
-            flags |= message_flags_dont_send_over_usb | message_flags_send_over_can | message_flags_may_split_packet;
+            flags |= message_flags_dont_send_over_usb | message_flags_send_over_can;
             send_over_usb_count++;
         }
 
         if (send_config_count == mpu9250_send_config_count) {
             // Send config
-            messaging_producer_send(&messaging_producer_config, message_flags_send_over_can | message_flags_may_split_packet, (const uint8_t*)&mpu9250_config);
+            messaging_producer_send(&messaging_producer_config, message_flags_send_over_can, (const uint8_t*)&mpu9250_config);
             send_config_count = 0;
         } else {
             send_config_count++;

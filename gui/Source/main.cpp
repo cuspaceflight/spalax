@@ -12,6 +12,7 @@
 #include <SerialDriver.h>
 #include <CanSerialDriver.h>
 #include <Rendering/Text/FTFont.h>
+#include <can_interface.h>
 
 #ifdef _WIN32
 #define _CRTDBG_MAP_ALLOC
@@ -33,7 +34,7 @@ void rocket_main() {
     telemetry_allocator_start();
     messaging_start();
 
-
+	can_interface_init();
     
     
 }

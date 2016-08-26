@@ -5,6 +5,7 @@
 #include "messaging_config.h"
 #include <serial/serial.h>
 #include <component_state.h>
+#include "can_interface.h"
 
 #define READ_BUFFER_SIZE 255
 #define WRITE_BUFFER_SIZE 255
@@ -59,46 +60,26 @@ struct can_header_t {
 
 SERIAL_INTERFACE(serial_interface, stream_get, stream_put, stream_flush, 1024);
 
-bool can_send(uint16_t msg_id, bool can_rtr, uint8_t *data, uint8_t datalen) {
+void can_send(uint16_t msg_id, bool can_rtr, uint8_t* data, uint8_t datalen) {
 	can_header_t header;
 	header.id = msg_id;
 	header.rtr = can_rtr ? 1 : 0;
 	header.dlc = datalen;
 
 	if (!serial_interface.stream_put(0x7E)) {
-		return false;
+		return;
 	}
 	
 	if (!serial_interface_write_bytes_to_buffer(&serial_interface, (uint8_t*)&header, sizeof(header))) {
-		return false;
+		return;
 	}
 
-	if (!serial_interface_write_bytes_to_buffer(&serial_interface, data, datalen)) {
-		return false;
-	}
-	return true;
+	serial_interface_write_bytes_to_buffer(&serial_interface, data, datalen);
 }
 
 static bool receive_packet(const telemetry_t* packet, message_metadata_t metadata) {
 	if (packet->header.origin == local_config.origin) {
-		if (packet->header.length <= 8) {
-			can_send((packet->header.id << 5) | telemetry_origin_avionics_gui, false, packet->payload, packet->header.length);
-		}
-
-		if ((metadata & message_flags_may_split_packet) == 0) {
-			COMPONENT_STATE_UPDATE(avionics_component_can_telemetry, state_error);
-			return true;
-		}
-
-		uint8_t* ptr = packet->payload;
-		int remaining = packet->header.length;
-		int i = 1;
-		do {
-			can_send(((packet->header.id + i) << 5) | telemetry_origin_avionics_gui, false, ptr, remaining > 8 ? 8 : remaining);
-			ptr += 8;
-			i++;
-			remaining -= 8;
-		} while (remaining > 0);
+		can_send_telemetry(packet, metadata);
 	}
 
 	return true;
@@ -113,40 +94,30 @@ static void reader_thread(CanSerialDriver* driver) {
 	}
 }
 
-telemetry_t* read_can_frame() {
+bool read_can_frame() {
 	can_header_t header;
 	if (!serial_interface_read_bytes_to_buffer(&serial_interface, (uint8_t*)&header, sizeof(header))) {
-		return nullptr;
+		return false;
 	}
-	telemetry_t* packet = telemetry_allocator_alloc(serial_interface.telemetry_allocator, header.dlc);
-	if (packet == nullptr)
-		return nullptr;
-	if (!serial_interface_read_bytes_to_buffer(&serial_interface, packet->payload, header.dlc)) {
-		telemetry_allocator_free(packet);
-		return nullptr;
+	uint8_t data[8];
+	if (!serial_interface_read_bytes_to_buffer(&serial_interface, data, header.dlc)) {
+		return false;
 	}
 
-	packet->header.id = (header.id >> 5) & 0x3F;
-	packet->header.length = header.dlc;
-	packet->header.origin = (telemetry_origin_t)(header.id & 0x1F);
-	return packet;
+	can_recv(header.id, header.rtr == 1 ? true : false, data, header.dlc);
+	return true;
 }
 
-static telemetry_t* get_next_can_packet() {
-	while (true) {
-		while (serial_interface.stream_get() != 0x7E) {}
-		struct telemetry_t* ret;
-		if ((ret = read_can_frame()) != NULL)
-			return ret;
-		return NULL;
-	}
+static bool handle_next_can_packet() {
+	while (serial_interface.stream_get() != 0x7E) {}
+	if (!read_can_frame())
+		return false;
+	return true;
 }
 
 static void writer_thread(CanSerialDriver* driver) {
 	while (s_port != nullptr) {
-		telemetry_t* packet = get_next_can_packet();
-		if (packet != nullptr)
-			messaging_send(packet, 0);
+		handle_next_can_packet();
 	}
 }
 
