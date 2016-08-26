@@ -9,6 +9,7 @@ set (SOURCES ${SOURCES}
 	${CMAKE_CURRENT_SOURCE_DIR}/SerialDriver.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/VectorRenderer.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/CalibrationLabel.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/CanSerialDriver.cpp
     PARENT_SCOPE)
 
 set (HEADERS ${HEADERS}
@@ -20,4 +21,5 @@ set (HEADERS ${HEADERS}
 	${CMAKE_CURRENT_SOURCE_DIR}/SerialDriver.h
 	${CMAKE_CURRENT_SOURCE_DIR}/VectorRenderer.h
 	${CMAKE_CURRENT_SOURCE_DIR}/CalibrationLabel.h
+	${CMAKE_CURRENT_SOURCE_DIR}/CanSerialDriver.h
     PARENT_SCOPE)

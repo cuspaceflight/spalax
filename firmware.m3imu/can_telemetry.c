@@ -25,6 +25,7 @@ static bool transmit_packet(const telemetry_t* packet, message_metadata_t metada
         if (packet->header.length <= 8) {
             // TODO: RTR?
             can_send((packet->header.id << 5) | CAN_ID_M3IMU, FALSE, packet->payload, packet->header.length);
+            return true;
         }
 
         if ((metadata & message_flags_may_split_packet) == 0) {
