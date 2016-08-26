@@ -371,13 +371,13 @@ static void mpu9250_init(mpu9250_config_t* config) {
     config->accel_sf =  16.0f * 9.8f / 32767.0f;
     config->gyro_sf = 500.0f * 0.01745329251f / 32767.0f;
 
-    config->magno_sf[0] = 0.003559f;
-    config->magno_sf[1] = 0.003571f;
-    config->magno_sf[2] = 0.002981f;
+    config->magno_sf[0] = 3559;
+    config->magno_sf[1] = 3571;
+    config->magno_sf[2] = 2981;
 
-    config->magno_bias[0] = -225.000000f;
-    config->magno_bias[1] = -115.000000f;
-    config->magno_bias[2] = -335.500000f;
+    config->magno_bias[0] = -225;
+    config->magno_bias[1] = -115;
+    config->magno_bias[2] = -335;
 }
 
 void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
@@ -427,18 +427,18 @@ void mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
         mpu9250_read_accel_temp_gyro((uint16_t*)&data);
         mpu9250_read_magno(data.magno);
 
-        message_metadata_t flags = 0;
+        message_metadata_t flags =  0;
 
         if (send_over_usb_count == mpu9250_send_over_usb_count)
             send_over_usb_count = 0;
         else {
-            flags |= message_flags_dont_send_over_usb;
+            flags |= message_flags_dont_send_over_usb | message_flags_send_over_can | message_flags_may_split_packet;
             send_over_usb_count++;
         }
 
         if (send_config_count == mpu9250_send_config_count) {
             // Send config
-            messaging_producer_send(&messaging_producer_config, 0, (const uint8_t*)&mpu9250_config);
+            messaging_producer_send(&messaging_producer_config, message_flags_send_over_can | message_flags_may_split_packet, (const uint8_t*)&mpu9250_config);
             send_config_count = 0;
         } else {
             send_config_count++;

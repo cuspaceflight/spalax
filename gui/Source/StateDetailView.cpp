@@ -16,7 +16,10 @@ static StateDetailView* s_instance = nullptr;
 static const int num_labels = 39;
 float values[num_labels];
 bool has_mpu9250_config = false;
+
+bool mpu9250_config_flags[3] = { false, false, false };
 mpu9250_config_t mpu9250_config;
+mpu9250_data_t mpu9250_data;
 bool has_adis16405_config = false;
 adis16405_config_t adis16405_config;
 
@@ -112,6 +115,46 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
 		values[36] = cal.magno[0];
 		values[37] = cal.magno[1];
 		values[38] = cal.magno[2];
+    } else if (packet->header.id == telemetry_id_mpu9250_config + 1 || packet->header.id == telemetry_id_mpu9250_config + 2 || packet->header.id == telemetry_id_mpu9250_config + 3) {
+		if (has_mpu9250_config)
+			return true;
+		int offset = packet->header.id - (int)telemetry_id_mpu9250_config - 1;
+
+		uint8_t* ptr = (uint8_t*)&mpu9250_config;
+		ptr += offset * 8;
+
+		FTAssert(packet->header.length + offset <= sizeof(mpu9250_config_t), "Incorrect Packet Size");
+		memcpy(ptr, packet->payload, packet->header.length);
+		mpu9250_config_flags[offset] = true;
+		if (mpu9250_config_flags[0] && mpu9250_config_flags[1] && mpu9250_config_flags[2])
+			has_mpu9250_config = true;
+    } else if (packet->header.id == telemetry_id_mpu9250_data + 1 || packet->header.id == telemetry_id_mpu9250_data + 2 || packet->header.id == telemetry_id_mpu9250_data + 3) {
+		
+		
+		int offset = packet->header.id - (int)telemetry_id_mpu9250_data - 1;
+
+		uint8_t* ptr = (uint8_t*)&mpu9250_data;
+		ptr += offset * 8;
+		FTAssert(packet->header.length + offset <= sizeof(mpu9250_data_t), "Incorrect Packet Size");
+		memcpy(ptr, packet->payload, packet->header.length);
+
+		if (has_mpu9250_config) {
+			mpu9250_calibrated_data_t calibrated;
+			mpu9250_calibrate_data(&mpu9250_config, &mpu9250_data, &calibrated);
+
+			values[3] = calibrated.accel[0];
+			values[4] = calibrated.accel[1];
+			values[5] = calibrated.accel[2];
+
+			values[6] = calibrated.gyro[0];
+			values[7] = calibrated.gyro[1];
+			values[8] = calibrated.gyro[2];
+
+			values[9] = calibrated.magno[0];
+			values[10] = calibrated.magno[1];
+			values[11] = calibrated.magno[2];
+		}
+
     }
     return true;
 }
