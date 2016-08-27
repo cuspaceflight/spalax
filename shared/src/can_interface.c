@@ -55,6 +55,8 @@ static bool isMultipacketValid(multipacket_message_t* msg) {
 	return true;
 }
 
+static volatile bool can_interface_initialized = false;
+
 TELEMETRY_ALLOCATOR(can_telemetry_allocator, 1024);
 
 void can_interface_init() {
@@ -63,6 +65,8 @@ void can_interface_init() {
 
 	for (int i = 0; i < num_multipacket_messages; i++)
 		resetMultipacketMessage(&multipacket_messages[i]);
+
+	can_interface_initialized = true;
 }
 
 static void handleFullPacket(uint16_t telemetry_id, telemetry_origin_t origin, uint8_t* data, uint8_t length) {
@@ -87,6 +91,9 @@ static multipacket_message_t* getMultipacket(uint16_t telemetry_id) {
 
 void can_recv(uint16_t can_msg_id, bool can_rtr, uint8_t *data, uint8_t datalen) {
 	(void)can_rtr;
+	if (!can_interface_initialized)
+		return;
+
 	uint16_t id = (can_msg_id >> 5) & 0x3F;
 	uint8_t origin = can_msg_id & 0x1F;
 

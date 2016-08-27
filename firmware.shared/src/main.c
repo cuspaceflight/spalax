@@ -38,6 +38,8 @@ int main(void) {
 	chSysInit();
 	chRegSetThreadName("Main");
 
+	can_init(CAN_ID_M3IMU);
+
 	component_state_start();
 	checksum_init();
 	telemetry_allocator_start();
@@ -63,8 +65,6 @@ int main(void) {
     //chThdCreateStatic(waUSBTransmit, sizeof(waUSBTransmit), NORMALPRIO, usb_telemetry_transmit_thread, NULL);
 
 	chThdCreateStatic(waCanTelemetry, sizeof(waCanTelemetry), NORMALPRIO, can_telemetry_transmit_thread, NULL);
-
-	can_init(CAN_ID_M3IMU);
 
 	while (true) {
 		chThdSleepMilliseconds(TIME_INFINITE);
