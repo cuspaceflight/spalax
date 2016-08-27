@@ -48,6 +48,7 @@ static bool stream_put(uint8_t byte) {
 
 static bool stream_flush() {
 	s_port->write(write_buffer, write_buffer_index);
+	write_buffer_index = 0;
 	return true;
 }
 
@@ -75,6 +76,8 @@ void can_send(uint16_t msg_id, bool can_rtr, uint8_t* data, uint8_t datalen) {
 	}
 
 	serial_interface_write_bytes_to_buffer(&serial_interface, data, datalen);
+
+	serial_interface.stream_flush_write();
 }
 
 static bool receive_packet(const telemetry_t* packet, message_metadata_t metadata) {

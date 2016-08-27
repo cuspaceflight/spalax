@@ -6,6 +6,7 @@
 #include "mpu9250_config.h"
 #include <adis16405_config.h>
 #include <state_estimate.h>
+#include <calibration.h>
 
 typedef struct {
 	int16_t base_id;
@@ -19,13 +20,14 @@ typedef struct {
 } multipacket_message_t;
 
 
-static const int num_multipacket_messages = 5;
-static multipacket_message_t multipacket_messages[5] = {
+static const int num_multipacket_messages = 6;
+static multipacket_message_t multipacket_messages[6] = {
 	{.base_id = telemetry_id_mpu9250_data, .size_in_bytes = sizeof(mpu9250_data_t), .num_bits = 2},
 	{.base_id = telemetry_id_mpu9250_config, .size_in_bytes = sizeof(mpu9250_config_t), .num_bits = 2},
 	{.base_id = telemetry_id_adis16405_config, .size_in_bytes = sizeof(adis16405_config_t),.num_bits = 2},
 	{.base_id = telemetry_id_adis16405_data, .size_in_bytes = sizeof(adis16405_data_t),.num_bits = 2},
-	{.base_id = telemetry_id_state_estimate_data, .size_in_bytes = sizeof(state_estimate_t),.num_bits = 2}
+	{.base_id = telemetry_id_state_estimate_data, .size_in_bytes = sizeof(state_estimate_t),.num_bits = 2},
+	{ .base_id = telemetry_id_calibration_magno_data,.size_in_bytes = sizeof(magno_calibration_data_t),.num_bits = 2 }
 };
 
 static void resetMultipacketMessage(multipacket_message_t* msg) {

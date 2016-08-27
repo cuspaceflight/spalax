@@ -12,7 +12,7 @@
 #include <string.h>
 #include "spalaxconf.h"
 
-static const uint32_t mpu9250_send_over_can_count = 10;
+static const uint32_t mpu9250_send_over_can_count = 100;
 static const uint32_t mpu9250_send_over_usb_count = 100; // Will send 1 in every 100 samples
 static const uint32_t mpu9250_send_config_count = 5000; // Will resend config every 1000 samples
 
@@ -372,13 +372,13 @@ static void mpu9250_init(mpu9250_config_t* config) {
     config->accel_sf =  16.0f * 9.8f / 32767.0f;
     config->gyro_sf = 500.0f * 0.01745329251f / 32767.0f;
 
-    config->magno_sf[0] = 3559;
-    config->magno_sf[1] = 3571;
-    config->magno_sf[2] = 2981;
+    config->magno_sf[0] = 3868;
+    config->magno_sf[1] = 3683;
+    config->magno_sf[2] = 3656;
 
-    config->magno_bias[0] = -225;
-    config->magno_bias[1] = -115;
-    config->magno_bias[2] = -335;
+    config->magno_bias[0] = 54;
+    config->magno_bias[1] = 266;
+    config->magno_bias[2] = -37;
 }
 
 void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {

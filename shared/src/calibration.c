@@ -8,14 +8,14 @@
 #include <math.h>
 
 static calibration_procedure_t current_producedure = calibration_procedure_none;
-static calibration_data_t calibration_data;
+static magno_calibration_data_t calibration_data;
 
 static bool control_packet(const telemetry_t* packet, message_metadata_t metadata);
 static bool data_packet(const telemetry_t* packet, message_metadata_t metadata);
 
 MESSAGING_CONSUMER(consumer_control, telemetry_id_calibration_control, telemetry_source_packet_specific_mask, 0, 0, &control_packet, 5);
 MESSAGING_CONSUMER(consumer_data, telemetry_source_imu_data, telemetry_source_imu_data_mask, 0, 0, data_packet, 1024);
-MESSAGING_PRODUCER(data_producer, telemetry_id_calibration_data, sizeof(calibration_data_t), 2);
+MESSAGING_PRODUCER(magno_calibration_data_producer, telemetry_id_calibration_magno_data, sizeof(magno_calibration_data_t), 2);
 
 static bool control_packet(const telemetry_t* packet, message_metadata_t metadata) {
     (void)metadata;
@@ -52,13 +52,11 @@ static bool mpu9250_bias_data(const telemetry_t* packet, uint16_t metadata) {
         for (int i = 0; i < 3; i++) {
             min_magno[i] = fminf(min_magno[i], calibrated.magno[i]);
             max_magno[i] = fmaxf(max_magno[i], calibrated.magno[i]);
-
             // Magno SF
-            calibration_data.data[0][i] = 1.0f / ((max_magno[i] - min_magno[i]) / 2.0f);
+			calibration_data.magno_sf[i] = (int)(1.0f / ((max_magno[i] - min_magno[i]) / 2.0f)  * 100000000.f / 10000.f);
 
             // Magno Bias
-            calibration_data.data[1][i] = (max_magno[i] + min_magno[i]) / 2.0f;
-
+            calibration_data.magno_bias[i] = (max_magno[i] + min_magno[i]) / 2 * 1000000 / 10000;
         }
 
     } else if (packet->header.id == telemetry_id_mpu9250_config) {
@@ -67,7 +65,7 @@ static bool mpu9250_bias_data(const telemetry_t* packet, uint16_t metadata) {
         has_config = true;
         config = *(mpu9250_config_t*)packet->payload;
         for (int i = 0; i < 3; i++) {
-            config.magno_sf[i] = 1;
+            config.magno_sf[i] = 10000;
             config.magno_bias[i] = 0;
         }
     }
@@ -89,7 +87,7 @@ void calibration_thread(void* arg) {
 
     messaging_consumer_init(&consumer_control);
     messaging_consumer_init(&consumer_data);
-    messaging_producer_init(&data_producer);
+    messaging_producer_init(&magno_calibration_data_producer);
 
 
     while (true) {
@@ -106,15 +104,14 @@ void calibration_thread(void* arg) {
 
         calibration_data.procedure = current_producedure;
         for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                calibration_data.data[i][j] = 0;
-            }
+			calibration_data.magno_sf[i] = 0;
+			calibration_data.magno_bias[i] = 0;
         }
 
         while (true) {
             while (messaging_consumer_receive(&consumer_control, false, false) == messaging_receive_ok);
             if (current_producedure == calibration_procedure_none) {
-                messaging_producer_send(&data_producer, 0, (const uint8_t*)&calibration_data);
+                messaging_producer_send(&magno_calibration_data_producer, message_flags_send_over_can, (const uint8_t*)&calibration_data);
                 break;
             }
 

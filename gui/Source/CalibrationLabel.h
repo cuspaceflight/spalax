@@ -6,7 +6,7 @@ class CalibrationLabel : public FTLabel {
 public:
     CalibrationLabel();
     virtual ~CalibrationLabel();
-    void handleCalibrationData(const calibration_data_t* data);
+    void handleCalibrationData(const magno_calibration_data_t* data);
     void updateDisplay() const;
 
 private:
