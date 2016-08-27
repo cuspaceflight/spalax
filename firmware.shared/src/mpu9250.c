@@ -11,8 +11,9 @@
 #include "messaging.h"
 #include <string.h>
 #include "spalaxconf.h"
+#include "board_config.h"
 
-static const uint32_t mpu9250_send_over_can_count = 100;
+static const uint32_t mpu9250_send_over_can_count = 10;
 static const uint32_t mpu9250_send_over_usb_count = 100; // Will send 1 in every 100 samples
 static const uint32_t mpu9250_send_config_count = 5000; // Will resend config every 1000 samples
 
@@ -372,13 +373,12 @@ static void mpu9250_init(mpu9250_config_t* config) {
     config->accel_sf =  16.0f * 9.8f / 32767.0f;
     config->gyro_sf = 500.0f * 0.01745329251f / 32767.0f;
 
-    config->magno_sf[0] = 3868;
-    config->magno_sf[1] = 3683;
-    config->magno_sf[2] = 3656;
+    board_config_t* board_config = getBoardConfig();
 
-    config->magno_bias[0] = 54;
-    config->magno_bias[1] = 266;
-    config->magno_bias[2] = -37;
+    for (int i = 0; i < 3; i++) {
+        config->magno_sf[i] = board_config->mpu9250_magno_sf[i];
+        config->magno_bias[i] = board_config->mpu9250_magno_bias[i];
+    }
 }
 
 void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
@@ -429,7 +429,7 @@ void mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
         mpu9250_read_accel_temp_gyro((uint16_t*)&data);
         mpu9250_read_magno(data.magno);
 
-        message_metadata_t flags =  0;
+        message_metadata_t flags =  message_flags_send_over_can;
 
         if (send_over_usb_count == mpu9250_send_over_usb_count)
             send_over_usb_count = 0;

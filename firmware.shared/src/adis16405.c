@@ -12,6 +12,7 @@
 
 static binary_semaphore_t adis16405_semaphore;
 static const uint32_t adis16405_send_over_usb_count = 100; // Will send 1 in every 100 samples
+static const uint32_t adis16405_send_over_can_count = 10;
 static const uint32_t adis16405_send_config_count = 5000; // Will resend config every 1000 samples
 static volatile bool adis16405_initialized = false;
 
@@ -312,6 +313,7 @@ void adis16405_thread(void *arg) {
 
     uint32_t send_over_usb_count = adis16405_send_over_usb_count;
     uint32_t send_config_count = adis16405_send_config_count;
+    uint32_t send_over_can_count = adis16405_send_over_can_count;
     while(TRUE) {
         chSysLock();
         chBSemWaitS(&adis16405_semaphore);
@@ -320,7 +322,7 @@ void adis16405_thread(void *arg) {
         if (!adis16405_burst_read((int16_t*)&data))
             continue;
 
-        message_metadata_t flags = 0;
+        message_metadata_t flags = message_flags_send_over_can;
 
         if (send_over_usb_count == adis16405_send_over_usb_count)
             send_over_usb_count = 0;
@@ -329,9 +331,16 @@ void adis16405_thread(void *arg) {
             send_over_usb_count++;
         }
 
+        if (send_over_can_count == adis16405_send_over_can_count) {
+            send_over_can_count = 0;
+            flags |= message_flags_send_over_can;
+        } else {
+            send_over_can_count++;
+        }
+
         if (send_config_count == adis16405_send_config_count) {
             // Send config
-            messaging_producer_send(&messaging_producer_config, 0, (const uint8_t*)&adis16405_config);
+            messaging_producer_send(&messaging_producer_config, message_flags_send_over_can, (const uint8_t*)&adis16405_config);
             send_config_count = 0;
         } else {
             send_config_count++;

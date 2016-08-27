@@ -88,17 +88,26 @@ static void calibrate(float sample_time) {
 }
 
 static void send_state_estimate(void) {
-    static int send_counter = 0;
-    message_metadata_t flags = 0;
+    static int usb_send_count = 0;
+	static int can_send_count = 10;
+    message_metadata_t flags = message_flags_send_over_can;
 
-	if (send_counter == 100) {
-		send_counter = 0;
-		flags |= message_flags_send_over_can;
+	if (usb_send_count == 100) {
+		usb_send_count = 0;
 	}
     else {
         flags |= message_flags_dont_send_over_usb;
-        send_counter++;
+        usb_send_count++;
     }
+
+	if (can_send_count == 10) {
+		can_send_count = 0;
+		flags |= message_flags_send_over_can;
+	} else {
+		can_send_count++;
+	}
+
+
     messaging_producer_send(&state_estimate_producer_data, flags, (const uint8_t*)&current_state);
 }
 
