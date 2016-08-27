@@ -12,7 +12,7 @@
 
 static binary_semaphore_t adis16405_semaphore;
 static const uint32_t adis16405_send_over_usb_count = 100; // Will send 1 in every 100 samples
-static const uint32_t adis16405_send_over_can_count = 10;
+static const uint32_t adis16405_send_over_can_count = 0;
 static const uint32_t adis16405_send_config_count = 5000; // Will resend config every 1000 samples
 static volatile bool adis16405_initialized = false;
 
@@ -322,7 +322,7 @@ void adis16405_thread(void *arg) {
         if (!adis16405_burst_read((int16_t*)&data))
             continue;
 
-        message_metadata_t flags = message_flags_send_over_can;
+        message_metadata_t flags = 0;
 
         if (send_over_usb_count == adis16405_send_over_usb_count)
             send_over_usb_count = 0;

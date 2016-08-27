@@ -45,6 +45,7 @@ static state_estimate_status_t current_status;
 static uint32_t last_prediction_time = 0;
 static uint32_t last_status_time = 0;
 
+#define state_estimate_send_over_can_count 0
 
 bool has_mpu9250_config = false;
 mpu9250_config_t mpu9250_config;
@@ -91,9 +92,9 @@ mpu9250_config_t mpu9250_config;
 //}
 
 static void send_state_estimate(void) {
-	static int usb_send_count = 0;
-	static int can_send_count = 10;
-	message_metadata_t flags = message_flags_send_over_can;
+	static uint32_t usb_send_count = 0;
+	static uint32_t can_send_count = state_estimate_send_over_can_count;
+	message_metadata_t flags = 0;
 
 	if (usb_send_count == 100) {
 		usb_send_count = 0;
@@ -102,7 +103,7 @@ static void send_state_estimate(void) {
 		usb_send_count++;
 	}
 
-	if (can_send_count == 10) {
+	if (can_send_count == state_estimate_send_over_can_count) {
 		can_send_count = 0;
 		flags |= message_flags_send_over_can;
 	} else {

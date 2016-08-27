@@ -13,7 +13,7 @@
 #include "spalaxconf.h"
 #include "board_config.h"
 
-static const uint32_t mpu9250_send_over_can_count = 10;
+static const uint32_t mpu9250_send_over_can_count = 0;
 static const uint32_t mpu9250_send_over_usb_count = 100; // Will send 1 in every 100 samples
 static const uint32_t mpu9250_send_config_count = 5000; // Will resend config every 1000 samples
 
@@ -429,7 +429,7 @@ void mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
         mpu9250_read_accel_temp_gyro((uint16_t*)&data);
         mpu9250_read_magno(data.magno);
 
-        message_metadata_t flags =  message_flags_send_over_can;
+        message_metadata_t flags =  0;
 
         if (send_over_usb_count == mpu9250_send_over_usb_count)
             send_over_usb_count = 0;
