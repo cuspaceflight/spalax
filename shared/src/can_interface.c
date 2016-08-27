@@ -4,12 +4,14 @@
 #include <avionics_config.h>
 #include <component_state.h>
 #include "mpu9250_config.h"
+#include <adis16405_config.h>
+#include <state_estimate.h>
 
 typedef struct {
 	int16_t base_id;
 	uint8_t size_in_bytes;
 	uint8_t num_bits;
-	uint8_t data_buffer[24];
+	uint8_t data_buffer[32];
 	bool is_valid[4];
 	uint8_t size_in_packets;
 	uint16_t seqno_mask;
@@ -17,10 +19,13 @@ typedef struct {
 } multipacket_message_t;
 
 
-static const int num_multipacket_messages = 2;
-static multipacket_message_t multipacket_messages[2] = {
+static const int num_multipacket_messages = 5;
+static multipacket_message_t multipacket_messages[5] = {
 	{.base_id = telemetry_id_mpu9250_data, .size_in_bytes = sizeof(mpu9250_data_t), .num_bits = 2},
-	{.base_id = telemetry_id_mpu9250_config, .size_in_bytes = sizeof(mpu9250_config_t), .num_bits = 2}
+	{.base_id = telemetry_id_mpu9250_config, .size_in_bytes = sizeof(mpu9250_config_t), .num_bits = 2},
+	{.base_id = telemetry_id_adis16405_config, .size_in_bytes = sizeof(adis16405_config_t),.num_bits = 2},
+	{.base_id = telemetry_id_adis16405_data, .size_in_bytes = sizeof(adis16405_data_t),.num_bits = 2},
+	{.base_id = telemetry_id_state_estimate_data, .size_in_bytes = sizeof(state_estimate_t),.num_bits = 2}
 };
 
 static void resetMultipacketMessage(multipacket_message_t* msg) {
@@ -30,7 +35,7 @@ static void resetMultipacketMessage(multipacket_message_t* msg) {
 		return;
 	}
 	msg->seqno_mask = (1 << msg->num_bits) - 1;
-	if (msg->seqno_mask < msg->size_in_packets) {
+	if (msg->seqno_mask < msg->size_in_packets - 1) {
 		COMPONENT_STATE_UPDATE(avionics_component_can_telemetry, state_error);
 		return;
 	}
@@ -107,11 +112,6 @@ void can_recv(uint16_t can_msg_id, bool can_rtr, uint8_t *data, uint8_t datalen)
 	}
 
 	uint8_t seqno = id & multipacket->seqno_mask;
-	if (seqno == 0) {
-		COMPONENT_STATE_UPDATE(avionics_component_can_telemetry, state_error);
-		return;
-	}
-	seqno--;
 
 	uint8_t* ptr = (uint8_t*)&multipacket->data_buffer;
 	ptr += seqno * 8;
@@ -151,7 +151,7 @@ bool can_send_telemetry(const telemetry_t* packet, message_metadata_t metadata) 
 
         uint8_t* ptr = packet->payload;
         int remaining = packet->header.length;
-        int i = 1;
+        int i = 0;
         do {
             can_send(((packet->header.id+i) << 5) | local_config.origin, false, ptr, remaining > 8 ? 8 : remaining);
             ptr += 8;

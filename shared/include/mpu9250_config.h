@@ -23,7 +23,7 @@ typedef struct mpu9250_config_t {
 	// Converts to rad/s
 	float gyro_sf;
 
-	uint16_t magno_sf[3];
+	int16_t magno_sf[3];
 	int16_t magno_bias[3];
 } mpu9250_config_t;
 

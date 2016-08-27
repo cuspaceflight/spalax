@@ -199,13 +199,14 @@ static void adis16405_init(adis16405_config_t* config) {
     config->accel_sf = 3.33f/1000.0f*9.8f;
     config->gyro_sf = 0.05f*PI/180.0f;
 
-    config->magno_sf[0] = 1;
-    config->magno_sf[1] = 1;
-    config->magno_sf[2] = 1;
+    // TODO: Tune these
+    config->magno_sf[0] = 4000;
+    config->magno_sf[1] = 4000;
+    config->magno_sf[2] = 4000;
 
-    config->magno_bias[0] = 0.0f;
-    config->magno_bias[1] = 0.0f;
-    config->magno_bias[2] = 0.0f;
+    config->magno_bias[0] = 0;
+    config->magno_bias[1] = 0;
+    config->magno_bias[2] = 0;
 
     adis16405_initialized = true;
     memory_barrier_release();

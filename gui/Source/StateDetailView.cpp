@@ -71,17 +71,17 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[16] = estimate->angular_velocity[1];
         values[17] = estimate->angular_velocity[2];
 
-        values[18] = estimate->pos[0];
-        values[19] = estimate->pos[1];
-        values[20] = estimate->pos[2];
-
-        values[21] = estimate->vel[0];
-        values[22] = estimate->vel[1];
-        values[23] = estimate->vel[2];
-
-        values[24] = estimate->accel[0];
-        values[25] = estimate->accel[1];
-        values[26] = estimate->accel[2];
+//        values[18] = estimate->pos[0];
+//        values[19] = estimate->pos[1];
+//        values[20] = estimate->pos[2];
+//
+//        values[21] = estimate->vel[0];
+//        values[22] = estimate->vel[1];
+//        values[23] = estimate->vel[2];
+//
+//        values[24] = estimate->accel[0];
+//        values[25] = estimate->accel[1];
+//        values[26] = estimate->accel[2];
     } else if (packet->header.id == telemetry_id_state_estimate_status) {
         FTAssert(packet->header.length == sizeof(state_estimate_status_t), "Incorrect Packet Size");
         auto status = (state_estimate_status_t*)packet->payload;

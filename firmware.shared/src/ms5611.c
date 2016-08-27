@@ -34,7 +34,7 @@ static const SPIConfig spi_cfg = {
 };
 
 static const uint32_t ms5611_send_over_usb_count = 5; // Will send 1 in every 5 samples
-
+static const uint32_t ms5611_send_over_can_count = 5;
 /* Acquire mutex and initialise SPI with DMA. */
 static void ms5611_spi_start(){
 	spiStart(&MS5611_SPID, &spi_cfg);
@@ -196,7 +196,7 @@ static void ms5611_read(MS5611CalData* cal_data,
 		COMPONENT_STATE_UPDATE(avionics_component_ms5611, state_error);
 }
 
-MESSAGING_PRODUCER(messaging_producer, telemetry_id_ms5611_data, sizeof(ms5611data_t), 10)
+MESSAGING_PRODUCER(messaging_producer, telemetry_id_ms5611_data, sizeof(ms5611data_t), 20)
 MESSAGING_PRODUCER(messaging_producer_config, telemetry_id_ms5611_config, sizeof(MS5611CalData), 2)
 
 /*
@@ -222,7 +222,7 @@ void ms5611_thread(void *arg){
 
 
     uint32_t send_over_usb_count = ms5611_send_over_usb_count;
-
+	uint32_t send_over_can_count = ms5611_send_over_can_count;
 
 	while (TRUE) {
 		ms5611_read(&cal_data, &data.temperature, &data.pressure);
@@ -234,6 +234,13 @@ void ms5611_thread(void *arg){
             flags |= message_flags_dont_send_over_usb;
             send_over_usb_count++;
         }
+
+		if (send_over_can_count == ms5611_send_over_can_count) {
+			send_over_can_count = 0;
+			flags |= message_flags_send_over_can;
+		} else {
+			send_over_can_count++;
+		}
 
         messaging_producer_send(&messaging_producer, flags, (const uint8_t*)&data);
         chThdSleepMilliseconds(20);

@@ -14,14 +14,14 @@ RocketPathRenderer::~RocketPathRenderer() {
 }
 
 void RocketPathRenderer::nextStateEstimate(const state_estimate_t& current_state) {
-    FTVertex<glm::vec3> vertex;
-    vertex.position_.x = current_state.pos[0];
-    vertex.position_.y = current_state.pos[1];
-    vertex.position_.z = current_state.pos[2];
-    if (vertices_.back() == vertex)
-        return;
-
-    addVertex(vertex);
+//    FTVertex<glm::vec3> vertex;
+//    vertex.position_.x = current_state.pos[0];
+//    vertex.position_.y = current_state.pos[1];
+//    vertex.position_.z = current_state.pos[2];
+//    if (vertices_.back() == vertex)
+//        return;
+//
+//    addVertex(vertex);
 }
 
 void RocketPathRenderer::addVertex(const FTVertex<glm::vec3>& vertex) {

@@ -8,10 +8,14 @@ extern "C" {
 #endif
 
 	typedef struct adis16405_config_t {
+		// Converts to m/s^2
 		float accel_sf;
+
+		// Converts to rad/s
 		float gyro_sf;
-		float magno_sf[3];
-		float magno_bias[3];
+
+		uint16_t magno_sf[3];
+		int16_t magno_bias[3];
 	} adis16405_config_t;
 
 	typedef struct adis16405_data_t {
@@ -28,6 +32,7 @@ extern "C" {
 		float magno[3];
 	} adis16405_calibrated_data_t;
 
+	STATIC_ASSERT(sizeof(adis16405_config_t) == 20, adis16405_config_padded);
 	STATIC_ASSERT(sizeof(adis16405_data_t) == 20, adis16405_data_padded);
 
 	void adis16405_calibrate_data(const adis16405_config_t* config, const adis16405_data_t* uncalibrated_data, adis16405_calibrated_data_t* calibrated_data);

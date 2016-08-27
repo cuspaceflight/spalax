@@ -9,15 +9,11 @@ extern "C" {
 
 // We use a right handed coordinate system with the y axis being up
 typedef struct state_estimate_t {
-    float pos[3]; // Position in relation to start
-    float vel[3];
-    float accel[3];
-
-    float angular_velocity[3];
-    float orientation_q[4];
+	float orientation_q[4];
+	float angular_velocity[3];
 } state_estimate_t;
 
-STATIC_ASSERT(sizeof(state_estimate_t) == 16 * 4, ms5611data_padded);
+STATIC_ASSERT(sizeof(state_estimate_t) == 7 * 4, ms5611data_padded);
 
 typedef struct state_estimate_calibration_t {
     // The length of time over which samples were taken

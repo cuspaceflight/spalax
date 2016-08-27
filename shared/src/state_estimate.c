@@ -91,8 +91,10 @@ static void send_state_estimate(void) {
     static int send_counter = 0;
     message_metadata_t flags = 0;
 
-    if (send_counter == 100)
-        send_counter = 0;
+	if (send_counter == 100) {
+		send_counter = 0;
+		flags |= message_flags_send_over_can;
+	}
     else {
         flags |= message_flags_dont_send_over_usb;
         send_counter++;

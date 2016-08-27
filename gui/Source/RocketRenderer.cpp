@@ -20,5 +20,5 @@ RocketRenderer::~RocketRenderer() {
 void RocketRenderer::nextStateEstimate(const state_estimate_t& current_state) {
     glm::quat rotation(current_state.orientation_q[3], current_state.orientation_q[0], current_state.orientation_q[1], current_state.orientation_q[2]);
     setRotationQuaternion(rotation);
-    setPosition(glm::vec3(current_state.pos[0], current_state.pos[1], current_state.pos[2]));
+    //setPosition(glm::vec3(current_state.pos[0], current_state.pos[1], current_state.pos[2]));
 }
