@@ -226,7 +226,7 @@ void ms5611_thread(void *arg){
 
 	while (TRUE) {
 		ms5611_read(&cal_data, &data.temperature, &data.pressure);
-        message_metadata_t flags = 0;
+        message_metadata_t flags = message_flags_send_over_can;
 
         if (send_over_usb_count == ms5611_send_over_usb_count)
             send_over_usb_count = 0;
