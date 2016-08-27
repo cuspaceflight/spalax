@@ -358,7 +358,7 @@ void kalman_new_accel(const float accel[3]) {
     float accel_mag = vector_mag(accel);
     // If more than half of the acceleration vector is not due to gravity we ignore it
     // We aren't going to get anything meaningful from it
-    if (accel_mag > 1.5f * g_reference_mag || accel_mag < 0.5f * g_reference_mag)
+    if (accel_mag > 1.2f * g_reference_mag || accel_mag < 0.8f * g_reference_mag)
         return;
 
     float predicted_measurement[3];

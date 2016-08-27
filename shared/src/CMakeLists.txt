@@ -10,6 +10,7 @@ set (SOURCES ${SOURCES}
 	${CMAKE_CURRENT_SOURCE_DIR}/math_utils.c
 	${CMAKE_CURRENT_SOURCE_DIR}/adis16405_config.c
 	${CMAKE_CURRENT_SOURCE_DIR}/can_interface.c
+	${CMAKE_CURRENT_SOURCE_DIR}/board_config.c
     PARENT_SCOPE)
 
 set (HEADERS ${HEADERS}

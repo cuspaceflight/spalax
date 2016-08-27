@@ -11,4 +11,5 @@ set (HEADERS ${HEADERS}
 	${CMAKE_CURRENT_SOURCE_DIR}/ms5611_config.h
 	${CMAKE_CURRENT_SOURCE_DIR}/adis16405_config.h
     ${CMAKE_CURRENT_SOURCE_DIR}/can_interface.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/board_config.h
     PARENT_SCOPE)

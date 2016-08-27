@@ -12,6 +12,8 @@ typedef struct {
     uint32_t board_id[3];
     uint16_t mpu9250_magno_bias[3];
     uint16_t mpu9250_magno_sf[3];
+    float accel_reference[3];
+    float magno_reference[3];
     bool has_adis;
 } board_config_t;
 
