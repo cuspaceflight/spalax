@@ -33,8 +33,6 @@ static THD_WORKING_AREA(waCanTelemetry, 512);
  * Set up pin change interrupts for the various sensors that react to them.
  */
 
-const avionics_config_t local_config = { telemetry_origin_m3imu, NULL };
-
 int main(void) {
 	halInit();
 	chSysInit();

@@ -21,12 +21,13 @@
 //static int breakAlloc = (_crtBreakAlloc = 157);
 #endif
 
-void error_handler(avionics_component_t component, int line) {
-    FTLogError("Error in component %i with line %i", component, line);
+void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
+	if (state == state_error)
+		FTLogError("Error in component %i with line %i", component, line);
 }
 
 
-const avionics_config_t local_config = {telemetry_origin_avionics_gui, error_handler};
+const avionics_config_t local_config = {telemetry_origin_avionics_gui, update_handler };
 
 void rocket_main() {
     component_state_start();
