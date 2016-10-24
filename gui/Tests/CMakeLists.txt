@@ -28,8 +28,6 @@ target_link_libraries(spalax.gui.tests
         freetype-gl
         freetype
         glfwmock
-        glewmock
-        glmock
         spalax.shared
         spalax.gui
         )
