@@ -197,3 +197,6 @@ install_manifest.txt
 Avionics.Shared/build-fw/
 *.idea/
 shared/build-fw/
+
+.idea/workspace.xml
+.idea/tasks.xml

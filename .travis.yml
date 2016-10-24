@@ -7,5 +7,5 @@ install:
   - sudo apt-get -y update
   - sudo apt-get -y install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi gcc xorg-dev libgl1-mesa-dev
 script:
-  - scripts/travis-build-firmware.sh
+  - ./travis-build-firmware.sh
 

@@ -2,8 +2,8 @@
 #include <string.h>
 #include <avionics_config.h>
 
-int num_board_configs = 2;
-board_config_t board_configs[2] = {
+int num_board_configs = 3;
+board_config_t board_configs[3] = {
     { // Dart
         .board_id = {3407947, 859066637, 858994999},
         .mpu9250_magno_sf = {3780, 2610, 1956},
@@ -19,6 +19,14 @@ board_config_t board_configs[2] = {
         .has_adis = false,
         .accel_reference = {0.404072106, 0.344563782, 9.53682613},
         .magno_reference = {0.293875277, -0.15511699, -0.872909367}
+    },
+    { // Spalax Board
+            .board_id = {3407919, 875778316, 808991032},
+            .mpu9250_magno_sf = {3780, 2610, 1956},
+            .mpu9250_magno_bias = {-10, 383, -257},
+            .has_adis = false,
+            .accel_reference = {0.278013796, 0.344436288, 9.90290546},
+            .magno_reference =   {0.209259585, -0.125725865, -0.54462719}
     }
 
 };
@@ -30,12 +38,13 @@ void getBoardID(uint32_t data[3]) {
 }
 
 board_config_t* getBoardConfig(void) {
-    uint32_t* board_id = (uint32_t*)0x1FFF7A10;
+    uint32_t id[3];
+    getBoardID(id);
     for (int i = 0; i < num_board_configs; i++) {
         board_config_t* config = &board_configs[i];
         bool is_equal = true;
         for (int j = 0; j < 3; j++) {
-            if (config->board_id[j] != board_id[j]) {
+            if (config->board_id[j] != id[j]) {
                 is_equal = false;
                 break;
             }
