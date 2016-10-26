@@ -33,7 +33,7 @@ static const SPIConfig spi_cfg = {
 	SPI_CR1_BR_1 | SPI_CR1_CPOL | SPI_CR1_CPHA
 };
 
-static const uint32_t ms5611_send_over_usb_count = 5; // Will send 1 in every 5 samples
+static const uint32_t ms5611_send_over_usb_count = 0; // Will send 1 in every 5 samples
 static const uint32_t ms5611_send_over_can_count = 0;
 /* Acquire mutex and initialise SPI with DMA. */
 static void ms5611_spi_start(){

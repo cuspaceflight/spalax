@@ -22,9 +22,9 @@ static THD_WORKING_AREA(waCalibration, 512);
 static THD_WORKING_AREA(waADIS, 1024);
 static THD_WORKING_AREA(waStateEstimation, 2048);
 
-//static THD_WORKING_AREA(waUSBTransmit, 512);
-//static THD_WORKING_AREA(waUSBReceive, 512);
-static THD_WORKING_AREA(waCanTelemetry, 512);
+static THD_WORKING_AREA(waUSBTransmit, 512);
+static THD_WORKING_AREA(waUSBReceive, 512);
+//static THD_WORKING_AREA(waCanTelemetry, 512);
 
 
 /*
@@ -54,10 +54,10 @@ int main(void) {
 		chThdCreateStatic(waADIS, sizeof(waADIS), NORMALPRIO, adis16405_thread, NULL);
     chThdCreateStatic(waStateEstimation, sizeof(waStateEstimation), NORMALPRIO, state_estimate_thread, NULL);
 
-    //usb_telemetry_start();
+    usb_telemetry_start();
 
-    //chThdCreateStatic(waUSBReceive, sizeof(waUSBReceive), NORMALPRIO, usb_telemetry_receive_thread, NULL);
-    //chThdCreateStatic(waUSBTransmit, sizeof(waUSBTransmit), NORMALPRIO, usb_telemetry_transmit_thread, NULL);
+    chThdCreateStatic(waUSBReceive, sizeof(waUSBReceive), NORMALPRIO, usb_telemetry_receive_thread, NULL);
+    chThdCreateStatic(waUSBTransmit, sizeof(waUSBTransmit), NORMALPRIO, usb_telemetry_transmit_thread, NULL);
 
 	while (true) {
 		chThdSleepMilliseconds(TIME_INFINITE);

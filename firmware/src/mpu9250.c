@@ -14,7 +14,7 @@
 #include "board_config.h"
 
 static const uint32_t mpu9250_send_over_can_count = 0;
-static const uint32_t mpu9250_send_over_usb_count = 100; // Will send 1 in every 100 samples
+static const uint32_t mpu9250_send_over_usb_count = 0; // Will send 1 in every 100 samples
 static const uint32_t mpu9250_send_config_count = 5000; // Will resend config every 1000 samples
 
 static binary_semaphore_t mpu9250_semaphore;

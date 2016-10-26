@@ -13,6 +13,7 @@
 #include <CanSerialDriver.h>
 #include <Rendering/Text/FTFont.h>
 #include <can_interface.h>
+#include <dirent.h>
 
 #ifdef _WIN32
 #define _CRTDBG_MAP_ALLOC
@@ -36,8 +37,6 @@ void rocket_main() {
     messaging_start();
 
 	can_interface_init();
-    
-    
 }
 
 int main() {
@@ -46,6 +45,12 @@ int main() {
 #ifdef _WIN32
     // We can't check manually as it returns false positives for static variables with custom initializers
     _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+#define STANDARD_SERIAL_PORT "COM3"
+#define CAN_SERIAL_PORT "COM3"
+#else
+#define STANDARD_SERIAL_PORT "/dev/serial/by-id/usb-CUSF_Spalax_100-if00"
+    // TODO: Complete me
+#define CAN_SERIAL_PORT "COM3"
 #endif
 
     if (FTEngine::setup()) {
@@ -54,8 +59,8 @@ int main() {
 
         rocket_main();
 
-        //auto driver = std::make_unique<SerialDriver>("COM8", 38400);
-		auto driver = std::make_unique<CanSerialDriver>("COM9", 38400);
+        auto can_driver = std::make_unique<CanSerialDriver>(CAN_SERIAL_PORT, 38400);
+		auto standard_driver = std::make_unique<SerialDriver>(STANDARD_SERIAL_PORT, 38400);
 
         FTEngine::getFileManager()->addSearchPath("Resources");
 

@@ -11,7 +11,7 @@
 #include "platform.h"
 
 static binary_semaphore_t adis16405_semaphore;
-static const uint32_t adis16405_send_over_usb_count = 100; // Will send 1 in every 100 samples
+static const uint32_t adis16405_send_over_usb_count = 0; // Will send 1 in every 100 samples
 static const uint32_t adis16405_send_over_can_count = 0;
 static const uint32_t adis16405_send_config_count = 5000; // Will resend config every 1000 samples
 static volatile bool adis16405_initialized = false;

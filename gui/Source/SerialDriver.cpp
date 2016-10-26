@@ -110,8 +110,12 @@ SerialDriver::~SerialDriver() {
 	is_initialised = false;
 	s_port = nullptr;
 	s_instance = nullptr;
+
+    messaging_consumer_terminate(&messaging_consumer);
+
+    writer_thread_.join();
+    reader_thread_.join();
+
 	serial_port_->close();
 	serial_port_.reset();
-	writer_thread_.join();
-	reader_thread_.join();
 }

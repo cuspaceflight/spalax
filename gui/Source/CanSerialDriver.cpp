@@ -159,8 +159,12 @@ CanSerialDriver::~CanSerialDriver() {
 	is_initialised = false;
 	s_port = nullptr;
 	s_instance = nullptr;
-	serial_port_->close();
-	serial_port_.reset();
+
+	messaging_consumer_terminate(&messaging_consumer);
+
 	writer_thread_.join();
 	reader_thread_.join();
+
+	serial_port_->close();
+	serial_port_.reset();
 }

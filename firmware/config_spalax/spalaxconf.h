@@ -3,6 +3,8 @@
 #include "ch.h"
 #include "hal.h"
 
+#define SPALAX
+
 #define ADIS16405_SPID         SPID3
 #define ADIS16405_SPI_CS_PORT  GPIOA
 #define ADIS16405_SPI_CS_PIN   GPIOA_ESPI_NSS
