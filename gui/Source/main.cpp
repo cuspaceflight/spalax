@@ -1,6 +1,6 @@
 ﻿#include <Frontier.h>
 #include "FTEngine.h"
-#include <MainScene.h>
+#include <Rendering/MainScene.h>
 #include <Rendering/FTDirector.h>
 #include <Util/FTFileManager.h>
 
@@ -9,8 +9,8 @@
 #include <messaging.h>
 #include <checksum.h>
 #include <component_state.h>
-#include <SerialDriver.h>
-#include <CanSerialDriver.h>
+#include <Data/SerialDriver.h>
+#include <Data/CanSerialDriver.h>
 #include <Rendering/Text/FTFont.h>
 #include <can_interface.h>
 #include <dirent.h>
@@ -54,7 +54,7 @@ int main() {
 #endif
 
     if (FTEngine::setup()) {
-        
+
         //FTEngine::setWindowsSize(glm::tvec2<int>(1024, 1024));
 
         rocket_main();

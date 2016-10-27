@@ -10,6 +10,9 @@
 #include <state_estimate.h>
 #include <Event/Input/FTInputManager.h>
 #include <adis16405_config.h>
+#include <Rendering/Primitives/FTTexturedPlane.h>
+#include "Rendering/FTDirector.h"
+#include "Rendering/Text/FTFontCache.h"
 
 
 static StateDetailView* s_instance = nullptr;
@@ -152,13 +155,13 @@ StateDetailView::StateDetailView() {
 	float x = 0;
 
     for (int i = 0; i < num_labels; i++) {
-        auto label = std::make_shared<FTLabel>("Fonts/Vera.ttf", label_names[i], 16);
+        auto label = std::make_shared<FTLabel>("Fonts/Vera.ftfont", label_names[i], 6);
         window_size_node->addChild(label);
         label->setPosition(glm::vec2(x + 30, y));
         label->setAnchorPoint(glm::vec2(0, 0.5f));
         label->setFillColor(glm::vec3(1, 1, 1));
 
-        label = std::make_shared<FTLabel>("Fonts/Vera.ttf", L"0", 16, true);
+        label = std::make_shared<FTLabel>("Fonts/Vera.ftfont", L"0", 6, true);
         window_size_node->addChild(label);
         label->setPosition(glm::vec2(x + 350, y));
         label->setAnchorPoint(glm::vec2(1, 0.5f));

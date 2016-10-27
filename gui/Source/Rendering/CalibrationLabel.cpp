@@ -15,7 +15,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
 MESSAGING_CONSUMER(messaging_consumer, telemetry_id_calibration_magno_data, telemetry_source_packet_specific_mask, 0, 0, getPacket, 10);
 MESSAGING_PRODUCER(messaging_producer, telemetry_id_calibration_control, sizeof(calibration_control_t), 2);
 
-CalibrationLabel::CalibrationLabel(): FTLabel("Fonts/Vera.ttf", L"",16, true), current_procedure_(calibration_procedure_none) {
+CalibrationLabel::CalibrationLabel(): FTLabel("Fonts/Vera.ftfont", L"",16, true), current_procedure_(calibration_procedure_none) {
     FTAssert(s_instance == nullptr, "Only one instance of CalibrationLabel can exist at once");
 
     messaging_consumer_init(&messaging_consumer);
