@@ -200,3 +200,8 @@ shared/build-fw/
 
 .idea/workspace.xml
 .idea/tasks.xml
+
+build.firmware.spalax
+build.gui.spalax
+cmake-build-debug
+cmake-build-release
