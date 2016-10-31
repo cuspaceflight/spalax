@@ -6,6 +6,7 @@
 #include <serial/serial.h>
 #include <component_state.h>
 #include "can_interface.h"
+#include "Utils.h"
 
 #define READ_BUFFER_SIZE 255
 #define WRITE_BUFFER_SIZE 255
@@ -33,7 +34,7 @@ static uint8_t stream_get() {
 			std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}
 
-	FTAssert(read_buffer_index < read_buffer_limit, "Failed to fill read buffer!");
+	UtilAssert(read_buffer_index < read_buffer_limit, "Failed to fill read buffer!");
 	return read_buffer[read_buffer_index++];
 }
 
@@ -125,7 +126,7 @@ static void writer_thread(CanSerialDriver* driver) {
 }
 
 CanSerialDriver::CanSerialDriver(const char* port_name, int baud_rate) {
-	FTAssert(!is_initialised, "Only one serial driver can be active at once");
+	UtilAssert(!is_initialised, "Only one serial driver can be active at once");
 
 
 	serial::Timeout timeout(0, 10, 0, 0, 0);

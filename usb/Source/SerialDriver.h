@@ -1,15 +1,14 @@
 ﻿#pragma once
-#include <Rendering/FTScene.h>
 #include <thread>
 
 namespace serial {
 class Serial;
 }
 
-class CanSerialDriver {
+class SerialDriver {
 public:
-    explicit CanSerialDriver(const char* port_name, int baud_rate);
-    ~CanSerialDriver();
+    explicit SerialDriver(const char* port_name, int baud_rate);
+    ~SerialDriver();
 private:
     std::unique_ptr<serial::Serial> serial_port_;
 

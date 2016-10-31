@@ -140,14 +140,12 @@ void can_recv(uint16_t can_msg_id, bool can_rtr, uint8_t *data, uint8_t datalen)
 	}
 }
 
-// can_send is implemented by the platform
-
 bool can_send_telemetry(const telemetry_t* packet, message_metadata_t metadata) {
     (void)metadata;
     if (packet->header.origin == local_config.origin) {
         if (packet->header.length <= 8) {
             // TODO: RTR?
-            can_send((packet->header.id << 5) | local_config.origin, false, packet->payload, packet->header.length);
+            local_config.can_send((packet->header.id << 5) | local_config.origin, false, packet->payload, packet->header.length);
             return true;
         }
 
@@ -162,7 +160,7 @@ bool can_send_telemetry(const telemetry_t* packet, message_metadata_t metadata) 
         int remaining = packet->header.length;
         int i = 0;
         do {
-            can_send(((packet->header.id+i) << 5) | local_config.origin, false, ptr, remaining > 8 ? 8 : remaining);
+            local_config.can_send(((packet->header.id+i) << 5) | local_config.origin, false, ptr, remaining > 8 ? 8 : remaining);
             ptr += 8;
             i++;
             remaining -= 8;

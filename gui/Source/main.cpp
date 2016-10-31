@@ -9,11 +9,9 @@
 #include <messaging.h>
 #include <checksum.h>
 #include <component_state.h>
-#include <Data/SerialDriver.h>
-#include <Data/CanSerialDriver.h>
-#include <Rendering/Text/FTFont.h>
+#include "SerialDriver.h"
+#include "CanSerialDriver.h"
 #include <can_interface.h>
-#include <dirent.h>
 
 #ifdef _WIN32
 #define _CRTDBG_MAP_ALLOC
@@ -28,7 +26,7 @@ void update_handler(avionics_component_t component, avionics_component_state_t s
 }
 
 
-const avionics_config_t local_config = {telemetry_origin_avionics_gui, update_handler };
+const avionics_config_t local_config = {telemetry_origin_avionics_gui, update_handler, can_send };
 
 void rocket_main() {
     component_state_start();

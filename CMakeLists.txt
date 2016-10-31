@@ -4,6 +4,7 @@ project(Spalax)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
+
 set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
@@ -35,6 +36,9 @@ if (SPALAX_BUILD_FIRMWARE)
 endif()
 
 if (SPALAX_BUILD_GUI)
+    add_subdirectory(external/serial)
+    add_subdirectory(external/Frontier.Engine)
+    add_subdirectory(usb)
     add_subdirectory(gui)
 endif()
 

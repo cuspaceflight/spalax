@@ -14,9 +14,6 @@ bool can_send_telemetry(const telemetry_t* packet, message_metadata_t metadata);
 
 void can_recv(uint16_t msg_id, bool can_rtr, uint8_t* data, uint8_t datalen);
 
-// Must be implemented by user of library
-void can_send(uint16_t msg_id, bool can_rtr, uint8_t* data, uint8_t datalen);
-
 #ifdef __cplusplus
 }
 #endif

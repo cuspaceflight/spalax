@@ -29,4 +29,4 @@ const EXTConfig extcfg = { {
                      { EXT_CH_MODE_DISABLED, NULL } /* Pin 22*/
                  } };
 
-const avionics_config_t local_config = { telemetry_origin_m3imu, NULL };
+const avionics_config_t local_config = { telemetry_origin_m3imu, NULL, NULL };

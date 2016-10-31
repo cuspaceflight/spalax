@@ -1,4 +1,3 @@
-add_subdirectory(Data)
 add_subdirectory(Rendering)
 
 set (SOURCES ${SOURCES}
