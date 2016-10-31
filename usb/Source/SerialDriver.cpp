@@ -120,3 +120,7 @@ SerialDriver::~SerialDriver() {
 	serial_port_->close();
 	serial_port_.reset();
 }
+
+bool SerialDriver::getInitialized() {
+	return is_initialised;
+}

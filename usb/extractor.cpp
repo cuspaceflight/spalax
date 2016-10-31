@@ -36,16 +36,16 @@ static bool mpu_consumer_func(const telemetry_t* packet, message_metadata_t meta
         mpu9250_data_t* data = (mpu9250_data_t*)packet->payload;
 
         *mpu_stream << data->accel[0] << ',';
-        *mpu_stream << data->accel[0] << ',';
-        *mpu_stream << data->accel[0] << ',';
+        *mpu_stream << data->accel[1] << ',';
+        *mpu_stream << data->accel[2] << ',';
 
         *mpu_stream << data->gyro[0] << ',';
-        *mpu_stream << data->gyro[0] << ',';
-        *mpu_stream << data->gyro[0] << ',';
+        *mpu_stream << data->gyro[1] << ',';
+        *mpu_stream << data->gyro[2] << ',';
 
         *mpu_stream << data->magno[0] << ',';
-        *mpu_stream << data->magno[0] << ',';
-        *mpu_stream << data->magno[0] << std::endl;
+        *mpu_stream << data->magno[1] << ',';
+        *mpu_stream << data->magno[2] << std::endl;
     }
     return true;
 }
@@ -86,6 +86,10 @@ int main() {
     mpu_stream = new std::ofstream(mpu_file_name);
 
     auto standard_driver = std::make_unique<SerialDriver>(STANDARD_SERIAL_PORT, 38400);
+    if (!standard_driver->getInitialized()) {
+        printf("Failed to connect to device!");
+        return 1;
+    }
 
     std::thread rocket_thread(rocket_main);
 

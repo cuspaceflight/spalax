@@ -9,6 +9,8 @@ class SerialDriver {
 public:
     explicit SerialDriver(const char* port_name, int baud_rate);
     ~SerialDriver();
+
+    bool getInitialized();
 private:
     std::unique_ptr<serial::Serial> serial_port_;
 
