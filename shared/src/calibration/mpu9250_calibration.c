@@ -1,4 +1,4 @@
-#include "mpu9250_config.h"
+#include "mpu9250_calibration.h"
 
 void mpu9250_calibrate_data(const mpu9250_config_t* config, const mpu9250_data_t* uncalibrated_data, mpu9250_calibrated_data_t* calibrated_data) {
 	// Correct for flight stack's upside down mpu9250

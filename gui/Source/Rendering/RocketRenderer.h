@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include <state_estimate_config.h>
+#include "config/telemetry_packets.h"
 #include <Rendering/Primitives/FTCuboid.h>
 
 class RocketRenderer : public FTNode {

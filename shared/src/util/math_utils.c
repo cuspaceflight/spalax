@@ -1,6 +1,5 @@
 #include "math_utils.h"
 #include "math.h"
-#include "logging.h"
 #include <float.h>
 
 float mat2x2_det(float mat[2][2]) {
@@ -10,7 +9,6 @@ float mat2x2_det(float mat[2][2]) {
 void mat2x2_inv(float mat[2][2], float out[2][2]) {
     float invdet = 1 / mat2x2_det(mat);
     if (invdet != invdet) {
-        PRINT("2x2 inverse Nan Error!\n");
         return;
     }
     out[0][0] = mat[1][1] * invdet;
@@ -28,7 +26,6 @@ float mat3x3_det(float mat[3][3]) {
 void mat3x3_inv(float m[3][3], float out[3][3]) {
     float invdet = 1 / mat3x3_det(m);
     if (invdet != invdet) {
-        PRINT("3x3 inverse Nan Error!\n");
         return;
     }
     out[0][0] = (m[1][1] * m[2][2] - m[1][2] * m[2][1]) * invdet;

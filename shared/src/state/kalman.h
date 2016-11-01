@@ -1,7 +1,7 @@
 #ifndef KALMAN_H
 #define KALMAN_H
 #include <stdint.h>
-#include <state_estimate.h>
+#include "state/state_estimate.h"
 
 #ifdef __cplusplus
 extern "C" {

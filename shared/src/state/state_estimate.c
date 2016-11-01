@@ -1,16 +1,12 @@
 #include "state_estimate.h"
-#include <calibration.h>
-#include <logging.h>
 #include <stdbool.h>
-#include <math_utils.h>
 #include "time_utils.h"
-#include <kalman.h>
 #include "component_state.h"
 #include "messaging.h"
-#include "telemetry_config.h"
-#include "mpu9250_config.h"
-#include <avionics_config.h>
-#include <board_config.h>
+#include "calibration/mpu9250_calibration.h"
+#include "util/board_config.h"
+#include "state/kalman.h"
+#include "avionics_config.h"
 
 // Number of seconds to compute average sensor bias over
 #define CALIBRATION_TIME 5.0f

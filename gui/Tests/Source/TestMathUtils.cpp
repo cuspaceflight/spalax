@@ -1,7 +1,7 @@
 #include <gmock/gmock.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <math_utils.h>
+#include <util/math_utils.h>
 #include <Util/FTLog.h>
 
 #define NUM_ITERATIONS 10000

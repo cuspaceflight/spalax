@@ -3,7 +3,7 @@
 #include <component_state.h>
 #include "messaging.h"
 #include <config/telemetry_config.h>
-#include <mpu9250_config.h>
+#include <calibration/mpu9250_calibration.h>
 #include <stdlib.h>
 #include <math.h>
 

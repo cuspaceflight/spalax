@@ -7,12 +7,15 @@
 
 
 #include "ms5611.h"
-#include "ms5611_config.h"
+#include "calibration/ms5611_calibration.h"
 #include "hal.h"
 #include "badthinghandler.h"
 #include "messaging.h"
 #include "spalaxconf.h"
 
+typedef struct {
+	uint16_t c1, c2, c3, c4, c5, c6;
+} MS5611CalData;
 
 static void ms5611_spi_start(void);
 static void ms5611_spi_stop(void);

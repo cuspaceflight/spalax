@@ -1,9 +1,7 @@
 ﻿#pragma once
 #include <Rendering/FTScene.h>
 
-extern "C" {
-#include <state_estimate.h>
-}
+#include <state/state_estimate.h>
 
 
 class StateDetailView;

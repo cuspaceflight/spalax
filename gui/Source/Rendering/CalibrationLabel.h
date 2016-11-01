@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <Rendering/Text/FTLabel.h>
-#include <calibration.h>
+#include <util/calibration.h>
+#include "telemetry_packets.h"
 
 class CalibrationLabel : public FTLabel {
 public:

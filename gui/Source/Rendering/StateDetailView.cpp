@@ -5,11 +5,12 @@
 #include <Rendering/FTWindowSizeNode.h>
 #include <telemetry.h>
 #include <messaging.h>
-#include <ms5611_config.h>
-#include <mpu9250_config.h>
-#include <state_estimate.h>
+#include <calibration/ms5611_calibration.h>
+#include <calibration/mpu9250_calibration.h>
+#include <calibration/adis16405_calibration.h>
+#include <state/state_estimate.h>
 #include <Event/Input/FTInputManager.h>
-#include <adis16405_config.h>
+
 #include <Rendering/Primitives/FTTexturedPlane.h>
 #include "Rendering/FTDirector.h"
 #include "Rendering/Text/FTFontCache.h"

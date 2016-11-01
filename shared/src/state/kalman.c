@@ -1,9 +1,8 @@
 // Python implementation by Rich Wareham can be found at http://nbviewer.ipython.org/gist/rjw57/cbbf33bdf597d20c5083
 
 #include "kalman.h"
-#include "math_utils.h"
+#include "util/math_utils.h"
 #include "math.h"
-#include <logging.h>
 
 typedef struct {
     union {
@@ -18,18 +17,6 @@ typedef struct {
     
     float covariance_diag[12];
 } kalman_state;
-
-void print_kalman_state(kalman_state* state) {
-    PRINT("State = {");
-    for (int i = 0; i < 12; i++) {
-        PRINT("%.2f, ", state->state_vector[i]);
-    }
-    PRINT("} Variance = {");
-    for (int i = 0; i < 12; i++) {
-        PRINT("%.2f, ", state->covariance_diag[i]);
-    }
-    PRINT("}\n");
-}
 
 void reset_kalman_state(kalman_state* state) {
     for (int i = 0; i < 3; i++) {

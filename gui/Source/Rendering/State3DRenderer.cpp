@@ -3,9 +3,6 @@
 #include "RocketRenderer.h"
 #include "RocketPathRenderer.h"
 #include "messaging.h"
-#include <state_estimate.h>
-#include <Rendering/Primitives/FTLine.h>
-#include <mpu9250_config.h>
 
 static State3DRenderer* s_instance = nullptr;
 static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {

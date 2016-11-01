@@ -1,9 +1,8 @@
 ﻿#pragma once
 #include <Rendering/Mesh/FTMesh.h>
 
-extern "C" {
-#include <state_estimate.h>
-}
+#include <state/state_estimate.h>
+
 
 class RocketPathRenderer : public FTMesh<FTVertex<glm::vec3>> {
 public:

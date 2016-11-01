@@ -1,9 +1,7 @@
 
-add_subdirectory(calibration)
-add_subdirectory(state)
-add_subdirectory(util)
-
 set (SOURCES ${SOURCES}
+	${CMAKE_CURRENT_SOURCE_DIR}/kalman.c
+	${CMAKE_CURRENT_SOURCE_DIR}/state_estimate.c
     PARENT_SCOPE)
 
 set (HEADERS ${HEADERS}

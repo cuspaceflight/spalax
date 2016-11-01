@@ -1,4 +1,4 @@
-#include "adis16405_config.h"
+#include "adis16405_calibration.h"
 
 void adis16405_calibrate_data(const adis16405_config_t* config, const adis16405_data_t* uncalibrated_data, adis16405_calibrated_data_t* calibrated_data) {
 	for (int i = 0; i < 3; i++) {

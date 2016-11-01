@@ -3,10 +3,10 @@
 #include "ch.h"
 #include "adis16405.h"
 #include "adis16405-reg.h"
-#include "adis16405_config.h"
+#include "calibration/adis16405_calibration.h"
 #include "badthinghandler.h"
 #include "spalaxconf.h"
-#include "math_utils.h"
+#include "util/math_utils.h"
 #include "messaging.h"
 #include "platform.h"
 

@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <math.h> // for self-test
 #include <machine/endian.h>
-#include "mpu9250_config.h"
+#include "calibration/mpu9250_calibration.h"
 
 #include "ch.h"
 #include "mpu9250.h"
@@ -11,7 +11,7 @@
 #include "messaging.h"
 #include <string.h>
 #include "spalaxconf.h"
-#include "board_config.h"
+#include "util/board_config.h"
 
 static const uint32_t mpu9250_send_over_can_count = 0;
 static const uint32_t mpu9250_send_over_usb_count = 0; // Will send 1 in every 100 samples

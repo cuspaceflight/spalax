@@ -1,19 +1,16 @@
 #include "ch.h"
 #include "hal.h"
-#include "state_estimate.h"
+#include "state/state_estimate.h"
 #include "mpu9250.h"
 #include "ms5611.h"
 #include "adis16405.h"
 #include "badthinghandler.h"
 #include "messaging.h"
 #include "usb_telemetry.h"
-#include "telemetry_allocator.h"
 #include "checksum.h"
-#include "avionics_config.h"
-#include "state_estimate.h"
-#include "calibration.h"
+#include "util/calibration.h"
 #include "spalaxconf.h"
-#include "board_config.h"
+#include "util/board_config.h"
 
 static THD_WORKING_AREA(waMPU, 1024);
 static THD_WORKING_AREA(waBadThing, 1024);

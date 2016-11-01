@@ -1,7 +1,7 @@
 #ifndef STATE_ESTIMATE_H
 #define STATE_ESTIMATE_H
 #include <stdint.h>
-#include <state_estimate_config.h>
+#include "telemetry_packets.h"
 
 #ifdef __cplusplus
 extern "C" {

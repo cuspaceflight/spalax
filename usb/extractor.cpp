@@ -6,8 +6,7 @@
 #include "SerialDriver.h"
 #include "CanSerialDriver.h"
 #include <can_interface.h>
-#include <mpu9250_config.h>
-#include <adis16405_config.h>
+#include "telemetry_packets.h"
 #include <fstream>
 #include <atomic>
 #include <iostream>

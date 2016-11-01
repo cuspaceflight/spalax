@@ -1,4 +1,4 @@
-#include "ms5611_config.h"
+#include "ms5611_calibration.h"
 #include <math.h>
 
 /* Constants from the US Standard Atmosphere 1976 */
