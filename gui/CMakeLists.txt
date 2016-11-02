@@ -22,5 +22,3 @@ TARGET_LINK_LIBRARIES(spalax.gui.launcher spalax.gui)
 add_custom_command(TARGET spalax.gui.launcher POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_directory
         ${CMAKE_CURRENT_SOURCE_DIR}/Resources ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Resources)
-		
-add_subdirectory(Tests)

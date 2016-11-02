@@ -40,6 +40,7 @@ if (SPALAX_BUILD_GUI)
     add_subdirectory(external/Frontier.Engine)
     add_subdirectory(usb)
     add_subdirectory(gui)
+    add_subdirectory(tests)
 endif()
 
 
