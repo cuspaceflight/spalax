@@ -6,7 +6,7 @@ add_subdirectory(src)
 add_library(spalax.usb ${HEADERS} ${SOURCES} ${CMAKELISTS})
 
 target_include_directories(spalax.usb PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/Source
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
 		../external/serial/include
         )
 
