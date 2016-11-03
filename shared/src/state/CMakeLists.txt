@@ -1,8 +1,7 @@
 
 set (SOURCES ${SOURCES}
-	${CMAKE_CURRENT_SOURCE_DIR}/kalman.c
-	${CMAKE_CURRENT_SOURCE_DIR}/state_estimate.c
-    PARENT_SCOPE)
+        ${CMAKE_CURRENT_SOURCE_DIR}/quest.cpp
+        PARENT_SCOPE)
 
 set (HEADERS ${HEADERS}
     PARENT_SCOPE)

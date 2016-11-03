@@ -1,6 +1,5 @@
 #include "ch.h"
 #include "hal.h"
-#include "state/state_estimate.h"
 #include "mpu9250.h"
 #include "ms5611.h"
 #include "adis16405.h"
@@ -17,7 +16,6 @@ static THD_WORKING_AREA(waBadThing, 1024);
 static THD_WORKING_AREA(waMS5611, 768);
 static THD_WORKING_AREA(waCalibration, 512);
 static THD_WORKING_AREA(waADIS, 1024);
-static THD_WORKING_AREA(waStateEstimation, 2048);
 
 static THD_WORKING_AREA(waUSBTransmit, 512);
 static THD_WORKING_AREA(waUSBReceive, 512);
@@ -49,7 +47,6 @@ int main(void) {
 
 	if (config->has_adis)
 		chThdCreateStatic(waADIS, sizeof(waADIS), NORMALPRIO, adis16405_thread, NULL);
-    chThdCreateStatic(waStateEstimation, sizeof(waStateEstimation), NORMALPRIO, state_estimate_thread, NULL);
 
     usb_telemetry_start();
 

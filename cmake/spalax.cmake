@@ -12,9 +12,6 @@ SET(CMAKE_MODULE_PATH ${CURRENT_DIR}/../external/stm32-cmake/cmake)
 set(STM32_CHIP "STM32F407VG")
 include(gcc_stm32)
 
-# This is set to arm by gcc_stm32 but libswiftnav expects it to be set to cortex-m4
-set(CMAKE_SYSTEM_PROCESSOR cortex-m4)
-
 set(BUILD_SHARED_LIBS OFF)
 
 ADD_DEFINITIONS(-DCORTEX_USE_FPU=TRUE)

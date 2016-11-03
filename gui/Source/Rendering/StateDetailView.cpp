@@ -8,7 +8,6 @@
 #include <calibration/ms5611_calibration.h>
 #include <calibration/mpu9250_calibration.h>
 #include <calibration/adis16405_calibration.h>
-#include <state/state_estimate.h>
 #include <Event/Input/FTInputManager.h>
 
 #include <Rendering/Primitives/FTTexturedPlane.h>

@@ -6,7 +6,6 @@
 #include "calibration/adis16405_calibration.h"
 #include "badthinghandler.h"
 #include "spalaxconf.h"
-#include "util/math_utils.h"
 #include "messaging.h"
 #include "platform.h"
 
@@ -198,7 +197,7 @@ static void adis16405_init(adis16405_config_t* config) {
     }
 
     config->accel_sf = 3.33f/1000.0f*9.8f;
-    config->gyro_sf = 0.05f*PI/180.0f;
+    config->gyro_sf = 0.05f*3.14159265359f/180.0f;
 
     // TODO: Tune these
     config->magno_sf[0] = 4000;

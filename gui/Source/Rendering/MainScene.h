@@ -1,8 +1,6 @@
 ﻿#pragma once
 #include <Rendering/FTScene.h>
-
-#include <state/state_estimate.h>
-
+#include <config/telemetry_packets.h>
 
 class StateDetailView;
 class State3DRenderer;

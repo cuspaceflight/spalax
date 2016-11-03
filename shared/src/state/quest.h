@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-void quest_estimate(const float accel[3], const float mag[3], float q_out[4]);
+void quest_estimate(const float observations[2][3], const float references[2][3], float q_out[4]);
 
 #ifdef __cplusplus
 }

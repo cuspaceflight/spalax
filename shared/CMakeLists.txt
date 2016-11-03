@@ -1,14 +1,19 @@
-cmake_minimum_required (VERSION 3.2)
-set(CMAKE_DISABLE_SOURCE_CHANGES ON)
-set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+    # Enable warnings
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-long-long -Werror")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-long-long -Werror")
+endif()
 
 add_subdirectory(src)
 
 add_library(spalax.shared ${SOURCES})
 
-target_include_directories (spalax.shared PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-    ${CMAKE_CURRENT_SOURCE_DIR}/../external/libswiftnav/include
+target_include_directories (spalax.shared
+        PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../external/eigen
 )
 
-target_link_libraries(spalax.shared PUBLIC messaging swiftnav-static)
+target_link_libraries(spalax.shared PUBLIC messaging)

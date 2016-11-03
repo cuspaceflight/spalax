@@ -2,7 +2,6 @@
 set (SOURCES ${SOURCES}
 	${CMAKE_CURRENT_SOURCE_DIR}/calibration.c
 	${CMAKE_CURRENT_SOURCE_DIR}/board_config.c
-	${CMAKE_CURRENT_SOURCE_DIR}/math_utils.c
     PARENT_SCOPE)
 
 set (HEADERS ${HEADERS}

@@ -1,7 +1,6 @@
 ﻿#pragma once
 #include <Rendering/Mesh/FTMesh.h>
-
-#include <state/state_estimate.h>
+#include <config/telemetry_packets.h>
 
 
 class RocketPathRenderer : public FTMesh<FTVertex<glm::vec3>> {
