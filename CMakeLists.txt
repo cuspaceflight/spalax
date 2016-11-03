@@ -29,6 +29,14 @@ else()
 endif()
 
 add_subdirectory(external/cusf-messaging)
+
+# The build process for lib2fc involves creating source files
+set(CMAKE_DISABLE_SOURCE_CHANGES OFF)
+
+message(STATUS ${PLOVER_GENERATED_C_DIR})
+add_subdirectory(external/libswiftnav)
+set(CMAKE_DISABLE_SOURCE_CHANGES ON)
+
 add_subdirectory(shared)
 
 if (SPALAX_BUILD_FIRMWARE)

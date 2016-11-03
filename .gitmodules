@@ -16,3 +16,6 @@
 [submodule "external/stm32-cmake"]
 	path = external/stm32-cmake
 	url = https://github.com/Tustvold/stm32-cmake.git
+[submodule "external/libswiftnav"]
+	path = external/libswiftnav
+	url = https://github.com/Tustvold/libswiftnav.git

@@ -8,6 +8,7 @@ add_library(spalax.shared ${SOURCES})
 
 target_include_directories (spalax.shared PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/../external/libswiftnav/include
 )
 
-target_link_libraries(spalax.shared PUBLIC messaging)
+target_link_libraries(spalax.shared PUBLIC messaging swiftnav-static)
