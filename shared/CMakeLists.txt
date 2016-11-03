@@ -6,6 +6,8 @@ endif()
 
 add_subdirectory(src)
 
+add_definitions(-DEIGEN_NO_MALLOC)
+
 add_library(spalax.shared ${SOURCES})
 
 target_include_directories (spalax.shared

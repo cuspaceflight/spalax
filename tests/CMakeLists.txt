@@ -6,8 +6,15 @@ SET(HEADERS)
 add_subdirectory(src)
 
 add_executable(spalax.tests ${SOURCES} ${HEADERS})
+
+add_definitions(-DEIGEN_NO_MALLOC)
+
+
 target_include_directories(spalax.tests PUBLIC
-        Source)
+        Source
+
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../external/eigen)
 
 
 target_link_libraries(spalax.tests

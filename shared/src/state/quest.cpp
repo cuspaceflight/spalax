@@ -1,7 +1,4 @@
 #include "quest.h"
-
-
-#define EIGEN_NO_MALLOC
 #include "Eigen/Core"
 
 
