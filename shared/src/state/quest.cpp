@@ -2,35 +2,76 @@
 #include "Eigen/Core"
 #include <Eigen/Geometry>
 
+bool try_estimate(const Eigen::Vector3f& v1, const Eigen::Vector3f& v2, const Eigen::Vector3f& w1, const Eigen::Vector3f& w2, const float a[2], float *q_out) {
+    float cos = v1.dot(v2) * w1.dot(w2) + v1.cross(v2).norm() * w1.cross(w2).norm();
+    float lambda_max = sqrtf(a[0] * a[0] + 2 * a[0] * a[1] * cos + a[1] * a[1]);
+
+    Eigen::Matrix3f B = a[0] * (w1 * v1.transpose()) + a[1] * (w2 * v2.transpose());
+    Eigen::Matrix3f S = B + B.transpose();
+    Eigen::Vector3f Z = a[0] * w1.cross(v1) + a[1] * w2.cross(v2);
+
+    float sigma = B.trace();
+    Eigen::Matrix3f to_invert = (lambda_max + sigma) * Eigen::Matrix3f::Identity() - S;
+    if (to_invert.determinant() < 0.1f)
+        return false;
+
+    Eigen::Vector3f Y = to_invert.inverse() * Z;
+
+    float q_mult = 1 / sqrtf(1 + Y.squaredNorm());
+    q_out[0] = Y[0] * q_mult;
+    q_out[1] = Y[1] * q_mult;
+    q_out[2] = Y[2] * q_mult;
+    q_out[3] = q_mult;
+
+    return true;
+}
+
 // Based on paper at - http://arc.aiaa.org/doi/pdf/10.2514/3.19717
 void quest_estimate(const float observations[2][3], const float references[2][3], const float a[2], float *q_out) {
     Eigen::Vector3f v1(references[0][0], references[0][1], references[0][2]);
     Eigen::Vector3f v2(references[1][0], references[1][1], references[1][2]);
+    { // No sequential rotation
+        Eigen::Vector3f w1(observations[0][0], observations[0][1], observations[0][2]);
+        Eigen::Vector3f w2(observations[1][0], observations[1][1], observations[1][2]);
+        if (try_estimate(v1, v2, w1, w2, a, q_out))
+            return;
+    }
+    { // Initial rotation through pi about the x axis
+        Eigen::Vector3f w1(observations[0][0], -observations[0][1], -observations[0][2]);
+        Eigen::Vector3f w2(observations[1][0], -observations[1][1], -observations[1][2]);
+        float q_temp[4];
+        if (try_estimate(v1, v2, w1, w2, a, q_temp)) {
+            q_out[0] = -q_temp[3];
+            q_out[1] = -q_temp[2];
+            q_out[2] = q_temp[1];
+            q_out[3] = q_temp[0];
+            return;
+        }
+    }
+    { // Initial rotation through pi about the y axis
+        Eigen::Vector3f w1(-observations[0][0], observations[0][1], -observations[0][2]);
+        Eigen::Vector3f w2(-observations[1][0], observations[1][1], -observations[1][2]);
+        float q_temp[4];
+        if (try_estimate(v1, v2, w1, w2, a, q_temp)) {
+            q_out[0] = q_temp[2];
+            q_out[1] = -q_temp[3];
+            q_out[2] = -q_temp[0];
+            q_out[3] = q_temp[1];
+            return;
+        }
+    }
+    { // Initial rotation through pi about the z axis
+        Eigen::Vector3f w1(-observations[0][0], -observations[0][1], observations[0][2]);
+        Eigen::Vector3f w2(-observations[1][0], -observations[1][1], observations[1][2]);
+        float q_temp[4];
+        if (try_estimate(v1, v2, w1, w2, a, q_temp)) {
+            q_out[0] = -q_temp[1];
+            q_out[1] = q_temp[0];
+            q_out[2] = -q_temp[3];
+            q_out[3] = q_temp[2];
+            return;
+        }
+    }
 
-    Eigen::Vector3f w1(observations[0][0], observations[0][1], observations[0][2]);
-    Eigen::Vector3f w2(observations[1][0], observations[1][1], observations[1][2]);
 
-    float lambda_max = v1.dot(v2) * w1.dot(w2) + v1.cross(v2).norm() * w1.cross(w2).norm();
-    Eigen::Matrix3f B = a[0] * (w1 * v1.transpose()) + a[1] * (w2 * v2.transpose());
-
-    Eigen::Matrix3f S = B + B.transpose();
-    float sigma = B.trace();
-    Eigen::Vector3f Z = a[0] * w1.cross(v1) + a[1] * w2.cross(v2);
-
-    auto delta = S.determinant();
-    auto k = S.adjoint().trace();
-
-    auto alpha = lambda_max * lambda_max - sigma * sigma + k;
-    auto beta = lambda_max - sigma;
-    auto gamma = (lambda_max + sigma) * alpha - delta;
-
-    Eigen::Vector3f X = (alpha * Eigen::Matrix3f::Identity() + beta * S + S * S) * Z;
-    auto x_norm = X.norm();
-
-    auto q_mult = 1 / sqrtf(gamma* gamma + x_norm * x_norm);
-
-    q_out[0] = q_mult * X[0];
-    q_out[1] = q_mult * X[1];
-    q_out[2] = q_mult * X[2];
-    q_out[3] = q_mult * gamma;
 }
