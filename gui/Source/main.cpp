@@ -13,13 +13,6 @@
 #include "CanSerialDriver.h"
 #include <can_interface.h>
 
-#ifdef _WIN32
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-// Use for debugging allocations
-//static int breakAlloc = (_crtBreakAlloc = 157);
-#endif
-
 void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
 	if (state == state_error)
 		FTLogError("Error in component %i with line %i", component, line);

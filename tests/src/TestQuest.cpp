@@ -77,7 +77,7 @@ TEST(TestQuest, TestIdentity2) {
 
     for (int i = 0; i < 2; i++) {
         Eigen::Vector3f orig(observations[i][0], observations[i][1], observations[i][2]);
-        auto new_vec = rotation * orig;
+        Eigen::Vector3f new_vec = rotation * orig;
         observations[i][0] = new_vec[0];
         observations[i][1] = new_vec[1];
         observations[i][2] = new_vec[2];
@@ -85,7 +85,7 @@ TEST(TestQuest, TestIdentity2) {
 
     for (int i = 0; i < 2; i++) {
         Eigen::Vector3f orig(references[i][0], references[i][1], references[i][2]);
-        auto new_vec = rotation * orig;
+        Eigen::Vector3f new_vec = rotation * orig;
         references[i][0] = new_vec[0];
         references[i][1] = new_vec[1];
         references[i][2] = new_vec[2];
@@ -118,7 +118,7 @@ TEST(TestQuest, TestIdentity3) {
 
     for (int i = 0; i < 1; i++) {
         Eigen::Vector3f orig(observations[i][0], observations[i][1], observations[i][2]);
-        auto new_vec = rotation * orig;
+        Eigen::Vector3f new_vec = rotation * orig;
         observations[i][0] = new_vec[0];
         observations[i][1] = new_vec[1];
         observations[i][2] = new_vec[2];
@@ -126,7 +126,7 @@ TEST(TestQuest, TestIdentity3) {
 
     for (int i = 0; i < 1; i++) {
         Eigen::Vector3f orig(references[i][0], references[i][1], references[i][2]);
-        auto new_vec = rotation * orig;
+        Eigen::Vector3f new_vec = rotation * orig;
         references[i][0] = new_vec[0];
         references[i][1] = new_vec[1];
         references[i][2] = new_vec[2];
@@ -159,7 +159,7 @@ TEST(TestQuest, TestRotation) {
 
     for (int i = 0; i < 2; i++) {
         Eigen::Vector3f orig(observations[i][0], observations[i][1], observations[i][2]);
-        auto new_vec = rotation * orig;
+        Eigen::Vector3f new_vec = rotation * orig;
         observations[i][0] = new_vec[0];
         observations[i][1] = new_vec[1];
         observations[i][2] = new_vec[2];
@@ -194,7 +194,7 @@ TEST(TestQuest, TestRotation2) {
 
     for (int i = 0; i < 2; i++) {
         Eigen::Vector3f orig(observations[i][0], observations[i][1], observations[i][2]);
-        auto new_vec = rotation * orig;
+        Eigen::Vector3f new_vec = rotation * orig;
         observations[i][0] = new_vec[0];
         observations[i][1] = new_vec[1];
         observations[i][2] = new_vec[2];
@@ -228,7 +228,7 @@ TEST(TestQuest, TestRotation3) {
 
     for (int i = 0; i < 2; i++) {
         Eigen::Vector3f orig(observations[i][0], observations[i][1], observations[i][2]);
-        auto new_vec = rotation * orig;
+        Eigen::Vector3f new_vec = rotation * orig;
         observations[i][0] = new_vec[0];
         observations[i][1] = new_vec[1];
         observations[i][2] = new_vec[2];
@@ -263,7 +263,7 @@ TEST(TestQuest, TestRotation4) {
 
         for (int i = 0; i < 2; i++) {
             Eigen::Vector3f orig(observations[i][0], observations[i][1], observations[i][2]);
-            auto new_vec = rotation * orig;
+            Eigen::Vector3f new_vec = rotation * orig;
             observations[i][0] = new_vec[0];
             observations[i][1] = new_vec[1];
             observations[i][2] = new_vec[2];
@@ -299,7 +299,7 @@ TEST(TestQuest, TestRotation5) {
 
         for (int i = 0; i < 2; i++) {
             Eigen::Vector3f orig(observations[i][0], observations[i][1], observations[i][2]);
-            auto new_vec = rotation * orig;
+            Eigen::Vector3f new_vec = rotation * orig;
             observations[i][0] = new_vec[0];
             observations[i][1] = new_vec[1];
             observations[i][2] = new_vec[2];
@@ -335,7 +335,7 @@ TEST(TestQuest, TestRotation6) {
 
         for (int i = 0; i < 2; i++) {
             Eigen::Vector3f orig(observations[i][0], observations[i][1], observations[i][2]);
-            auto new_vec = rotation * orig;
+            Eigen::Vector3f new_vec = rotation * orig;
             observations[i][0] = new_vec[0];
             observations[i][1] = new_vec[1];
             observations[i][2] = new_vec[2];
@@ -371,7 +371,7 @@ TEST(TestQuest, TestRotationRandom) {
 
         for (int i = 0; i < 2; i++) {
             Eigen::Vector3f orig(observations[i][0], observations[i][1], observations[i][2]);
-            auto new_vec = rotation * orig;
+            Eigen::Vector3f new_vec = rotation * orig;
             observations[i][0] = new_vec[0];
             observations[i][1] = new_vec[1];
             observations[i][2] = new_vec[2];
@@ -407,11 +407,60 @@ TEST(TestQuest, TestRotationRandom2) {
 
         for (int i = 0; i < 2; i++) {
             Eigen::Vector3f orig(observations[i][0], observations[i][1], observations[i][2]);
-            auto new_vec = rotation * orig;
+            Eigen::Vector3f new_vec = rotation * orig;
             observations[i][0] = new_vec[0];
             observations[i][1] = new_vec[1];
             observations[i][2] = new_vec[2];
         }
+
+        const float a[2] = {0.5f, 0.5f};
+
+        float q_out[4];
+
+        quest_estimate(observations, references, a, q_out);
+
+        // QUEST returns the quaternion to rotate the observations onto the references
+        // This should be the reverse of the rotation above
+        auto inv_rotation = rotation.inverse();
+
+        expect_quat_eq(inv_rotation, q_out);
+    }
+}
+
+TEST(TestQuest, TestRotationDisturbed) {
+    for (int rand_i = 0; rand_i < 1; rand_i++) {
+        float observations[2][3] = {
+                {1.0, 0.0, 0.0f},
+                {0.0, 1.0, 0.0f}
+        };
+
+        float references[2][3] = {
+                {1.0, 0.0, 0.0f},
+                {0.0, 1.0, 0.0f}
+        };
+
+        Eigen::Quaternionf rotation(Eigen::AngleAxisf(get_rand(), Eigen::Vector3f::UnitZ()) * Eigen::AngleAxisf(get_rand(), Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(get_rand(), Eigen::Vector3f::UnitX()));
+
+        Eigen::Quaternionf disturb(Eigen::AngleAxisf(get_rand(0.5f), Eigen::Vector3f::UnitZ()) * Eigen::AngleAxisf(get_rand(0.1f), Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(get_rand(0.1f), Eigen::Vector3f::UnitX()));
+        Eigen::Quaternionf disturb_inv = disturb.inverse();
+        // We disturb the vectors equally in opposite directions so the result should be halfway between them - i.e unchanged
+
+        Eigen::Quaternionf disturbed = disturb ;//* rotation;
+        Eigen::Quaternionf disturbed_inv = disturb_inv;// * rotation;
+
+        Eigen::Vector3f orig(observations[0][0], observations[0][1], observations[0][2]);
+        Eigen::Vector3f new_vec = disturbed * orig;
+        observations[0][0] = new_vec[0];
+        observations[0][1] = new_vec[1];
+        observations[0][2] = new_vec[2];
+
+        Eigen::Vector3f orig1(observations[1][0], observations[1][1], observations[1][2]);
+        Eigen::Vector3f new_vec1 = disturbed_inv * orig1;
+        observations[1][0] = new_vec1[0];
+        observations[1][1] = new_vec1[1];
+        observations[1][2] = new_vec1[2];
+
+
 
         const float a[2] = {0.5f, 0.5f};
 

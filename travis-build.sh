@@ -16,3 +16,5 @@ mkdir build.gui.spalax
 cd build.gui.spalax
 cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/std.cmake
 make
+cd bin
+./spalax.tests

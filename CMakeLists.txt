@@ -11,6 +11,8 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
+include(CMakeToolsHelpers OPTIONAL)
+
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     message(FATAL_ERROR "Must specify toolchain file - NB: changing the toolchain requires deleting the CMake cache")
 else()

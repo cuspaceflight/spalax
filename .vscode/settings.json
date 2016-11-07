@@ -1,0 +1,21 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "cmake.configureArgs": ["-DCMAKE_TOOLCHAIN_FILE=cmake/std.cmake"],
+    "cmake.buildDirectory": "${workspaceRoot}/build-vscode",
+    "cmake.experimental.enableTargetDebugging": true,
+    "cmake.debugConfig": {
+        "all": {
+            "request": "launch",
+            "cwd": "${workspaceRoot}/build-vscode/bin",
+            "linux": {
+                "MIMode": "gdb"
+            },
+            "osx": {
+                "MIMode": "lldb"
+            },
+            "windows": {
+                "MIMode": "gdb"
+            }
+        }
+    }
+}

@@ -72,6 +72,6 @@ void quest_estimate(const float observations[2][3], const float references[2][3]
             return;
         }
     }
-
+    assert(false);
 
 }

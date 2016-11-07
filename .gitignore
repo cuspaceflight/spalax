@@ -201,6 +201,7 @@ shared/build-fw/
 .idea/workspace.xml
 .idea/tasks.xml
 
+build-vscode
 build.firmware.spalax
 build.gui.spalax
 cmake-build-debug
