@@ -1,6 +1,7 @@
 #include "quest.h"
 #include "Eigen/Core"
 #include <Eigen/Geometry>
+#include <Eigen/Eigenvalues>
 
 bool try_estimate(const Eigen::Vector3f& v1, const Eigen::Vector3f& v2, const Eigen::Vector3f& w1, const Eigen::Vector3f& w2, const float a[2], float *q_out) {
     float cos = v1.dot(v2) * w1.dot(w2) + v1.cross(v2).norm() * w1.cross(w2).norm();
@@ -8,7 +9,7 @@ bool try_estimate(const Eigen::Vector3f& v1, const Eigen::Vector3f& v2, const Ei
 
     Eigen::Matrix3f B = a[0] * (w1 * v1.transpose()) + a[1] * (w2 * v2.transpose());
     Eigen::Matrix3f S = B + B.transpose();
-    Eigen::Vector3f Z = a[0] * w1.cross(v1) + a[1] * w2.cross(v2);
+    Eigen::Vector3f Z(B(1,2) - B(2,1), B(2,0) - B(0,2), B(0,1) - B(1,0));
 
     float sigma = B.trace();
     Eigen::Matrix3f to_invert = (lambda_max + sigma) * Eigen::Matrix3f::Identity() - S;
@@ -22,6 +23,21 @@ bool try_estimate(const Eigen::Vector3f& v1, const Eigen::Vector3f& v2, const Ei
     q_out[1] = Y[1] * q_mult;
     q_out[2] = Y[2] * q_mult;
     q_out[3] = q_mult;
+
+//    Eigen::Matrix4f K;
+//    Eigen::Matrix3f d = S - sigma * Eigen::Matrix3f::Identity();
+//    for (int i = 0; i < 3; i++) {
+//        for (int j = 0; j < 3; j++) {
+//            K(i,j) = d(i,j);
+//        }
+//        K(3,i) = Z[i];
+//        K(i,3) = Z[i];
+//        K(3,3) = sigma;
+//    }
+//
+//    // This should be very close to 0
+//    float test = (lambda_max * Eigen::Matrix4f::Identity() - K).determinant();
+
 
     return true;
 }
