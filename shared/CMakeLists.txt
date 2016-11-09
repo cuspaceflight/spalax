@@ -18,4 +18,4 @@ target_include_directories (spalax.shared
         ${CMAKE_CURRENT_SOURCE_DIR}/../external/eigen
 )
 
-target_link_libraries(spalax.shared PUBLIC messaging)
+target_link_libraries(spalax.shared PUBLIC messaging wmm)

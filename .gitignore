@@ -206,3 +206,4 @@ build.firmware.spalax
 build.gui.spalax
 cmake-build-debug
 cmake-build-release
+/build-firmware/
