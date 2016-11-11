@@ -1,42 +1,8 @@
 #include <gmock/gmock.h>
 #include "state/quest.h"
-#include "Eigen/Core"
-#include <Eigen/Geometry>
+#include "math_debug_util.h"
 
 #define NUM_ITERATIONS 1000
-
-float get_rand(float range = 20.0f) {
-    float divisor = RAND_MAX / 2 / range;
-    return (float)(rand() % RAND_MAX) / divisor - range;
-}
-
-bool fuzzy_eq(float A, float B) {
-    const float maxRelativeError = 0.00005f;
-    const float maxAbsoluteError = 1e-5f;
-
-    if (fabs(A - B) < maxAbsoluteError)
-        return true;
-    float relativeError;
-    if (fabs(B) > fabs(A))
-        relativeError = fabs((A - B) / B);
-    else
-        relativeError = fabs((A - B) / A);
-    return relativeError <= maxRelativeError;
-}
-
-void expect_fuzzy_eq(float A, float B) {
-    EXPECT_TRUE(fuzzy_eq(A, B));
-}
-
-bool quat_eq(const Eigen::Quaternionf& q, float q_arr[4]) {
-    if (fuzzy_eq(q.x(), q_arr[0]) && fuzzy_eq(q.y(), q_arr[1]) && fuzzy_eq(q.z(), q_arr[2]) && fuzzy_eq(q.w(), q_arr[3]))
-        return true;
-    return fuzzy_eq(-q.x(), q_arr[0]) && fuzzy_eq(-q.y(), q_arr[1]) && fuzzy_eq(-q.z(), q_arr[2]) && fuzzy_eq(-q.w(), q_arr[3]);
-}
-
-void expect_quat_eq(const Eigen::Quaternionf& q, float q_arr[4]) {
-    EXPECT_TRUE(quat_eq(q, q_arr));
-}
 
 TEST(TestQuest, TestIdentity) {
     const float observations[2][3] = {

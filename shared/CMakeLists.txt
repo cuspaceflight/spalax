@@ -6,7 +6,13 @@ endif()
 
 add_subdirectory(src)
 
-add_definitions(-DEIGEN_NO_MALLOC)
+string(TIMESTAMP Year "%Y")
+string(TIMESTAMP Week "%U")
+string(TIMESTAMP DayOfWeek "%w")
+
+message(STATUS "Compilation Date: Year - ${Year}, Week - ${Week}, DayOfWeek - ${DayOfWeek}")
+
+add_definitions(-DEIGEN_NO_MALLOC -DTIMESTAMP_YEAR=${Year} -DTIMESTAMP_WEEK=${Week} -DTIMESTAMP_DAY_OF_WEEK=${DayOfWeek})
 
 add_library(spalax.shared ${SOURCES})
 
@@ -18,4 +24,8 @@ target_include_directories (spalax.shared
         ${CMAKE_CURRENT_SOURCE_DIR}/../external/eigen
 )
 
-target_link_libraries(spalax.shared PUBLIC messaging wmm)
+target_link_libraries(spalax.shared 
+    PUBLIC 
+    messaging
+    PRIVATE 
+    wmm)
