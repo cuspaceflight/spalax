@@ -5,6 +5,7 @@
 
 TEST(TestWMM, TestDeclination) {
     component_state_start();
+    // 11/11/2016
     wmm_util_init(2016.8790832455215);
 
     MagneticFieldParams params;
