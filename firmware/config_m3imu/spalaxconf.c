@@ -40,4 +40,4 @@ static void update_handler(avionics_component_t component, avionics_component_st
         // This isn't ideal but the full line number will be logged by component_state
 }
 
-const avionics_config_t local_config = { telemetry_origin_m3imu, update_handler};
+const avionics_config_t local_config = { telemetry_origin_m3imu, update_handler, NULL};
