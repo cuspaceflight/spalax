@@ -17,8 +17,6 @@ static THD_WORKING_AREA(waMS5611, 768);
 static THD_WORKING_AREA(waCalibration, 512);
 static THD_WORKING_AREA(waADIS, 1024);
 
-static THD_WORKING_AREA(waUSBTransmit, 512);
-static THD_WORKING_AREA(waUSBReceive, 512);
 //static THD_WORKING_AREA(waCanTelemetry, 512);
 
 
@@ -50,8 +48,7 @@ int main(void) {
 
     usb_telemetry_start();
 
-    chThdCreateStatic(waUSBReceive, sizeof(waUSBReceive), NORMALPRIO, usb_telemetry_receive_thread, NULL);
-    chThdCreateStatic(waUSBTransmit, sizeof(waUSBTransmit), NORMALPRIO, usb_telemetry_transmit_thread, NULL);
+
 
 	while (true) {
 		chThdSleepMilliseconds(TIME_INFINITE);
