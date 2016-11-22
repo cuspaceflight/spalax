@@ -13,7 +13,7 @@ static void update_handler(avionics_component_t component, avionics_component_st
         printf("Component: %i State Error: OK\n", component);
 }
 
-const avionics_config_t local_config = { telemetry_origin_m3imu, update_handler, NULL};
+const avionics_config_t local_config = { telemetry_origin_m3imu, update_handler};
 
 int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);

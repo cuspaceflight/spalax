@@ -55,6 +55,11 @@ void rocket_main() {
 
     messaging_consumer_init(&mpu_consumer);
 
+    if (!can_telemetry_connected() && !usb_telemetry_connected()) {
+        printf("No valid data source found\n");
+        exit(1);
+    }
+
     while(running) {
         messaging_consumer_receive(&mpu_consumer, true, false);
     }
