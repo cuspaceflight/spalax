@@ -9,9 +9,8 @@
 #include <messaging.h>
 #include <checksum.h>
 #include <component_state.h>
-#include "SerialDriver.h"
-#include "CanSerialDriver.h"
-#include <can_interface.h>
+#include <usb_telemetry.h>
+#include <can_telemetry.h>
 
 void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
 	if (state == state_error)
@@ -19,7 +18,7 @@ void update_handler(avionics_component_t component, avionics_component_state_t s
 }
 
 
-const avionics_config_t local_config = {telemetry_origin_avionics_gui, update_handler, can_send };
+const avionics_config_t local_config = {telemetry_origin_avionics_gui, update_handler };
 
 void rocket_main() {
     component_state_start();
@@ -27,7 +26,8 @@ void rocket_main() {
     telemetry_allocator_start();
     messaging_start();
 
-	can_interface_init();
+    usb_telemetry_start();
+    can_telemetry_start();
 }
 
 int main() {
@@ -50,8 +50,7 @@ int main() {
 
         rocket_main();
 
-        auto can_driver = std::make_unique<CanSerialDriver>(CAN_SERIAL_PORT, 38400);
-		auto standard_driver = std::make_unique<SerialDriver>(STANDARD_SERIAL_PORT, 38400);
+
 
         FTEngine::getFileManager()->addSearchPath("Resources");
 

@@ -1,31 +1,23 @@
-#include "Utils.h"
 #include "avionics_config.h"
 #include <messaging.h>
 #include <checksum.h>
 #include <component_state.h>
-#include "SerialDriver.h"
-#include "CanSerialDriver.h"
 #include <can_interface.h>
 #include "telemetry_packets.h"
 #include <fstream>
 #include <atomic>
 #include <iostream>
 #include <cstring>
-#include <stdlib.h>
-
-#ifdef _WIN32
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-// Use for debugging allocations
-//static int breakAlloc = (_crtBreakAlloc = 157);
-#endif
+#include <can_telemetry.h>
+#include <usb_telemetry.h>
+#include <thread>
 
 void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
     if (state == state_error)
         printf("Error in component %i with line %i\n", component, line);
 }
 
-const avionics_config_t local_config = {telemetry_origin_avionics_gui, update_handler, can_send };
+const avionics_config_t local_config = {telemetry_origin_avionics_gui, update_handler };
 
 std::ofstream* mpu_stream;
 std::atomic<bool> running(true);
@@ -58,7 +50,8 @@ void rocket_main() {
     telemetry_allocator_start();
     messaging_start();
 
-    can_interface_init();
+    can_telemetry_start();
+    usb_telemetry_start();
 
     messaging_consumer_init(&mpu_consumer);
 
@@ -68,27 +61,10 @@ void rocket_main() {
 }
 
 int main() {
-#ifdef _WIN32
-    // We can't check manually as it returns false positives for static variables with custom initializers
-    _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-#define STANDARD_SERIAL_PORT "COM3"
-#define CAN_SERIAL_PORT "COM3"
-#else
-#define STANDARD_SERIAL_PORT "/dev/serial/by-id/usb-CUSF_Spalax_100-if00"
-    // TODO: Complete me
-#define CAN_SERIAL_PORT "COM3"
-#endif
-
     auto mpu_file_name = "mpu_data.csv";
     printf("Writing MPU data to %s\n", mpu_file_name);
 
     mpu_stream = new std::ofstream(mpu_file_name);
-
-    auto standard_driver = std::make_unique<SerialDriver>(STANDARD_SERIAL_PORT, 38400);
-    if (!standard_driver->getInitialized()) {
-        printf("Failed to connect to device!");
-        return 1;
-    }
 
     std::thread rocket_thread(rocket_main);
 
