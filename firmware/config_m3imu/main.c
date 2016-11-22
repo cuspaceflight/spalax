@@ -1,3 +1,5 @@
+#include <util/board_config.h>
+#include <util/calibration.h>
 #include "ch.h"
 #include "hal.h"
 #include "mpu9250.h"
@@ -9,22 +11,20 @@
 #include "telemetry_allocator.h"
 #include "checksum.h"
 #include "avionics_config.h"
-#include "calibration.h"
 #include "spalaxconf.h"
-#include "m3can.h"
 #include "can_telemetry.h"
-#include "board_config.h"
 
 static THD_WORKING_AREA(waMPU, 1024);
 static THD_WORKING_AREA(waBadThing, 1024);
 static THD_WORKING_AREA(waMS5611, 768);
 static THD_WORKING_AREA(waCalibration, 512);
 static THD_WORKING_AREA(waADIS, 1024);
-static THD_WORKING_AREA(waStateEstimation, 2048);
 
 //static THD_WORKING_AREA(waUSBTransmit, 512);
 //static THD_WORKING_AREA(waUSBReceive, 512);
-static THD_WORKING_AREA(waCanTelemetry, 512);
+static THD_WORKING_AREA(waCanTelemetryTransmit, 512);
+static THD_WORKING_AREA(waCanTelemetryReceive, 512);
+
 
 
 /*
@@ -36,12 +36,13 @@ int main(void) {
 	chSysInit();
 	chRegSetThreadName("Main");
 
-	can_init(CAN_ID_M3IMU);
-
 	component_state_start();
 	checksum_init();
 	telemetry_allocator_start();
 	messaging_start();
+
+    can_telemetry_start();
+    //usb_telemetry_start();
 
 	extStart(&EXTD1, &extcfg);
 
@@ -54,15 +55,15 @@ int main(void) {
 
 	if (config->has_adis)
 		chThdCreateStatic(waADIS, sizeof(waADIS), NORMALPRIO, adis16405_thread, NULL);
-    chThdCreateStatic(waStateEstimation, sizeof(waStateEstimation), NORMALPRIO, state_estimate_thread, NULL);
 
-	can_telemetry_start();
-    //usb_telemetry_start();
+
+
 
     //chThdCreateStatic(waUSBReceive, sizeof(waUSBReceive), NORMALPRIO, usb_telemetry_receive_thread, NULL);
     //chThdCreateStatic(waUSBTransmit, sizeof(waUSBTransmit), NORMALPRIO, usb_telemetry_transmit_thread, NULL);
 
-	chThdCreateStatic(waCanTelemetry, sizeof(waCanTelemetry), NORMALPRIO, can_telemetry_transmit_thread, NULL);
+	chThdCreateStatic(waCanTelemetryTransmit, sizeof(waCanTelemetryTransmit), NORMALPRIO, can_telemetry_transmit_thread, NULL);
+	chThdCreateStatic(waCanTelemetryReceive, sizeof(waCanTelemetryReceive), NORMALPRIO, can_telemetry_receive_thread, NULL);
 
 	while (true) {
 		chThdSleepMilliseconds(TIME_INFINITE);

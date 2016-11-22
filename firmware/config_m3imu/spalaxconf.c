@@ -2,7 +2,6 @@
 #include "adis16405.h"
 #include "mpu9250.h"
 #include "avionics_config.h"
-#include "m3status.h"
 
 const EXTConfig extcfg = { {
                      { EXT_CH_MODE_DISABLED, NULL }, /* Pin 0 */
@@ -31,13 +30,14 @@ const EXTConfig extcfg = { {
                  } };
 
 static void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
-    if (state == state_initializing)
-        m3status_set_init(component);
-    else if (state == state_ok)
-        m3status_set_ok(component);
-    else if (state == state_error)
-        m3status_set_error(component, line & 0xFF);
+    // TODO: Create replacement for this
+//    if (state == state_initializing)
+//        m3status_set_init(component);
+//    else if (state == state_ok)
+//        m3status_set_ok(component);
+//    else if (state == state_error)
+//        m3status_set_error(component, line & 0xFF);
         // This isn't ideal but the full line number will be logged by component_state
 }
 
-const avionics_config_t local_config = { telemetry_origin_m3imu, update_handler, NULL};
+const avionics_config_t local_config = { telemetry_origin_m3imu, update_handler};

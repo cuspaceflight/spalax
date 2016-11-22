@@ -1,7 +1,6 @@
 
 set (SOURCES ${SOURCES}
-	${CMAKE_CURRENT_SOURCE_DIR}/board.c
-	${CMAKE_CURRENT_SOURCE_DIR}/spalaxconf.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/main.c
-	${CMAKE_CURRENT_SOURCE_DIR}/usbcfg.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/board.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/spalaxconf.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/main.c
     PARENT_SCOPE)

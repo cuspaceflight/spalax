@@ -10,7 +10,7 @@ target_include_directories(spalax.gui PUBLIC
         )
 
 TARGET_LINK_LIBRARIES(spalax.gui
-		spalax.usb
+		spalax.shared
 		${FRONTIER_ENGINE_LIBS}
 		)
 
