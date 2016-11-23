@@ -19,16 +19,26 @@ else()
     message(STATUS "Using Toolchain File: ${CMAKE_TOOLCHAIN_FILE}")
 endif()
 
-if (${MESSAGING_OS} STREQUAL chibios)
+
+if (UNIX)
+    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+    set(SPALAX_BUILD_FIRMWARE NO)
+    set(SPALAX_BUILD_GUI YES)
+
+elseif (DEFINED STM32_CHIP)
     SET(CHIBIOS_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/external/ChibiOS")
     # Full list nil rt hal adc can dac ext gpt i2c i2s icu mac mmc_spi pal pwm rtc sdc serial serial_usb spi st uart usb memstreams nullstreams
     FIND_PACKAGE(ChibiOS 16 COMPONENTS rt hal adc can dac ext gpt i2c i2s icu mac mmc_spi pal pwm rtc sdc serial serial_usb spi st uart usb chprintf memstreams nullstreams evtimer shell syscalls REQUIRED)
     SET(ChibiOS_INCLUDE_DIRS ${ChibiOS_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR}/firmware/config_${SPALAX_CONF})
     option(WMM_BUILD_EXEC "Whether to build the WMM executables" OFF)
+
+    set(SPALAX_BUILD_FIRMWARE YES)
+    set(SPALAX_BUILD_GUI NO)
 else()
-    set(CMAKE_CXX_STANDARD 11)
-    set(CMAKE_CXX_STANDARD_REQUIRED ON)
-endif()
+    message(FATAL_ERROR "Platform not supported")
+endif ()
 
 add_subdirectory(external/cusf-messaging)
 add_subdirectory(external/wmm)
