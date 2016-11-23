@@ -11,6 +11,7 @@
 #include <can_telemetry.h>
 #include <usb_telemetry.h>
 #include <thread>
+#include <messaging_all.h>
 
 void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
     if (state == state_error)
@@ -45,13 +46,7 @@ static bool mpu_consumer_func(const telemetry_t* packet, message_metadata_t meta
 MESSAGING_CONSUMER(mpu_consumer, telemetry_source_mpu9250, telemetry_source_mpu9250_mask, 0, 0, mpu_consumer_func, 1024);
 
 void rocket_main() {
-    component_state_start();
-    checksum_init();
-    telemetry_allocator_start();
-    messaging_start();
-
-    can_telemetry_start();
-    usb_telemetry_start();
+    messaging_all_start();
 
     messaging_consumer_init(&mpu_consumer);
 
