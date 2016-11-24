@@ -12,32 +12,37 @@
 #include <usb_telemetry.h>
 #include <thread>
 #include <messaging_all.h>
+#include <file_telemetry.h>
+#include <future>
 
 void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
     if (state == state_error)
         printf("Error in component %i with line %i\n", component, line);
 }
 
-const avionics_config_t local_config = {telemetry_origin_avionics_gui, update_handler };
+avionics_config_t local_config = {telemetry_origin_avionics_gui, update_handler, nullptr, nullptr, true};
 
-std::ofstream* mpu_stream;
+const char* output_file_name;
+std::ostream* out_stream;
 std::atomic<bool> running(true);
+std::atomic<bool> input_running(true);
 
 static bool mpu_consumer_func(const telemetry_t* packet, message_metadata_t metadata) {
     if (packet->header.id == telemetry_id_mpu9250_data) {
         mpu9250_data_t* data = (mpu9250_data_t*)packet->payload;
+        *out_stream << "MPU9250Data,";
 
-        *mpu_stream << data->accel[0] << ',';
-        *mpu_stream << data->accel[1] << ',';
-        *mpu_stream << data->accel[2] << ',';
+        *out_stream << data->accel[0] << ',';
+        *out_stream << data->accel[1] << ',';
+        *out_stream << data->accel[2] << ',';
 
-        *mpu_stream << data->gyro[0] << ',';
-        *mpu_stream << data->gyro[1] << ',';
-        *mpu_stream << data->gyro[2] << ',';
+        *out_stream << data->gyro[0] << ',';
+        *out_stream << data->gyro[1] << ',';
+        *out_stream << data->gyro[2] << ',';
 
-        *mpu_stream << data->magno[0] << ',';
-        *mpu_stream << data->magno[1] << ',';
-        *mpu_stream << data->magno[2] << std::endl;
+        *out_stream << data->magno[0] << ',';
+        *out_stream << data->magno[1] << ',';
+        *out_stream << data->magno[2] << std::endl;
     }
     return true;
 }
@@ -45,44 +50,105 @@ static bool mpu_consumer_func(const telemetry_t* packet, message_metadata_t meta
 
 MESSAGING_CONSUMER(mpu_consumer, telemetry_source_mpu9250, telemetry_source_mpu9250_mask, 0, 0, mpu_consumer_func, 1024);
 
-void rocket_main() {
+int rocket_main() {
     messaging_all_start();
-
     messaging_consumer_init(&mpu_consumer);
 
-    if (!can_telemetry_connected() && !usb_telemetry_connected()) {
-        printf("No valid data source found\n");
-        exit(1);
+    std::ofstream ofstream;
+    if (output_file_name == nullptr) {
+        out_stream = &std::cout;
+    } else {
+        ofstream = std::ofstream(output_file_name);
+        out_stream = &ofstream;
     }
+
+
+
+    bool connected = false;
+
+    if (can_telemetry_connected()) {
+        std::cerr << "Using CAN Telemetry\n";
+        connected = true;
+    }
+
+
+    if (usb_telemetry_connected()) {
+        std::cerr << "Using USB Telemetry\n";
+        connected = true;
+    }
+
+
+    if (file_telemetry_input_connected()) {
+        if (connected) {
+            // They will be interleaved together strangely
+            std::cerr << "File telemetry cannot be used at the same time as other telemetry sources - aborting\n";
+            return 1;
+        }
+        std::cerr << "Using File Input Telemetry\n";
+        connected = true;
+    }
+
+    if (!connected) {
+        std::cerr << "No valid data source found\n";
+        return 1;
+    }
+
+    if (output_file_name == nullptr)
+        std::cerr << "Writing data to stdout\n";
+    else
+        std::cerr << "Writing data to " << output_file_name << std::endl;
 
     while(running) {
         messaging_consumer_receive(&mpu_consumer, true, false);
     }
+
+    out_stream = nullptr;
+
+    return 0;
 }
 
-int main() {
-    auto mpu_file_name = "mpu_data.csv";
-    printf("Writing MPU data to %s\n", mpu_file_name);
 
-    mpu_stream = new std::ofstream(mpu_file_name);
+bool myAsyncGetline(std::string & result) {
+    getline(std::cin,result);
+    return true;
+}
 
-    std::thread rocket_thread(rocket_main);
 
-    char line[256];
-    while (true) {
-        std::cin.getline(line, 256);
-        if (strcmp(line, "quit") == 0)
+void input_main() {
+    while (input_running) {
+        std::string result;
+        std::future<bool> fut = std::async(myAsyncGetline, std::ref(result));
+
+        std::chrono::seconds span(5);
+
+        if ((fut.wait_for(span) != std::future_status::timeout && result ==  "quit") || (!can_telemetry_connected() && !usb_telemetry_connected() && !file_telemetry_input_connected()))
             break;
+
+        printf(".\n");
     }
 
     running = false;
     messaging_consumer_terminate(&mpu_consumer);
+}
 
-    rocket_thread.join();
+int main(int argc, char* argv[]) {
+    if (argc == 2) {
+        local_config.input_file_name = argv[1];
+        output_file_name = nullptr;
 
-    mpu_stream->close();
-    delete mpu_stream;
-    mpu_stream = nullptr;
+    } else if (argc == 3) {
+        local_config.input_file_name = argv[1];
+        output_file_name = argv[2];
+    }
 
-    return 0;
+    std::thread input_thread(input_main);
+
+
+    int ret = rocket_main();
+
+    input_running = false;
+
+    input_thread.join();
+
+    return ret;
 }
