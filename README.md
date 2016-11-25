@@ -17,8 +17,8 @@ This repository contains the schematics, PCB designs and firmware for a 10DOF IM
 - GCC v4.8+
 - CMake v3.2+
 - arm-none-eabi-gcc (firmware build)
-- xorg-dev libgl1-mesa-dev libfreetype6-dev libglew-dev (GUI build)
-- GLFW v3+ (GUI build) - may need to be compiled from source (see travis.yml)
+- xorg-dev libgl1-mesa-dev libfreetype6-dev libglew-dev libglm-dev (GUI build)
+- GLFW v3+ (GUI build) - see [glfw-install.sh](scripts/glfw-install.sh)
 
 ## Compilation
 
@@ -26,7 +26,7 @@ Having installed all the dependencies simply run from the root directory of the 
 
 ```bash
 git submodule update --init --recursive
-./travis-build.sh
+./scripts/travis-build.sh
 ```
 
-This will configure and compile all the different components. If you only wish to configure a subset, just run the relevant section of travis-build.sh.
+This will configure and compile all the different components. If you only wish to configure a subset, just run the relevant section of [travis-build.sh](scripts/travis-build.sh).

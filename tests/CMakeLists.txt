@@ -14,14 +14,12 @@ target_include_directories(spalax.tests PUBLIC
         Source
 
         PRIVATE
+        ${FRONTIER_ENGINE_INCLUDES}
         ${CMAKE_CURRENT_SOURCE_DIR}/../external/eigen)
 
 
 target_link_libraries(spalax.tests
-        Frontier.Engine
-        freetype-gl
-        freetype
-        glfwmock
         spalax.shared
-        spalax.gui
+        gmock
+        gtest
         )

@@ -7,13 +7,8 @@ install:
   - sudo apt-get -y update
   - sudo apt-get -y install cmake gcc-arm-none-eabi
   - sudo apt-get -y install gcc xorg-dev libgl1-mesa-dev libfreetype6-dev libglew-dev
-  - git clone https://github.com/glfw/glfw.git /tmp/glfw
-  - cd /tmp/glfw
-  - cmake . -DBUILD_SHARED_LIBS=ON
-  - make
-  - sudo make install
-  - sudo ldconfig
-  - cd -
+  - ./scripts/glfw-install.sh
+  - ./scripts/glm-install.sh
 script:
-  - ./travis-build.sh
+  - ./scripts/travis-build.sh
 
