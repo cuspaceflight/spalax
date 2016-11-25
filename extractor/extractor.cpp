@@ -11,6 +11,7 @@
 #include <messaging_all.h>
 #include <file_telemetry.h>
 #include <zconf.h>
+#include <cpp_utils.h>
 
 
 void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
@@ -52,12 +53,12 @@ int rocket_main() {
     messaging_all_start();
     messaging_consumer_init(&mpu_consumer);
 
-    std::ofstream ofstream;
+    std::unique_ptr<std::ofstream> ofstream;
     if (output_file_name == nullptr) {
         out_stream = &std::cout;
     } else {
-        ofstream = std::ofstream(output_file_name);
-        out_stream = &ofstream;
+        ofstream = std::make_unique<std::ofstream>(output_file_name);
+        out_stream = ofstream.get();
     }
 
 
