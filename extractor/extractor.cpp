@@ -1,8 +1,5 @@
 #include "avionics_config.h"
 #include <messaging.h>
-#include <checksum.h>
-#include <component_state.h>
-#include <can_interface.h>
 #include "telemetry_packets.h"
 #include <fstream>
 #include <atomic>
@@ -13,7 +10,8 @@
 #include <thread>
 #include <messaging_all.h>
 #include <file_telemetry.h>
-#include <future>
+#include <zconf.h>
+
 
 void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
     if (state == state_error)
@@ -107,24 +105,28 @@ int rocket_main() {
     return 0;
 }
 
-
-bool myAsyncGetline(std::string & result) {
-    getline(std::cin,result);
-    return true;
+int wait_for_input(int seconds) {
+    struct timeval tv;
+    fd_set fds;
+    tv.tv_sec = seconds;
+    tv.tv_usec = 0;
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+    select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+    return FD_ISSET(STDIN_FILENO, &fds);
 }
 
 
 void input_main() {
     while (input_running) {
-        std::string result;
-        std::future<bool> fut = std::async(myAsyncGetline, std::ref(result));
-
-        std::chrono::seconds span(5);
-
-        if ((fut.wait_for(span) != std::future_status::timeout && result ==  "quit") || (!can_telemetry_connected() && !usb_telemetry_connected() && !file_telemetry_input_connected()))
+        if (wait_for_input(1) != 0) {
+            std::string str;
+            std::cin >> str;
+            if (str == "quit")
+                break;
+        }
+        if (!usb_telemetry_connected() && !can_telemetry_connected() && !file_telemetry_input_connected())
             break;
-
-        printf(".\n");
     }
 
     running = false;
