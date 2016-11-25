@@ -1,6 +1,6 @@
 # Spalax
 
-[![Build Status](https://travis-ci.org/cuspaceflight/spalax.svg?branch=master)](https://travis-ci.org/cuspaceflight/state-estimators)
+[![Build Status](https://travis-ci.org/cuspaceflight/spalax.svg?branch=master)](https://travis-ci.org/cuspaceflight/spalax)
 
 This repository contains the schematics, PCB designs and firmware for a 10DOF IMU system.
 
