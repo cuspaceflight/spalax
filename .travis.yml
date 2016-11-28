@@ -7,8 +7,8 @@ install:
   - sudo apt-get -y update
   - sudo apt-get -y install cmake gcc-arm-none-eabi
   - sudo apt-get -y install gcc xorg-dev libgl1-mesa-dev libfreetype6-dev libglew-dev
-  - ./scripts/glfw-install.sh
-  - ./scripts/glm-install.sh
+  - ./scripts/bash/glfw-install.sh
+  - ./scripts/bash/glm-install.sh
 script:
-  - ./scripts/travis-build.sh
+  - ./scripts/bash/travis-build.sh
 
