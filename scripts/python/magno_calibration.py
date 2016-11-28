@@ -76,8 +76,10 @@ def calibration_ellipsoid(data):
     plot_scatter(calibrated, "Ellipsoid Calibration", 100)
     eval = eval_calibrated(calibrated)
 
-    print("Ellipsoid Calibration (Transform - {}, Eval - {})".format(np.array_str(transform),
-                                                                    str(eval)))
+    print("Ellipsoid Calibration (Transform - {}, Offset - {} Eval - {})".format(
+        np.array_str(transform),
+        np.array_str(center.T),
+        str(eval)))
     return transform
 
 tmp = []
