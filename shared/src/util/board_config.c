@@ -8,7 +8,7 @@ board_config_t board_configs[3] = {
         .board_id = {3407947, 859066637, 858994999},
         .mpu9250_magno_sf = {3780, 2610, 1956},
         .mpu9250_magno_bias = {-10, 383, -257},
-        .has_adis = true,
+        .has_adis = false,
         .accel_reference = {0.278013796, 0.344436288, 9.90290546},
         .magno_reference =   {0.209259585, -0.125725865, -0.54462719}
     },
