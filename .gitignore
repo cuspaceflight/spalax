@@ -23,6 +23,7 @@ build.firmware.spalax
 build.gui.spalax
 cmake-build-debug
 cmake-build-release
+/build/
 /build-firmware/
 /build-vscode-firmware/
 /build.firmware.m3imu/
