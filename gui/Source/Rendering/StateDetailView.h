@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include <Rendering/FTView.h>
-#include "CalibrationLabel.h"
 
 class FTLabel;
 struct state_estimate_t;
@@ -14,7 +13,6 @@ public:
 
 protected:
     std::vector<FTLabel*> value_labels_;
-    std::shared_ptr<CalibrationLabel> calibration_label_;
 
 	void toggleDetails();
 };
