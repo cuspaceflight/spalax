@@ -10,10 +10,6 @@
 #include <calibration/adis16405_calibration.h>
 #include <Event/Input/FTInputManager.h>
 
-#include <Rendering/Primitives/FTTexturedPlane.h>
-#include "Rendering/FTDirector.h"
-#include "Rendering/Text/FTFontCache.h"
-
 
 static StateDetailView* s_instance = nullptr;
 static const int num_labels = 39;
@@ -177,10 +173,6 @@ StateDetailView::StateDetailView() {
 		}
     }
 
-    calibration_label_ = std::make_shared<CalibrationLabel>();
-    calibration_label_->setFillColor(glm::vec3(1, 1, 1));
-    addChild(calibration_label_);
-
     messaging_consumer_init(&messaging_consumer);
 
     s_instance = this;
@@ -199,8 +191,6 @@ void StateDetailView::updateDisplay() {
     static wchar_t buff[24];
     for (int i = 0; i < num_labels; i++)
         value_labels_[i]->setString(FTWCharUtil::formatString(buff, 24, L"%.2f", values[i]));
-
-    calibration_label_->updateDisplay();
 }
 
 void StateDetailView::toggleDetails() {
