@@ -19,3 +19,4 @@ shared/build-fw/
 .idea/tasks.xml
 
 /*build*/
+/resources/
