@@ -19,92 +19,7 @@ void update_handler(avionics_component_t component, avionics_component_state_t s
         printf("Error in component %i with line %i\n", component, line);
 }
 
-avionics_config_t local_config = {update_handler, nullptr, nullptr, true};
-
-const char* output_file_name;
-std::ostream* out_stream;
-std::atomic<bool> running(true);
-std::atomic<bool> input_running(true);
-
-static bool mpu_consumer_func(const telemetry_t* packet, message_metadata_t metadata) {
-    if (packet->header.id == ts_mpu9250_data) {
-        mpu9250_data_t* data = (mpu9250_data_t*)packet->payload;
-        *out_stream << "MPU9250Data,";
-
-        *out_stream << data->accel[0] << ',';
-        *out_stream << data->accel[1] << ',';
-        *out_stream << data->accel[2] << ',';
-
-        *out_stream << data->gyro[0] << ',';
-        *out_stream << data->gyro[1] << ',';
-        *out_stream << data->gyro[2] << ',';
-
-        *out_stream << data->magno[0] << ',';
-        *out_stream << data->magno[1] << ',';
-        *out_stream << data->magno[2] << std::endl;
-    }
-    return true;
-}
-
-
-MESSAGING_CONSUMER(mpu_consumer, ts_all, ts_all_mask, 0, 0, mpu_consumer_func, 1024);
-
-int rocket_main() {
-    messaging_all_start();
-    messaging_consumer_init(&mpu_consumer);
-
-    std::unique_ptr<std::ofstream> ofstream;
-    if (output_file_name == nullptr) {
-        out_stream = &std::cout;
-    } else {
-        ofstream = std::make_unique<std::ofstream>(output_file_name);
-        out_stream = ofstream.get();
-    }
-
-
-
-    bool connected = false;
-
-    if (can_telemetry_connected()) {
-        std::cerr << "Using CAN Telemetry\n";
-        connected = true;
-    }
-
-
-    if (usb_telemetry_connected()) {
-        std::cerr << "Using USB Telemetry\n";
-        connected = true;
-    }
-
-
-    if (file_telemetry_input_connected()) {
-        if (connected) {
-            // They will be interleaved together strangely
-            std::cerr << "File telemetry cannot be used at the same time as other telemetry sources - aborting\n";
-            return 1;
-        }
-        std::cerr << "Using File Input Telemetry\n";
-        connected = true;
-    }
-
-    if (!connected) {
-        std::cerr << "No valid data source found\n";
-        return 1;
-    }
-
-    if (output_file_name == nullptr)
-        std::cerr << "Writing data to stdout\n";
-    else
-        std::cerr << "Writing data to " << output_file_name << std::endl;
-
-    while(running) {
-        messaging_consumer_receive(&mpu_consumer, true, false);
-    }
-
-    out_stream = nullptr;
-
-    return 0;
-}
+avionics_config_t local_config = {update_handler, nullptr, nullptr, false, true};
 
 int wait_for_input(int seconds) {
     struct timeval tv;
@@ -117,41 +32,59 @@ int wait_for_input(int seconds) {
     return FD_ISSET(STDIN_FILENO, &fds);
 }
 
+static void print_help() {
+    printf("-h, --help                 Print this help\n");
+    printf("-i, --input                Specify input file - the format will be determined by the extension\n");
+    printf("-o, --output               Specify output file - the format will be determined by the extension\n");
+    printf("-r, --replace              Overwrite existing files\n");
+    printf("-s, --stdout               Print CSV output to stdout\n");
+}
 
-void input_main() {
-    while (input_running) {
+int main(int argc, char* argv[]) {
+    for (int i = 1; i < argc; i++) {
+        std::string option = std::string(argv[i]);
+        if (option == "--input" || option == "-i") {
+            if (i+1 == argc) {
+                printf("Invalid Arguments\n");
+                print_help();
+                return 1;
+            }
+            local_config.input_file_name = argv[++i];
+        } else if (option == "--output" || option == "-o") {
+            if (i+1 == argc) {
+                printf("Invalid Arguments\n");
+                print_help();
+                return 1;
+            }
+            local_config.output_file_name = argv[++i];
+        } else if (option == "--help" || option == "-h") {
+            print_help();
+            return 0;
+        } else if (option == "--stdout" || option == "-s") {
+            local_config.output_file_name = "stdout.csv";
+        } else if (option == "--replace" || option == "-r") {
+            local_config.output_file_overwrite_enabled = true;
+        } else {
+            printf("Invalid Option %s\n", argv[i]);
+            print_help();
+            return 1;
+        }
+    }
+
+    messaging_all_start();
+
+    if (local_config.output_file_name && !file_telemetry_output_connected()) {
+        return 1;
+    }
+
+    while (usb_telemetry_connected() || can_telemetry_connected() || file_telemetry_input_connected()) {
         if (wait_for_input(1) != 0) {
             std::string str;
             std::cin >> str;
             if (str == "quit")
                 break;
         }
-        if (!usb_telemetry_connected() && !can_telemetry_connected() && !file_telemetry_input_connected())
-            break;
     }
 
-    running = false;
-    messaging_consumer_terminate(&mpu_consumer);
-}
-
-int main(int argc, char* argv[]) {
-    if (argc == 2) {
-        local_config.input_file_name = argv[1];
-        output_file_name = nullptr;
-
-    } else if (argc == 3) {
-        local_config.input_file_name = argv[1];
-        output_file_name = argv[2];
-    }
-
-    std::thread input_thread(input_main);
-
-
-    int ret = rocket_main();
-
-    input_running = false;
-
-    input_thread.join();
-
-    return ret;
+    return 0;
 }

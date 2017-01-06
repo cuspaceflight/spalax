@@ -12,7 +12,7 @@ void update_handler(avionics_component_t component, avionics_component_state_t s
 }
 
 
-avionics_config_t local_config = {update_handler };
+avionics_config_t local_config = {update_handler, nullptr, nullptr, false, true};
 
 int main() {
     int ret = -1;
