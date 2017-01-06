@@ -390,9 +390,9 @@ void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
     chSysUnlockFromISR();
 }
 
-MESSAGING_PRODUCER(messaging_producer_data, telemetry_id_mpu9250_data, sizeof(mpu9250_data_t), 40)
+MESSAGING_PRODUCER(messaging_producer_data, ts_mpu9250_data, sizeof(mpu9250_data_t), 40)
 
-MESSAGING_PRODUCER(messaging_producer_config, telemetry_id_mpu9250_config, sizeof(mpu9250_config_t), 10)
+MESSAGING_PRODUCER(messaging_producer_config, ts_mpu9250_config, sizeof(mpu9250_config_t), 10)
 
 void mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
 

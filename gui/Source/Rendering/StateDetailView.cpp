@@ -23,7 +23,7 @@ adis16405_config_t adis16405_config;
 static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
     if (s_instance == nullptr)
         return false;
-    if (packet->header.id == telemetry_id_mpu9250_data) {
+    if (packet->header.id == ts_mpu9250_data) {
         if (!has_mpu9250_config)
             return true;
         mpu9250_data_t* data = (mpu9250_data_t*)packet->payload;
@@ -43,21 +43,21 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[10] = calibrated.magno[1];
         values[11] = calibrated.magno[2];
 
-    } else if (packet->header.id == telemetry_id_mpu9250_config) {
+    } else if (packet->header.id == ts_mpu9250_config) {
         if (has_mpu9250_config)
             return true;
         mpu9250_config_t* config = (mpu9250_config_t*)packet->payload;
         mpu9250_config = *config;
         has_mpu9250_config = true;
     }
-    else if (packet->header.id == telemetry_id_ms5611_data) {
+    else if (packet->header.id == ts_ms5611_data) {
         FTAssert(packet->header.length == sizeof(ms5611data_t), "Incorrect Packet Size");
         auto data = (ms5611data_t*)packet->payload;
 
         values[0] = (float)data->pressure;
         values[1] = ms5611_get_altitude((float)data->pressure);
         values[2] = (float)data->temperature;
-    } else if (packet->header.id == telemetry_id_state_estimate_data) {
+    } else if (packet->header.id == ts_state_estimate_data) {
         FTAssert(packet->header.length == sizeof(state_estimate_t), "Incorrect Packet Size");
         auto estimate = (state_estimate_t*)packet->payload;
 
@@ -81,19 +81,19 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
 //        values[24] = estimate->accel[0];
 //        values[25] = estimate->accel[1];
 //        values[26] = estimate->accel[2];
-    } else if (packet->header.id == telemetry_id_state_estimate_status) {
+    } else if (packet->header.id == ts_state_estimate_status) {
         FTAssert(packet->header.length == sizeof(state_estimate_status_t), "Incorrect Packet Size");
         auto status = (state_estimate_status_t*)packet->payload;
         values[27] = (float)status->number_prediction_steps / status->sample_time;
         values[28] = (float)status->number_update_steps / status->sample_time;
-    } else if (packet->header.id == telemetry_id_adis16405_config) {
+    } else if (packet->header.id == ts_adis16405_config) {
 		if (has_adis16405_config)
 			return true;
 		FTAssert(packet->header.length == sizeof(adis16405_config_t), "Incorrect Packet Size");
 		adis16405_config_t* data = (adis16405_config_t*)packet->payload;
 		adis16405_config = *data;
 		has_adis16405_config = true;
-    } else if (packet->header.id == telemetry_id_adis16405_data) {
+    } else if (packet->header.id == ts_adis16405_data) {
 		if (!has_adis16405_config)
 			return true;
 		FTAssert(packet->header.length == sizeof(adis16405_data_t), "Incorrect Packet Size");
@@ -115,7 +115,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
     return true;
 }
 
-MESSAGING_CONSUMER(messaging_consumer, telemetry_source_all, telemetry_source_all_mask, 0, 0, getPacket, 1024);
+MESSAGING_CONSUMER(messaging_consumer, ts_all, ts_all_mask, 0, 0, getPacket, 1024);
 
 StateDetailView::StateDetailView() {
     FTAssert(s_instance == nullptr, "Only one StateDetailView instance can exist at once");

@@ -245,8 +245,8 @@ void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
     chSysUnlockFromISR();
 }
 
-MESSAGING_PRODUCER(messaging_producer_data, telemetry_id_adis16405_data, sizeof(adis16405_data_t), 40)
-MESSAGING_PRODUCER(messaging_producer_config, telemetry_id_adis16405_config, sizeof(adis16405_config_t), 10)
+MESSAGING_PRODUCER(messaging_producer_data, ts_adis16405_data, sizeof(adis16405_data_t), 40)
+MESSAGING_PRODUCER(messaging_producer_config, ts_adis16405_config, sizeof(adis16405_config_t), 10)
 
 void adis16405_thread(void *arg) {
     (void)arg;

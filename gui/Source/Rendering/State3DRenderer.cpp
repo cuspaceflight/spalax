@@ -11,7 +11,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
     return s_instance->handlePacket(packet);
     
 }
-MESSAGING_CONSUMER(messaging_consumer, telemetry_source_all, telemetry_source_all_mask, 0, 0, getPacket, 1024);
+MESSAGING_CONSUMER(messaging_consumer, ts_all, ts_all_mask, 0, 0, getPacket, 1024);
 
 State3DRenderer::State3DRenderer() : 
     rocket_renderer_(new RocketRenderer()), 
@@ -42,11 +42,11 @@ State3DRenderer::~State3DRenderer() {
 }
 
 bool State3DRenderer::handlePacket(const telemetry_t* packet) const {
-    if (packet->header.id == telemetry_id_state_estimate_data) {
+    if (packet->header.id == ts_state_estimate_data) {
         auto data = (state_estimate_t*)packet->payload;
         rocket_renderer_->nextStateEstimate(*data);
         rocket_path_renderer_->nextStateEstimate(*data);
-    } else if (packet->header.id == telemetry_id_mpu9250_data) {
+    } else if (packet->header.id == ts_mpu9250_data) {
         auto data = (mpu9250_data_t*)packet->payload;
         mag_renderer_->renderVector(glm::vec3(data->magno[0], data->magno[1], data->magno[2]));
         accel_renderer_->renderVector(glm::vec3(data->accel[0], data->accel[1], data->accel[2]));

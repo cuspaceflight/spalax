@@ -12,7 +12,7 @@ void update_handler(avionics_component_t component, avionics_component_state_t s
 }
 
 
-avionics_config_t local_config = {telemetry_origin_avionics_gui, update_handler };
+avionics_config_t local_config = {update_handler };
 
 int main() {
     int ret = -1;

@@ -19,7 +19,7 @@ void update_handler(avionics_component_t component, avionics_component_state_t s
         printf("Error in component %i with line %i\n", component, line);
 }
 
-avionics_config_t local_config = {telemetry_origin_avionics_gui, update_handler, nullptr, nullptr, true};
+avionics_config_t local_config = {update_handler, nullptr, nullptr, true};
 
 const char* output_file_name;
 std::ostream* out_stream;
@@ -27,7 +27,7 @@ std::atomic<bool> running(true);
 std::atomic<bool> input_running(true);
 
 static bool mpu_consumer_func(const telemetry_t* packet, message_metadata_t metadata) {
-    if (packet->header.id == telemetry_id_mpu9250_data) {
+    if (packet->header.id == ts_mpu9250_data) {
         mpu9250_data_t* data = (mpu9250_data_t*)packet->payload;
         *out_stream << "MPU9250Data,";
 
@@ -47,7 +47,7 @@ static bool mpu_consumer_func(const telemetry_t* packet, message_metadata_t meta
 }
 
 
-MESSAGING_CONSUMER(mpu_consumer, telemetry_source_mpu9250, telemetry_source_mpu9250_mask, 0, 0, mpu_consumer_func, 1024);
+MESSAGING_CONSUMER(mpu_consumer, ts_all, ts_all_mask, 0, 0, mpu_consumer_func, 1024);
 
 int rocket_main() {
     messaging_all_start();
