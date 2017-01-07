@@ -52,7 +52,6 @@ if (SPALAX_BUILD_GUI)
     add_subdirectory(external/Frontier.Engine)
     add_subdirectory(gui)
     add_subdirectory(tests)
-    add_subdirectory(extractor)
 endif()
 
 
