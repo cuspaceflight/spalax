@@ -1,5 +1,6 @@
 #ifndef UBLOX_UBX_H
 #define UBLOX_UBX_H
+// See http://bit.ly/2eYbm7w for specification
 
 #include "compilermacros.h"
 
@@ -74,10 +75,10 @@ STATIC_ASSERT(sizeof(ubx_header_t) == 6, ubx_header_t_padded);
 typedef struct __attribute__((packed)) {
     const ubx_header_t header;
 
-    uint32_t i_tow;
-    uint16_t year;
+    uint32_t i_tow; // GPS Time of week of the navigation epoch
+    uint16_t year; // Year (UTC)
     uint8_t month, day, hour, minute, second;
-    uint8_t valid;
+    uint8_t valid; // Validity Flags
     uint32_t t_acc;
     int32_t nano;
     uint8_t fix_type;

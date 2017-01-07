@@ -1,10 +1,3 @@
-#include "avionics_config.h"
-#include <messaging.h>
-#include "telemetry_packets.h"
-#include <fstream>
-#include <atomic>
-#include <iostream>
-#include <cstring>
 #include <can_telemetry.h>
 #include <usb_telemetry.h>
 #include <thread>
@@ -12,14 +5,15 @@
 #include <file_telemetry.h>
 #include <zconf.h>
 #include <cpp_utils.h>
+#include <config/component_state_config.h>
+#include <component_state.h>
+#include <iostream>
 
 
 void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
     if (state == state_error)
-        printf("Error in component %i with line %i\n", component, line);
+        fprintf(stderr, "Error in component %i with line %i\n", component, line);
 }
-
-avionics_config_t local_config = {update_handler, nullptr, nullptr, false, true};
 
 int wait_for_input(int seconds) {
     struct timeval tv;
@@ -41,6 +35,10 @@ static void print_help() {
 }
 
 int main(int argc, char* argv[]) {
+    const char* input = nullptr;
+    const char* output = nullptr;
+    bool overwrite = false;
+
     for (int i = 1; i < argc; i++) {
         std::string option = std::string(argv[i]);
         if (option == "--input" || option == "-i") {
@@ -49,21 +47,21 @@ int main(int argc, char* argv[]) {
                 print_help();
                 return 1;
             }
-            local_config.input_file_name = argv[++i];
+            input = argv[++i];
         } else if (option == "--output" || option == "-o") {
             if (i+1 == argc) {
                 printf("Invalid Arguments\n");
                 print_help();
                 return 1;
             }
-            local_config.output_file_name = argv[++i];
+            input = argv[++i];
         } else if (option == "--help" || option == "-h") {
             print_help();
             return 0;
         } else if (option == "--stdout" || option == "-s") {
-            local_config.output_file_name = "stdout.csv";
+            output = "stdout.csv";
         } else if (option == "--replace" || option == "-r") {
-            local_config.output_file_overwrite_enabled = true;
+            overwrite = true;
         } else {
             printf("Invalid Option %s\n", argv[i]);
             print_help();
@@ -71,9 +69,29 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    component_state_start(update_handler, true);
     messaging_all_start();
+    file_telemetry_input_start(input);
+    file_telemetry_output_start(output, overwrite);
 
-    if (local_config.output_file_name && !file_telemetry_output_connected()) {
+    if (!file_telemetry_output_connected()) {
+        fprintf(stderr, "No output specified\n");
+        return 1;
+    }
+
+    int input_count = 0;
+    if (usb_telemetry_connected())
+        input_count++;
+    if (can_telemetry_connected())
+        input_count++;
+    if (file_telemetry_input_connected())
+        input_count++;
+
+    if (input_count == 0) {
+        fprintf(stderr, "No input source\n");
+        return 1;
+    } else if (input_count > 1) {
+        fprintf(stderr, "Multiple input sources\n");
         return 1;
     }
 

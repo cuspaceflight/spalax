@@ -1,7 +1,6 @@
 #include "spalaxconf.h"
 #include "adis16405.h"
 #include "mpu9250.h"
-#include "avionics_config.h"
 
 const EXTConfig extcfg = { {
                      { EXT_CH_MODE_AUTOSTART | EXT_CH_MODE_RISING_EDGE | EXT_MODE_GPIOE, adis16405_wakeup}, /* Pin 0 */
@@ -28,5 +27,3 @@ const EXTConfig extcfg = { {
                      { EXT_CH_MODE_DISABLED, NULL }, /* Pin 21*/
                      { EXT_CH_MODE_DISABLED, NULL } /* Pin 22*/
                  } };
-
-avionics_config_t local_config = { NULL };

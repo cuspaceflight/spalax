@@ -3,7 +3,7 @@
 #include <Rendering/MainScene.h>
 #include <Rendering/FTDirector.h>
 #include <Util/FTFileManager.h>
-#include "avionics_config.h"
+#include <component_state.h>
 #include "messaging_all.h"
 
 void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
@@ -11,13 +11,11 @@ void update_handler(avionics_component_t component, avionics_component_state_t s
 		FTLogError("Error in component %i with line %i", component, line);
 }
 
-
-avionics_config_t local_config = {update_handler, nullptr, nullptr, false, true};
-
 int main() {
     int ret = -1;
 
     if (FTEngine::setup()) {
+        component_state_start(update_handler, true);
         messaging_all_start();
 
         FTEngine::getFileManager()->addSearchPath("Resources");

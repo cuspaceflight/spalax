@@ -1,6 +1,5 @@
 #include "board_config.h"
 #include <string.h>
-#include <avionics_config.h>
 
 int num_board_configs = 3;
 board_config_t board_configs[3] = {

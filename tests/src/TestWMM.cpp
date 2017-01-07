@@ -3,8 +3,13 @@
 #include "state/wmm_util.h"
 #include "math_debug_util.h"
 
+static void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
+    ASSERT_NE(state, state_error);
+}
+
 TEST(TestWMM, TestDeclination) {
-    component_state_start();
+    component_state_start(update_handler, false);
+
     // 11/11/2016
     wmm_util_init(2016.8790832455215);
 
