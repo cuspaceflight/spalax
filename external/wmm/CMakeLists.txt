@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.2)
 
 option(WMM_BUILD_EXEC "Whether to build the WMM executables" ON)
 
-add_library(wmm STATIC src/GeomagnetismLibrary.c)
+add_library(wmm STATIC src/GeomagnetismLibrary.c src/EGM9615.c)
 
 # Link math library
 target_link_libraries(wmm m)

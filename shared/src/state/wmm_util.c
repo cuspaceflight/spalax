@@ -1,9 +1,9 @@
-#include <string.h>
 #include "wmm_util.h"
+#include <string.h>
+#include <stdbool.h>
+#include <GeomagnetismHeader.h>
 #include "component_state.h"
 #include "messaging.h"
-#include "GeomagnetismHeader.h"
-#include "EGM9615.h"
 
 #if defined MESSAGING_OS_STD
 // Don't need to do anything
@@ -43,7 +43,6 @@ typedef struct model_parameter_t {
 #define EPOCHS 1
 #define EPOCH 20
 
-const double wmm_compile_time = (double)TIMESTAMP_YEAR + (TIMESTAMP_WEEK / 52.0) + (TIMESTAMP_DAY_OF_WEEK / 365.0);
 static const double wmm_epoch = 2015.0;
 static const int wmm_nmax = 12;
 static const int wmm_num_terms = CALCULATE_NUMTERMS(12);
@@ -160,6 +159,7 @@ void wmm_util_init(double model_time) {
 
     if (model == NULL) {
         COMPONENT_STATE_UPDATE(avionics_component_world_mag_model, state_error);
+        return;
     }
 
     model->nMax = wmm_nmax;
@@ -203,8 +203,8 @@ void wmm_util_init(double model_time) {
     MAG_SetDefaults(&ellipsoid, &geoid); /* Set default values and constants */
         
     /* Set EGM96 Geoid parameters */
-    geoid.GeoidHeightBuffer = GeoidHeightBuffer;
-    geoid.Geoid_Initialized = 1;
+    //geoid.GeoidHeightBuffer = GeoidHeightBuffer;
+    //geoid.Geoid_Initialized = 1;
 
     COMPONENT_STATE_UPDATE(avionics_component_world_mag_model, state_ok);
 }
@@ -216,7 +216,10 @@ void wmm_util_get_magnetic_field(float latitude, float longitude, float elevatio
 
     coordGeodetic.phi = latitude;
     coordGeodetic.lambda = longitude;
-    coordGeodetic.HeightAboveEllipsoid = elevation/1000.0; // convert to km from metres
+
+    // Height above the WGS84 ellipsoid
+    coordGeodetic.HeightAboveEllipsoid = elevation;
+    // Height above the EGM96 Geoid model
     coordGeodetic.HeightAboveGeoid = 0;
     coordGeodetic.UseGeoid = 0;
 
@@ -225,11 +228,19 @@ void wmm_util_get_magnetic_field(float latitude, float longitude, float elevatio
     MAG_Geomag(ellipsoid, coordSpherical, coordGeodetic, timed_magnetic_model, &geoMagneticElements);
     MAG_CalculateGridVariation(coordGeodetic, &geoMagneticElements);
 
-    out->declination = geoMagneticElements.Decl;
-    out->inclination = geoMagneticElements.Incl;
-    out->field_strength = geoMagneticElements.F;
-    out->horizontal_field_strength = geoMagneticElements.H;
-    out->field_vector[0] = geoMagneticElements.X;
-    out->field_vector[1] = geoMagneticElements.Y;
-    out->field_vector[2] = geoMagneticElements.Z;
+    out->declination = (float) geoMagneticElements.Decl;
+    out->inclination = (float) geoMagneticElements.Incl;
+    out->field_strength = (float) geoMagneticElements.F;
+    out->horizontal_field_strength = (float) geoMagneticElements.H;
+    out->field_vector[0] = (float) geoMagneticElements.X;
+    out->field_vector[1] = (float) geoMagneticElements.Y;
+    out->field_vector[2] = (float) geoMagneticElements.Z;
+}
+
+bool wmm_util_get_year(int year, int month, int day, double *out) {
+    MAGtype_Date date = {year, month, day};
+    if (!MAG_DateToYear(&date,NULL))
+        return false;
+    *out = date.DecimalYear;
+    return true;
 }

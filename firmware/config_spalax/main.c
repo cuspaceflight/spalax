@@ -13,7 +13,7 @@ static THD_WORKING_AREA(waMPU, 1024);
 static THD_WORKING_AREA(waBadThing, 1024);
 static THD_WORKING_AREA(waMS5611, 768);
 static THD_WORKING_AREA(waADIS, 1024);
-//static THD_WORKING_AREA(waGPS, 1024);
+static THD_WORKING_AREA(waGPS, 1024);
 
 int main(void) {
 	halInit();
@@ -29,7 +29,7 @@ int main(void) {
 	chThdCreateStatic(waBadThing, sizeof(waBadThing), NORMALPRIO, bthandler_thread, NULL);
 	chThdCreateStatic(waMPU, sizeof(waMPU), NORMALPRIO, mpu9250_thread, NULL);
 	chThdCreateStatic(waMS5611, sizeof(waMS5611), NORMALPRIO, ms5611_thread, NULL);
-	//chThdCreateStatic(waGPS, sizeof(waGPS), NORMALPRIO, ublox_thread, NULL);
+	chThdCreateStatic(waGPS, sizeof(waGPS), NORMALPRIO, ublox_thread, NULL);
 
 	if (config->has_adis)
 		chThdCreateStatic(waADIS, sizeof(waADIS), NORMALPRIO, adis16405_thread, NULL);

@@ -2749,13 +2749,14 @@ CALLS : none
     /******************Validation********************************/
     if(CalendarDate->Month <= 0 || CalendarDate->Month > 12)
     {
-        strcpy(Error, "\nError: The Month entered is invalid, valid months are '1 to 12'\n");
+        if (Error)
+            strcpy(Error, "\nError: The Month entered is invalid, valid months are '1 to 12'\n");
         return 0;
     }
     if(CalendarDate->Day <= 0 || CalendarDate->Day > MonthDays[CalendarDate->Month])
     {
-        printf("\nThe number of days in month %d is %d\n", CalendarDate->Month, MonthDays[CalendarDate->Month]);
-        strcpy(Error, "\nError: The day entered is invalid\n");
+        if (Error)
+            strcpy(Error, "\nError: The day entered is invalid\n");
         return 0;
     }
     /****************Calculation of t***************************/

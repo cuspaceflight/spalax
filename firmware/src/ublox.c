@@ -1,4 +1,6 @@
 #include <component_state.h>
+#include <messaging.h>
+#include <config/telemetry_packets.h>
 #include "ublox.h"
 #include "ublox_ubx.h"
 #include "ch.h"
@@ -76,6 +78,8 @@ bool process_ack_message(uint8_t* buf) {
     return ack->header.msg_id == UBX_ACK_ACK;
 }
 
+MESSAGING_PRODUCER(messaging_producer, ts_ublox_nav, sizeof(ublox_nav_t), 10)
+
 bool process_nav_message(uint8_t* buf) {
     ubx_header_t* header = (ubx_header_t*)buf;
     if (header->msg_id != UBX_NAV_PVT)
@@ -83,9 +87,34 @@ bool process_nav_message(uint8_t* buf) {
 
     ubx_nav_pvt_t* msg = (ubx_nav_pvt_t*)buf;
 
-    // TODO: Do something with this data
-    // TODO: Identify other useful NAV messages
-    return msg->year == 2016;
+    ublox_nav_t data;
+    data.year = msg->year;
+    data.month = msg->month;
+    data.day = msg->day;
+    data.hour = msg->hour;
+    data.minute = msg->minute;
+    data.second = msg->second;
+    data.valid = msg->valid;
+    data.t_acc = msg->t_acc;
+    data.nano = msg->nano;
+    data.fix_type = msg->fix_type;
+    data.flags = msg->flags;
+    data.num_sv = msg->num_sv;
+    data.lon = msg->lon;
+    data.lat = msg->lat;
+    data.height = msg->height;
+    data.h_msl = msg->h_msl;
+    data.h_acc = msg->h_acc;
+    data.v_acc = msg->v_acc;
+    data.velN = msg->velN;
+    data.velE = msg->velE;
+    data.velD = msg->velD;
+    data.s_acc = msg->s_acc;
+    data.p_dop = msg->p_dop;
+
+    messaging_producer_send(&messaging_producer, message_flags_send_over_can, (const uint8_t*)&data);
+
+    return true;
 }
 
 bool process_message(uint8_t* buf) {
@@ -124,6 +153,8 @@ bool ublox_next_packet() {
 }
 
 static bool ublox_init(void) {
+    messaging_producer_init(&messaging_producer);
+
     ubx_cfg_msg_t cfg_msg = {.header = UBX_CFG_MSG_HEADER};
 
     // Disable NMEA
