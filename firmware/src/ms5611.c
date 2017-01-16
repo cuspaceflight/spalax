@@ -200,7 +200,6 @@ static void ms5611_read(MS5611CalData* cal_data,
 }
 
 MESSAGING_PRODUCER(messaging_producer, ts_ms5611_data, sizeof(ms5611data_t), 20)
-MESSAGING_PRODUCER(messaging_producer_config, ts_ms5611_config, sizeof(MS5611CalData), 2)
 
 /*
  * MS5611 main thread.
@@ -217,9 +216,6 @@ void ms5611_thread(void *arg){
 
 	ms5611_init(&cal_data);
     messaging_producer_init(&messaging_producer);
-    messaging_producer_init(&messaging_producer_config);
-
-    messaging_producer_send(&messaging_producer_config, 0, (const uint8_t*)&cal_data);
 
 	COMPONENT_STATE_UPDATE(avionics_component_ms5611, state_ok);
 
