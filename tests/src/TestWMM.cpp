@@ -2,7 +2,6 @@
 #include "component_state.h"
 #include "state/wmm_util.h"
 #include "math_debug_util.h"
-#include "../../external/wmm/src/EGM9615.h"
 
 static void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
     ASSERT_NE(state, state_error);
