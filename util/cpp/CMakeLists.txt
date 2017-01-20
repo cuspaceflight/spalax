@@ -6,3 +6,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../external/eigen
 link_libraries(spalax.shared python2.7)
 
 add_executable(testmatplotlibcpp testmatplotlibcpp.cpp)
+
+add_executable(altitude altitude.cpp)
