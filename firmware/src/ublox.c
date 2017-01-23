@@ -157,6 +157,9 @@ static bool ublox_init(void) {
 
     ubx_cfg_msg_t cfg_msg = {.header = UBX_CFG_MSG_HEADER};
 
+    // We give the GPS time to startup - otherwise our message gets ignored and is therefore never ACKed -> deadlock
+    chThdSleepMilliseconds(2000);
+
     // Disable NMEA
     for (uint8_t i = 0x00; i <= 0x0A; i++) {
         cfg_msg.cfg_msg_class = NMEA_CLASS;
