@@ -8,3 +8,5 @@ link_libraries(spalax.shared python2.7)
 add_executable(testmatplotlibcpp testmatplotlibcpp.cpp)
 
 add_executable(altitude altitude.cpp)
+
+add_executable(heading heading.cpp)

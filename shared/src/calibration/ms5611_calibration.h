@@ -8,7 +8,7 @@
 extern "C" {
 #endif
 
-float ms5611_get_altitude(float pressure);
+float ms5611_get_altitude(const ms5611data_t* data);
 
 
 #ifdef __cplusplus

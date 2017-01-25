@@ -7,18 +7,47 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "compilermacros.h"
+
+typedef enum {
+    BoardConfigM3Dart,
+    BoardConfigM3Booster,
+    BoardConfigSpalax,
+    BoardConfigSpalaxBrokenSD,
+    BoardConfigMax
+} BoardConfig;
 
 typedef struct {
     uint32_t board_id[3];
-    uint16_t mpu9250_magno_bias[3];
-    uint16_t mpu9250_magno_sf[3];
-    float accel_reference[3];
-    float magno_reference[3];
+    BoardConfig name;
+
+    bool has_ms5611;
+    bool has_mpu9250;
     bool has_adis;
+    bool has_gps;
+
+    // Row Major 3x3 Matrix
+    float mpu9250_magno_transform[9];
+    float mpu9250_magno_offset[3];
+
+    // Row Major 3x3 Matrix
+    float mpu9250_accel_transform[9];
+    float mpu9250_accel_offset[3];
+
+    float mpu9250_gyro_sf;
 } board_config_t;
 
-board_config_t* getBoardConfig(void);
 
-void getBoardID(uint32_t data[3]);
+board_config_t *getBoardConfig(void);
+
+#ifdef MESSAGING_OS_STD
+
+void setBoardConfig(BoardConfig config);
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

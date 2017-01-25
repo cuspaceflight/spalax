@@ -12,7 +12,6 @@
 static binary_semaphore_t adis16405_semaphore;
 static const uint32_t adis16405_send_over_usb_count = 0; // Will send 1 in every 100 samples
 static const uint32_t adis16405_send_over_can_count = 0;
-static const uint32_t adis16405_send_config_count = 5000; // Will resend config every 1000 samples
 static volatile bool adis16405_initialized = false;
 
 static const SPIConfig spi_cfg = {
@@ -146,23 +145,23 @@ static bool adis16405_burst_read(int16_t rx_buff[10]) {
           return false;
         }
     }
-    rx_buff[0] = sign_extend(rx_buff[0] & 0x3fff, 14);
-    rx_buff[1] = sign_extend(rx_buff[1] & 0x3fff, 14);
-    rx_buff[2] = sign_extend(rx_buff[2] & 0x3fff, 14);
-    rx_buff[3] = sign_extend(rx_buff[3] & 0x3fff, 14);
-    rx_buff[4] = sign_extend(rx_buff[4] & 0x3fff, 14);
-    rx_buff[5] = sign_extend(rx_buff[5] & 0x3fff, 14);
-    rx_buff[6] = sign_extend(rx_buff[6] & 0x3fff, 14);
-    rx_buff[7] = sign_extend(rx_buff[7] & 0x3fff, 14);
-    rx_buff[8] = sign_extend(rx_buff[8] & 0x3fff, 14);
-    rx_buff[9] = sign_extend(rx_buff[9] & 0x3fff, 14);
+    rx_buff[0] = sign_extend((uint16_t) (rx_buff[0] & 0x3fff), 14);
+    rx_buff[1] = sign_extend((uint16_t) (rx_buff[1] & 0x3fff), 14);
+    rx_buff[2] = sign_extend((uint16_t) (rx_buff[2] & 0x3fff), 14);
+    rx_buff[3] = sign_extend((uint16_t) (rx_buff[3] & 0x3fff), 14);
+    rx_buff[4] = sign_extend((uint16_t) (rx_buff[4] & 0x3fff), 14);
+    rx_buff[5] = sign_extend((uint16_t) (rx_buff[5] & 0x3fff), 14);
+    rx_buff[6] = sign_extend((uint16_t) (rx_buff[6] & 0x3fff), 14);
+    rx_buff[7] = sign_extend((uint16_t) (rx_buff[7] & 0x3fff), 14);
+    rx_buff[8] = sign_extend((uint16_t) (rx_buff[8] & 0x3fff), 14);
+    rx_buff[9] = sign_extend((uint16_t) (rx_buff[9] & 0x3fff), 14);
     //rx_buff[10] = sign_extend(rx_buff[10] & 0x3fff, 12);
     //rx_buff[11] = rx_buff[11] & 0x0fff;
 
     return true;
 }
 
-static void adis16405_init(adis16405_config_t* config) {
+static void adis16405_init() {
 
     // Reset calibration to factory defaults
     adis16405_write_u16(ADIS16405_REG_GLOB_CMD, 0x0001);
@@ -196,17 +195,17 @@ static void adis16405_init(adis16405_config_t* config) {
         component_state_update(avionics_component_adis16405, state_error, errors);
     }
 
-    config->accel_sf = 3.33f/1000.0f*9.8f;
-    config->gyro_sf = 0.05f*3.14159265359f/180.0f;
-
-    // TODO: Tune these
-    config->magno_sf[0] = 4000;
-    config->magno_sf[1] = 4000;
-    config->magno_sf[2] = 4000;
-
-    config->magno_bias[0] = 0;
-    config->magno_bias[1] = 0;
-    config->magno_bias[2] = 0;
+//    config->accel_sf = 3.33f/1000.0f*9.8f;
+//    config->gyro_sf = 0.05f*3.14159265359f/180.0f;
+//
+//    // TODO: Tune these
+//    config->magno_sf[0] = 4000;
+//    config->magno_sf[1] = 4000;
+//    config->magno_sf[2] = 4000;
+//
+//    config->magno_bias[0] = 0;
+//    config->magno_bias[1] = 0;
+//    config->magno_bias[2] = 0;
 
     adis16405_initialized = true;
     memory_barrier_release();
@@ -246,7 +245,6 @@ void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
 }
 
 MESSAGING_PRODUCER(messaging_producer_data, ts_adis16405_data, sizeof(adis16405_data_t), 40)
-MESSAGING_PRODUCER(messaging_producer_config, ts_adis16405_config, sizeof(adis16405_config_t), 10)
 
 void adis16405_thread(void *arg) {
     (void)arg;
@@ -285,8 +283,6 @@ void adis16405_thread(void *arg) {
     // Log that we have passed the error check
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
 
-    adis16405_config_t adis16405_config;
-
     while (!adis16405_self_test()) {
         chThdSleepMilliseconds(100);
     }
@@ -301,17 +297,15 @@ void adis16405_thread(void *arg) {
 
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
 
-    adis16405_init(&adis16405_config);
+    adis16405_init();
 
     messaging_producer_init(&messaging_producer_data);
-    messaging_producer_init(&messaging_producer_config);
 
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_ok);
 
     adis16405_data_t data;
 
     uint32_t send_over_usb_count = adis16405_send_over_usb_count;
-    uint32_t send_config_count = adis16405_send_config_count;
     uint32_t send_over_can_count = adis16405_send_over_can_count;
     while(TRUE) {
         chSysLock();
@@ -335,14 +329,6 @@ void adis16405_thread(void *arg) {
             flags |= message_flags_send_over_can;
         } else {
             send_over_can_count++;
-        }
-
-        if (send_config_count == adis16405_send_config_count) {
-            // Send config
-            messaging_producer_send(&messaging_producer_config, message_flags_send_over_can, (const uint8_t*)&adis16405_config);
-            send_config_count = 0;
-        } else {
-            send_config_count++;
         }
 
         messaging_producer_send(&messaging_producer_data, flags, (const uint8_t*)&data);

@@ -1,13 +1,12 @@
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
-import scipy, math, fileinput
+import scipy, math
 from ellipsoid_fit import ellipsoid_fit as ellipsoid_fit, data_regularize
-
 
 def down_sample(b, R):
     pad_size = math.ceil(float(b.shape[0]) / R) * R - b.shape[0]
-    b_padded = np.append(b, np.zeros((pad_size, b.shape[1])) * np.NaN)
+    b_padded = np.append(b, np.zeros((int(pad_size), b.shape[1])) * np.NaN)
     temp = b_padded.reshape((-1, R, b.shape[1]))
     return scipy.nanmean(temp, axis=1)
 
@@ -55,7 +54,7 @@ def calibration_basic_mean(data):
     magno_bias = (max_magno + min_magno) / 2
     magno_sf = 1 / np.mean(np.linalg.norm(data - magno_bias, axis=1))
 
-    calibrated = (raw_data - magno_bias) * magno_sf
+    calibrated = (data - magno_bias) * magno_sf
     eval = eval_calibrated(calibrated)
 
     print(
@@ -82,23 +81,17 @@ def calibration_ellipsoid(data):
         str(eval)))
     return transform
 
-tmp = []
-for line in fileinput.input():
-    vals = line.strip().split(",")
-    if vals[0] == "MPU9250Data":
-        # Calibrate Accel
-        # tmp.append([float(vals[1]), float(vals[2]), float(vals[3])])
-        # Calibrate Magno
-        tmp.append([float(vals[7]), float(vals[8]), float(vals[9])])
+def calibration_all(data):
+    plot_scatter(data, "Raw Magno Data")
 
-raw_data = np.array(tmp)
-tmp = []
+    print ("Performing Basic Calibration")
 
-plot_scatter(raw_data, "Raw Magno Data")
+    calibration_basic(data)
 
-calibration_basic(raw_data)
-calibration_basic_mean(raw_data)
-calibration_ellipsoid(raw_data)
+    print ("Performing Mean Calibration")
 
-plt.show()
+    calibration_basic_mean(data)
 
+    print ("Performing Ellipsoid Calibration")
+
+    calibration_ellipsoid(data)

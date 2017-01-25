@@ -11,11 +11,9 @@
 #include "messaging.h"
 #include <string.h>
 #include "spalaxconf.h"
-#include "util/board_config.h"
 
 static const uint32_t mpu9250_send_over_can_count = 0;
 static const uint32_t mpu9250_send_over_usb_count = 0; // Will send 1 in every 100 samples
-static const uint32_t mpu9250_send_config_count = 5000; // Will resend config every 1000 samples
 
 static binary_semaphore_t mpu9250_semaphore;
 
@@ -89,7 +87,7 @@ static void mpu9250_read_multiple(uint8_t addr, uint8_t* buf, int num) {
 
     spiSelect(&MPU9250_SPID);
     spiSend(&MPU9250_SPID, 1, (void*)&addr);
-    spiReceive(&MPU9250_SPID, num, (void*)buf);
+    spiReceive(&MPU9250_SPID, (size_t) num, (void*)buf);
     spiUnselect(&MPU9250_SPID);
 
     spiReleaseBus(&MPU9250_SPID);
@@ -279,7 +277,7 @@ static bool mpu9250_self_test_accel(void) {
     return true;
 }
 
-static void mpu9250_init(mpu9250_config_t* config) {
+static void mpu9250_init() {
     COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
 
     ///
@@ -365,20 +363,6 @@ static void mpu9250_init(mpu9250_config_t* config) {
     }
 
     COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_initializing);
-
-    ///
-    // Config update
-    ///
-
-    config->accel_sf =  16.0f * 9.8f / 32767.0f;
-    config->gyro_sf = 500.0f * 0.01745329251f / 32767.0f;
-
-    board_config_t* board_config = getBoardConfig();
-
-    for (int i = 0; i < 3; i++) {
-        config->magno_sf[i] = board_config->mpu9250_magno_sf[i];
-        config->magno_bias[i] = board_config->mpu9250_magno_bias[i];
-    }
 }
 
 void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
@@ -392,13 +376,8 @@ void mpu9250_wakeup(EXTDriver *extp, expchannel_t channel) {
 
 MESSAGING_PRODUCER(messaging_producer_data, ts_mpu9250_data, sizeof(mpu9250_data_t), 40)
 
-MESSAGING_PRODUCER(messaging_producer_config, ts_mpu9250_config, sizeof(mpu9250_config_t), 10)
 
 void mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
-
-
-    mpu9250_config_t mpu9250_config;
-
     chBSemObjectInit(&mpu9250_semaphore, true);
 
     chRegSetThreadName("MPU9250");
@@ -410,16 +389,14 @@ void mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
         chThdSleepMilliseconds(50);
     }
 
-    mpu9250_init(&mpu9250_config);
+    mpu9250_init();
 
     messaging_producer_init(&messaging_producer_data);
-    messaging_producer_init(&messaging_producer_config);
 
     COMPONENT_STATE_UPDATE(avionics_component_mpu9250, state_ok);
 
     mpu9250_data_t data;
     uint32_t send_over_usb_count = mpu9250_send_over_usb_count;
-    uint32_t send_config_count = mpu9250_send_config_count;
     uint32_t send_over_can_count = mpu9250_send_over_can_count;
     while(TRUE) {
         chSysLock();
@@ -443,14 +420,6 @@ void mpu9250_thread(COMPILER_UNUSED_ARG(void *arg)) {
             flags |= message_flags_send_over_can;
         } else {
             send_over_can_count++;
-        }
-
-        if (send_config_count == mpu9250_send_config_count) {
-            // Send config
-            messaging_producer_send(&messaging_producer_config, message_flags_send_over_can, (const uint8_t*)&mpu9250_config);
-            send_config_count = 0;
-        } else {
-            send_config_count++;
         }
 
         messaging_producer_send(&messaging_producer_data, flags, (const uint8_t*)&data);

@@ -183,6 +183,8 @@ static bool ublox_init(void) {
             .header = UBX_CFG_NAV5_HEADER,
             .mask = 1, // Set the parameter mask to include below parameters
             .dyn_model = 8, // Set the model to airborne <4g acceleration
+            .reserved3 = 0,
+            .reserved4 = 0,
     };
     if (!send_message_ack((uint8_t*)&cfg_nav5))
         return false;

@@ -38,8 +38,10 @@ static float state_estimation_p2a_zero_lapse(float pressure, int b)
     return hb + (Rs * tb) / (g0 * M) * (logf(pressure) - logf(pb));
 }
 
-float ms5611_get_altitude(float pressure)
+float ms5611_get_altitude(const ms5611data_t *data)
 {
+
+    float pressure = data->pressure;
     int b;
     /* For each level of the US Standard Atmosphere 1976, check if the pressure
     * is inside that level, and use the appropriate conversion based on lapse

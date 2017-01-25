@@ -1,4 +1,5 @@
 #include <messaging_all.h>
+#include <util/board_config.h>
 #include "ch.h"
 #include "hal.h"
 #include "mpu9250.h"
@@ -27,9 +28,15 @@ int main(void) {
 	board_config_t* config = getBoardConfig();
 
 	chThdCreateStatic(waBadThing, sizeof(waBadThing), NORMALPRIO, bthandler_thread, NULL);
-	chThdCreateStatic(waMPU, sizeof(waMPU), NORMALPRIO, mpu9250_thread, NULL);
-	chThdCreateStatic(waMS5611, sizeof(waMS5611), NORMALPRIO, ms5611_thread, NULL);
-	chThdCreateStatic(waGPS, sizeof(waGPS), NORMALPRIO, ublox_thread, NULL);
+
+	if (config->has_ms5611)
+		chThdCreateStatic(waMS5611, sizeof(waMS5611), NORMALPRIO, ms5611_thread, NULL);
+
+	if (config->has_mpu9250)
+		chThdCreateStatic(waMPU, sizeof(waMPU), NORMALPRIO, mpu9250_thread, NULL);
+
+	if (config->has_gps)
+		chThdCreateStatic(waGPS, sizeof(waGPS), NORMALPRIO, ublox_thread, NULL);
 
 	if (config->has_adis)
 		chThdCreateStatic(waADIS, sizeof(waADIS), NORMALPRIO, adis16405_thread, NULL);
