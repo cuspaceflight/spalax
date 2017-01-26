@@ -2,6 +2,10 @@
 #include "mpu9250_calibration.h"
 #include "Eigen/Core"
 
+// Needed for Travis Build
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 void mpu9250_calibrate_data(const mpu9250_data_t* uncalibrated_data, mpu9250_calibrated_data_t* calibrated_data) {
     // TODO: Correct Axes
 
