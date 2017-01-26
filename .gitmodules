@@ -19,3 +19,6 @@
 [submodule "external/matplotlibcpp"]
 	path = external/matplotlibcpp
 	url = https://github.com/Tustvold/matplotlib-cpp.git
+[submodule "external/wrappy"]
+	path = external/wrappy
+	url = https://github.com/Tustvold/wrappy.git

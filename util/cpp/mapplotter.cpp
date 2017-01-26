@@ -1,3 +1,5 @@
+
+
 #include <messaging_all.h>
 #include <file_telemetry.h>
 #include <cpp_utils.h>
@@ -6,57 +8,22 @@
 #include <iostream>
 #include <vector>
 #include <config/telemetry_packets.h>
-#include <calibration/ms5611_calibration.h>
-#include <time_utils.h>
-#include <matplotlibcpp.h>
 #include <chrono>
 #include <thread>
 #include <algorithm>
-#include <calibration/mpu9250_calibration.h>
 #include <util/board_config.h>
+#include <wrappy/wrappy.h>
 
-
-namespace plt = matplotlibcpp;
-
-
-uint64_t timestamp = 0;
-uint32_t last_timestamp = 0;
-
-std::vector<float> mpu_headings;
-std::vector<float> mpu_timestamps;
-std::vector<float> ublox_cogs;
-std::vector<float> ublox_timestamps;
-
-static float ublox_heading(const ublox_nav_t *pkt) {
-    float value = atan2f(pkt->velE, pkt->velN) * 180.0f / (float)M_PI;
-    if (value < 0.0f)
-        value += 360.0f;
-    return value;
-}
-
-static float mpu_compute_heading(const mpu9250_data_t* data) {
-    mpu9250_calibrated_data_t calibrated_data;
-    mpu9250_calibrate_data(data, &calibrated_data);
-
-    return mpu9250_get_heading(&calibrated_data);
-}
+std::vector<float> latitudes;
+std::vector<float> longitudes;
 
 static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
-    if (last_timestamp != 0) {
-        timestamp += clocks_between(last_timestamp, packet->header.timestamp);
-    }
-    last_timestamp = packet->header.timestamp;
-
     if (packet->header.id == ts_ublox_nav) {
         auto data = telemetry_get_payload<ublox_nav_t>(packet);
         if (data->fix_type != 3 || data->num_sv < 8)
             return true;
-        ublox_cogs.push_back(ublox_heading(data));
-        ublox_timestamps.push_back((float)timestamp / (float)platform_get_counter_frequency());
-    } else if (packet->header.id == ts_mpu9250_data) {
-        auto data = telemetry_get_payload<mpu9250_data_t>(packet);
-        mpu_timestamps.push_back((float)timestamp / (float)platform_get_counter_frequency());
-        mpu_headings.push_back(mpu_compute_heading(data));
+        latitudes.push_back(data->lat / 10000000.0f);
+        longitudes.push_back(data->lon / 10000000.0f);
     }
     return true;
 }
@@ -93,11 +60,19 @@ int main(int argc, char* argv[]) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    plt::named_plot("Ublox Heading", ublox_timestamps, ublox_cogs);
-    plt::named_plot("MPU Heading", mpu_timestamps, mpu_headings);
+    std::vector<wrappy::PythonObject> py_latitudes;
+    std::vector<wrappy::PythonObject> py_longitudes;
 
-    plt::grid(true);
-    plt::legend();
-    plt::save(output);
+    std::transform(latitudes.begin(), latitudes.end(), std::back_inserter(py_latitudes),
+                   [](float d) { return wrappy::construct(d); });
+
+    std::transform(longitudes.begin(), longitudes.end(), std::back_inserter(py_longitudes),
+                   [](float d) { return wrappy::construct(d); });
+
+    auto gmap = wrappy::call("gmplot.GoogleMapPlotter", *latitudes.begin(), *longitudes.begin(), 16);
+
+    gmap.call("plot", py_latitudes, py_longitudes, "cornflowerblue");
+    gmap.call("draw", output);
+
     return 0;
 }

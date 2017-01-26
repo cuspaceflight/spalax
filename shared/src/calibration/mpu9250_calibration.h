@@ -21,6 +21,8 @@ typedef struct mpu9250_calibrated_data_t {
 // Also alters the magnetometer's axes to match those of the other sensors
 void mpu9250_calibrate_data(const mpu9250_data_t* uncalibrated_data, mpu9250_calibrated_data_t* calibrated_data);
 
+float mpu9250_get_heading(mpu9250_calibrated_data_t* calibrated_data);
+
 #ifdef __cplusplus
 }
 #endif

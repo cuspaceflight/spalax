@@ -12,7 +12,7 @@
 
 
 static StateDetailView* s_instance = nullptr;
-static const int num_labels = 12;
+static const int num_labels = 13;
 float values[num_labels];
 
 
@@ -37,6 +37,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[10] = calibrated.magno[1];
         values[11] = calibrated.magno[2];
 
+        values[12] = mpu9250_get_heading(&calibrated);
     }
     else if (packet->header.id == ts_ms5611_data) {
         FTAssert(packet->header.length == sizeof(ms5611data_t), "Incorrect Packet Size");
@@ -62,7 +63,8 @@ StateDetailView::StateDetailView() {
         L"MS5611 Pressure", L"MS5611 Altitude", L"MS5611 Temperature",
         L"MPU9250 Accel X", L"MPU9250 Accel Y", L"MPU9250 Accel Z", 
         L"MPU9250 Gyro X", L"MPU9250 Gyro Y", L"MPU9250 Gyro Z", 
-        L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z"};
+        L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z",
+        L"MPU9250 Heading"};
 
     auto window_size_node = std::make_shared<FTWindowSizeNode>();
     window_size_node->setAnchorPoint(glm::vec2(0, -1.0f));
