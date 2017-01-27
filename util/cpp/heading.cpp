@@ -14,18 +14,21 @@
 #include <algorithm>
 #include <calibration/mpu9250_calibration.h>
 #include <util/board_config.h>
-
+#include <cfloat>
+#include <state/wmm_util.h>
 
 namespace plt = matplotlibcpp;
 
-
 uint64_t timestamp = 0;
 uint32_t last_timestamp = 0;
+#define TIMESTAMP_NOW (float)timestamp / (float)platform_get_counter_frequency()
 
 std::vector<float> mpu_headings;
 std::vector<float> mpu_timestamps;
-std::vector<float> ublox_cogs;
+std::vector<float> ublox_altitudes;
 std::vector<float> ublox_timestamps;
+std::vector<float> delta_headings;
+std::vector<float> delta_timestamps;
 
 static float ublox_heading(const ublox_nav_t *pkt) {
     float value = atan2f(pkt->velE, pkt->velN) * 180.0f / (float)M_PI;
@@ -41,6 +44,8 @@ static float mpu_compute_heading(const mpu9250_data_t* data) {
     return mpu9250_get_heading(&calibrated_data);
 }
 
+float magnetic_declination = FLT_MAX;
+
 static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
     if (last_timestamp != 0) {
         timestamp += clocks_between(last_timestamp, packet->header.timestamp);
@@ -49,14 +54,31 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
 
     if (packet->header.id == ts_ublox_nav) {
         auto data = telemetry_get_payload<ublox_nav_t>(packet);
-        if (data->fix_type != 3 || data->num_sv < 8)
+        auto v_mag = sqrtf(data->velE * data->velE + data->velN * data->velN);
+
+        if (data->fix_type != 3 || data->num_sv < 8 || data->p_dop > 300 || data->v_acc > v_mag / 2.0f)
             return true;
-        ublox_cogs.push_back(ublox_heading(data));
-        ublox_timestamps.push_back((float)timestamp / (float)platform_get_counter_frequency());
+
+        auto heading = ublox_heading(data);
+        ublox_altitudes.push_back(heading);
+
+        if (mpu_headings.size() != 0) {
+            delta_headings.push_back(std::abs(heading - mpu_headings.back()));
+            delta_timestamps.push_back(TIMESTAMP_NOW);
+        }
+
+        MagneticFieldParams params;
+        wmm_util_get_magnetic_field(data->lat / 10000000.0f, data->lon / 10000000.0f, data->h_msl / 1000.0f, &params);
+
+        magnetic_declination = params.declination;
+
+        ublox_timestamps.push_back(TIMESTAMP_NOW);
     } else if (packet->header.id == ts_mpu9250_data) {
+        if (magnetic_declination == FLT_MAX)
+            return true;
         auto data = telemetry_get_payload<mpu9250_data_t>(packet);
-        mpu_timestamps.push_back((float)timestamp / (float)platform_get_counter_frequency());
-        mpu_headings.push_back(mpu_compute_heading(data));
+        mpu_timestamps.push_back(TIMESTAMP_NOW);
+        mpu_headings.push_back(mpu_compute_heading(data) - magnetic_declination);
     }
     return true;
 }
@@ -78,6 +100,8 @@ int main(int argc, char* argv[]) {
 
     setBoardConfig(BoardConfigSpalax);
 
+    wmm_util_init(2016.860655737705);
+
     component_state_start(update_handler, false);
     messaging_all_start_options(false, false);
 
@@ -93,8 +117,12 @@ int main(int argc, char* argv[]) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    plt::named_plot("Ublox Heading", ublox_timestamps, ublox_cogs);
+
+
+    plt::named_plot("Ublox Heading", ublox_timestamps, ublox_altitudes);
     plt::named_plot("MPU Heading", mpu_timestamps, mpu_headings);
+
+    plt::named_plot("Heading Delta", delta_timestamps, delta_headings);
 
     plt::grid(true);
     plt::legend();

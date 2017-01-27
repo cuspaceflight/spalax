@@ -81,6 +81,35 @@ def calibration_ellipsoid(data):
         str(eval)))
     return transform
 
+def calibration_combination(data):
+    min_magno = np.array([float("inf"), float("inf"), float("inf")])
+    max_magno = -np.array([float("inf"), float("inf"), float("inf")])
+    for vec in data:
+        min_magno = np.minimum(min_magno, vec)
+        max_magno = np.maximum(max_magno, vec)
+
+    magno_sf = 2 / (max_magno - min_magno)
+    magno_bias = (max_magno + min_magno) / 2
+
+    calibrated_initial = (data - magno_bias) * magno_sf
+
+    data2 = data_regularize(calibrated_initial)
+
+    center, (a, b, c), evecs, v = ellipsoid_fit(data2)
+    D = np.array([[1 / a, 0., 0.], [0., 1 / b, 0.], [0., 0., 1 / c]])
+
+
+    transform = np.dot(np.diag(magno_sf),evecs.dot(D).dot(evecs.T))
+    offset = center.T + magno_bias
+
+    calibrated = transform.dot((data - offset).T).T
+    plot_scatter(calibrated, "Combination Calibration", 100)
+    eval = eval_calibrated(calibrated)
+    print("Combination Calibration (Transform - {}, Offset - {} Eval - {})".format(
+        np.array_str(transform),
+        np.array_str(offset),
+        str(eval)))
+
 def calibration_all(data):
     plot_scatter(data, "Raw Magno Data")
 
@@ -95,3 +124,7 @@ def calibration_all(data):
     print ("Performing Ellipsoid Calibration")
 
     calibration_ellipsoid(data)
+
+    print ("Performing Combination Calibration")
+
+    calibration_combination(data)

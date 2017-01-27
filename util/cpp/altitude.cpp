@@ -20,11 +20,14 @@ namespace plt = matplotlibcpp;
 uint64_t timestamp = 0;
 uint32_t last_timestamp = 0;
 
-std::vector<float> mpu9250_heading;
+std::vector<float> mpu9250_altitudes;
 std::vector<float> mpu_timestamps;
-std::vector<float> ublox_cogs;
+std::vector<float> ublox_altitudes;
 std::vector<float> ublox_timestamps;
 std::vector<float> ublox_error_bars;
+
+std::vector<float> delta_timestamps;
+std::vector<float> delta_altitudes;
 
 static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
     if (last_timestamp != 0) {
@@ -37,13 +40,18 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         auto altitude = ms5611_get_altitude(data);
         if (altitude == -9999.0f)
             return true;
-        mpu9250_heading.push_back(altitude);
+        mpu9250_altitudes.push_back(altitude);
+        if (ublox_altitudes.size() != 0) {
+            delta_timestamps.push_back((float)timestamp / (float)platform_get_counter_frequency());
+            delta_altitudes.push_back(std::abs(altitude - ublox_altitudes.back()));
+        }
+
         mpu_timestamps.push_back((float)timestamp / (float)platform_get_counter_frequency());
     } else if (packet->header.id == ts_ublox_nav) {
         auto data = telemetry_get_payload<ublox_nav_t>(packet);
-        if (data->fix_type != 3 || data->num_sv < 8 || (data->h_acc > 5000 && ublox_cogs.empty()))
+        if (data->fix_type != 3 || data->num_sv < 8 || (data->h_acc > 5000 && ublox_altitudes.empty()))
             return true;
-        ublox_cogs.push_back(data->h_msl / 1000.0f);
+        ublox_altitudes.push_back(data->height / 1000.0f);
         ublox_timestamps.push_back((float)timestamp / (float)platform_get_counter_frequency());
         ublox_error_bars.push_back(data->h_acc / 1000.0f);
     }
@@ -80,9 +88,9 @@ int main(int argc, char* argv[]) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    plt::errorbar(ublox_timestamps, ublox_cogs, ublox_error_bars);
-    plt::named_plot("MS5611 Altitudes", mpu_timestamps, mpu9250_heading);
-    //plt::named_plot("Ublox Error", ublox_timestamps, ublox_error_bars);
+    plt::errorbar(ublox_timestamps, ublox_altitudes, ublox_error_bars);
+    plt::named_plot("MS5611 Altitudes", mpu_timestamps, mpu9250_altitudes);
+    plt::named_plot("Altitude Delta", delta_timestamps, delta_altitudes);
 
     plt::grid(true);
     plt::legend();
