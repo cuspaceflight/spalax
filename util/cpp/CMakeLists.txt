@@ -8,7 +8,7 @@ link_libraries(spalax.shared wrappy)
 
 add_executable(testmatplotlibcpp testmatplotlibcpp.cpp)
 
-add_executable(altitude altitude.cpp map.cpp)
+add_executable(altitude altitude.cpp)
 
 add_executable(heading heading.cpp)
 

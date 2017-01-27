@@ -13,17 +13,37 @@
 #include <algorithm>
 #include <util/board_config.h>
 #include <wrappy/wrappy.h>
+#include <time_utils.h>
 
 std::vector<float> latitudes;
 std::vector<float> longitudes;
 
+std::vector<float> pin_latitudes;
+std::vector<float> pin_longitudes;
+
+float next_interval = 0;
+
+uint64_t timestamp = 0;
+uint32_t last_timestamp = 0;
+
 static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
+    if (last_timestamp != 0) {
+        timestamp += clocks_between(last_timestamp, packet->header.timestamp);
+    }
+    last_timestamp = packet->header.timestamp;
+
     if (packet->header.id == ts_ublox_nav) {
         auto data = telemetry_get_payload<ublox_nav_t>(packet);
         if (data->fix_type != 3 || data->num_sv < 8)
             return true;
         latitudes.push_back(data->lat / 10000000.0f);
         longitudes.push_back(data->lon / 10000000.0f);
+        if ((float)timestamp / (float)platform_get_counter_frequency() > next_interval) {
+            pin_latitudes.push_back(data->lat / 10000000.0f);
+            pin_longitudes.push_back(data->lon / 10000000.0f);
+            next_interval += 100.0f;
+        }
+
     }
     return true;
 }
@@ -72,6 +92,12 @@ int main(int argc, char* argv[]) {
     auto gmap = wrappy::call("gmplot.GoogleMapPlotter", *latitudes.begin(), *longitudes.begin(), 16);
 
     gmap.call("plot", py_latitudes, py_longitudes, "cornflowerblue");
+
+
+    for (int i = 0; i < std::min(pin_latitudes.size(), pin_longitudes.size()); i++) {
+        gmap.call("marker", pin_latitudes[i], pin_longitudes[i]);
+    }
+
     gmap.call("draw", output);
 
     return 0;
