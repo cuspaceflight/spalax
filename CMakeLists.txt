@@ -40,6 +40,10 @@ else()
     message(FATAL_ERROR "Platform not supported")
 endif ()
 
+if (SPALAX_BUILD_FIRMWARE)
+    add_subdirectory(external/fatfs-cmake)
+endif()
+
 add_subdirectory(external/cusf-messaging)
 add_subdirectory(external/wmm)
 add_subdirectory(shared)

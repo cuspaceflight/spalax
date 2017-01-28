@@ -25,6 +25,7 @@ typedef struct {
     bool has_mpu9250;
     bool has_adis;
     bool has_gps;
+    bool has_sdcard;
 
     // Row Major 3x3 Matrix
     float mpu9250_magno_transform[9];

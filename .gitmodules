@@ -22,3 +22,6 @@
 [submodule "external/wrappy"]
 	path = external/wrappy
 	url = https://github.com/Tustvold/wrappy.git
+[submodule "external/fatfs-cmake"]
+	path = external/fatfs-cmake
+	url = https://github.com/Tustvold/fatfs-cmake.git

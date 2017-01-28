@@ -1,5 +1,6 @@
 #include "board_config.h"
 #include <string.h>
+#include <component_state.h>
 
 
 board_config_t board_configs[BoardConfigMax] = {
@@ -10,6 +11,7 @@ board_config_t board_configs[BoardConfigMax] = {
                 .has_gps = false,
                 .has_mpu9250 = true,
                 .has_ms5611 = true,
+                .has_sdcard = false,
         },
         {
                 .name = BoardConfigM3Booster,
@@ -18,14 +20,16 @@ board_config_t board_configs[BoardConfigMax] = {
                 .has_gps = false,
                 .has_mpu9250 = true,
                 .has_ms5611 = true,
+                .has_sdcard = false,
         },
         {
                 .name = BoardConfigSpalax,
                 .board_id = {3407919, 875778316, 808991032},
                 .has_adis = false,
-                .has_gps = true,
+                .has_gps = false,
                 .has_mpu9250 = true,
                 .has_ms5611 = true,
+                .has_sdcard = true,
 
                 .mpu9250_magno_transform = {3.83654358e-03f,  -3.16423517e-05f,   1.81636820e-05f,
                                             -3.16423517e-05f,   3.84013596e-03f,   4.12319935e-05f,
@@ -46,6 +50,7 @@ board_config_t board_configs[BoardConfigMax] = {
                 .has_gps = false,
                 .has_mpu9250 = true,
                 .has_ms5611 = true,
+                .has_sdcard = false,
         }
 };
 
@@ -95,6 +100,8 @@ board_config_t *getBoardConfig(void) {
             return cached;
         }
     }
+    COMPONENT_STATE_UPDATE(avionics_component_state_board_config, state_error);
+
     return NULL;
 }
 
