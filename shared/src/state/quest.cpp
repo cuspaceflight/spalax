@@ -43,14 +43,14 @@ bool try_estimate(const Eigen::Vector3f& v1, const Eigen::Vector3f& v2, const Ei
 }
 
 // Based on paper at - http://arc.aiaa.org/doi/pdf/10.2514/3.19717
-void quest_estimate(const float observations[2][3], const float references[2][3], const float a[2], float *q_out) {
+int quest_estimate(const float observations[2][3], const float references[2][3], const float a[2], float *q_out) {
     Eigen::Vector3f v1(references[0][0], references[0][1], references[0][2]);
     Eigen::Vector3f v2(references[1][0], references[1][1], references[1][2]);
     { // No sequential rotation
         Eigen::Vector3f w1(observations[0][0], observations[0][1], observations[0][2]);
         Eigen::Vector3f w2(observations[1][0], observations[1][1], observations[1][2]);
         if (try_estimate(v1, v2, w1, w2, a, q_out))
-            return;
+            return 1;
     }
     { // Initial rotation through pi about the x axis
         Eigen::Vector3f w1(observations[0][0], -observations[0][1], -observations[0][2]);
@@ -61,7 +61,7 @@ void quest_estimate(const float observations[2][3], const float references[2][3]
             q_out[1] = -q_temp[2];
             q_out[2] = q_temp[1];
             q_out[3] = q_temp[0];
-            return;
+            return 2;
         }
     }
     { // Initial rotation through pi about the y axis
@@ -73,7 +73,7 @@ void quest_estimate(const float observations[2][3], const float references[2][3]
             q_out[1] = -q_temp[3];
             q_out[2] = -q_temp[0];
             q_out[3] = q_temp[1];
-            return;
+            return 3;
         }
     }
     { // Initial rotation through pi about the z axis
@@ -85,9 +85,8 @@ void quest_estimate(const float observations[2][3], const float references[2][3]
             q_out[1] = q_temp[0];
             q_out[2] = -q_temp[3];
             q_out[3] = q_temp[2];
-            return;
+            return 4;
         }
     }
-    assert(false);
-
+    return -1;
 }

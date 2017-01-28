@@ -20,7 +20,7 @@ TEST(TestQuest, TestIdentity) {
 
     float q_out[4];
 
-    quest_estimate(observations, references, a, q_out);
+    EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
 
     expect_fuzzy_eq(q_out[0], 0);
     expect_fuzzy_eq(q_out[1], 0);
@@ -61,7 +61,7 @@ TEST(TestQuest, TestIdentity2) {
 
     float q_out[4];
 
-    quest_estimate(observations, references, a, q_out);
+    EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
 
     expect_fuzzy_eq(q_out[0], 0);
     expect_fuzzy_eq(q_out[1], 0);
@@ -102,7 +102,7 @@ TEST(TestQuest, TestIdentity3) {
 
     float q_out[4];
 
-    quest_estimate(observations, references, a, q_out);
+    EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
 
     expect_fuzzy_eq(q_out[0], 0);
     expect_fuzzy_eq(q_out[1], 0);
@@ -135,7 +135,7 @@ TEST(TestQuest, TestRotation) {
 
     float q_out[4];
 
-    quest_estimate(observations, references, a, q_out);
+    EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
 
     // QUEST returns the quaternion to rotate the observations onto the references
     // This should be the reverse of the rotation above
@@ -170,7 +170,7 @@ TEST(TestQuest, TestRotation2) {
 
     float q_out[4];
 
-    quest_estimate(observations, references, a, q_out);
+    EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
 
     // QUEST returns the quaternion to rotate the observations onto the references
     // This should be the reverse of the rotation above
@@ -204,7 +204,7 @@ TEST(TestQuest, TestRotation3) {
 
     float q_out[4];
 
-    quest_estimate(observations, references, a, q_out);
+    EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
 
     // QUEST returns the quaternion to rotate the observations onto the references
     // This should be the reverse of the rotation above
@@ -239,7 +239,7 @@ TEST(TestQuest, TestRotation4) {
 
         float q_out[4];
 
-        quest_estimate(observations, references, a, q_out);
+        EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
 
         // QUEST returns the quaternion to rotate the observations onto the references
         // This should be the reverse of the rotation above
@@ -275,7 +275,7 @@ TEST(TestQuest, TestRotation5) {
 
         float q_out[4];
 
-        quest_estimate(observations, references, a, q_out);
+        EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
 
         // QUEST returns the quaternion to rotate the observations onto the references
         // This should be the reverse of the rotation above
@@ -311,7 +311,7 @@ TEST(TestQuest, TestRotation6) {
 
         float q_out[4];
 
-        quest_estimate(observations, references, a, q_out);
+        EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
 
         // QUEST returns the quaternion to rotate the observations onto the references
         // This should be the reverse of the rotation above
@@ -347,7 +347,7 @@ TEST(TestQuest, TestRotationRandom) {
 
         float q_out[4];
 
-        quest_estimate(observations, references, a, q_out);
+        EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
 
         // QUEST returns the quaternion to rotate the observations onto the references
         // This should be the reverse of the rotation above
@@ -383,7 +383,7 @@ TEST(TestQuest, TestRotationRandom2) {
 
         float q_out[4];
 
-        quest_estimate(observations, references, a, q_out);
+        EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
 
         // QUEST returns the quaternion to rotate the observations onto the references
         // This should be the reverse of the rotation above

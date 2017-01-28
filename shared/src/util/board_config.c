@@ -23,7 +23,7 @@ board_config_t board_configs[BoardConfigMax] = {
                 .name = BoardConfigSpalax,
                 .board_id = {3407919, 875778316, 808991032},
                 .has_adis = false,
-                .has_gps = false,
+                .has_gps = true,
                 .has_mpu9250 = true,
                 .has_ms5611 = true,
 
