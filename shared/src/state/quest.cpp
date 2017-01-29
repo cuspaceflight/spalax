@@ -62,7 +62,9 @@ bool try_estimate(const Eigen::Vector3f& v1, const Eigen::Vector3f& v2, const Ei
     return true;
 }
 
-// Based on paper at - http://arc.aiaa.org/doi/pdf/10.2514/3.19717
+// Based on papers at -
+// http://arc.aiaa.org/doi/pdf/10.2514/3.19717
+// http://malcolmdshuster.com/FC_MarkleyMortari_Girdwood_1999_AAS.pdf
 int quest_estimate(const float observations[2][3], const float references[2][3], const float a[2], float *q_out) {
     Eigen::Vector3f v1(references[0][0], references[0][1], references[0][2]);
     Eigen::Vector3f v2(references[1][0], references[1][1], references[1][2]);

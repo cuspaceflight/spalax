@@ -30,8 +30,10 @@ int main(void) {
 
     chThdCreateStatic(waBadThing, sizeof(waBadThing), NORMALPRIO, bthandler_thread, NULL);
 
+#if FILE_TELEMETRY_OUTPUT_ENABLED
     if (config->has_sdcard)
         file_telemetry_output_start("log.m3tel", false);
+#endif
 
     if (config->has_ms5611)
         chThdCreateStatic(waMS5611, sizeof(waMS5611), NORMALPRIO, ms5611_thread, NULL);

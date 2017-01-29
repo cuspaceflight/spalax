@@ -40,7 +40,7 @@ else()
     message(FATAL_ERROR "Platform not supported")
 endif ()
 
-if (SPALAX_BUILD_FIRMWARE)
+if (BUILD_FATFS)
     add_subdirectory(external/fatfs-cmake)
 endif()
 
