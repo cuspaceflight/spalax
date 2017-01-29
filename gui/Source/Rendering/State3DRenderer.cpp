@@ -1,5 +1,6 @@
 ﻿#include "State3DRenderer.h"
 #include <Rendering/Camera/FTCameraFPS.h>
+#include <calibration/mpu9250_calibration.h>
 #include "RocketRenderer.h"
 #include "RocketPathRenderer.h"
 #include "messaging.h"
@@ -21,9 +22,9 @@ State3DRenderer::State3DRenderer() :
     FTAssert(s_instance == nullptr, "Only one State3DRenderer instance can exist at once");
 
     auto camera = std::make_shared<FTCameraFPS>();
-    camera->setPosition(glm::vec3(0, -50, 0));
-    // The state estimate uses z as up and y as forwards so we adjust to match
-    camera->setAxes(glm::vec3(0, 0, 1), glm::vec3(0, 1, 0));
+    camera->setPosition(glm::vec3(-30, 0, 0));
+    // The state estimate uses z as up and x as forwards so we adjust to match
+    camera->setAxes(glm::vec3(0, 0, 1), glm::vec3(1, 0, 0));
     setCamera(std::move(camera));
     
 
@@ -31,7 +32,7 @@ State3DRenderer::State3DRenderer() :
     addChild(rocket_path_renderer_);
 
     addChild(mag_renderer_);
-    rocket_renderer_->addChild(accel_renderer_);
+    addChild(accel_renderer_);
     s_instance = this;
 
     messaging_consumer_init(&messaging_consumer);
@@ -48,8 +49,12 @@ bool State3DRenderer::handlePacket(const telemetry_t* packet) const {
         rocket_path_renderer_->nextStateEstimate(*data);
     } else if (packet->header.id == ts_mpu9250_data) {
         auto data = (mpu9250_data_t*)packet->payload;
-        mag_renderer_->renderVector(glm::vec3(data->magno[0], data->magno[1], data->magno[2]));
-        accel_renderer_->renderVector(glm::vec3(data->accel[0], data->accel[1], data->accel[2]));
+
+        mpu9250_calibrated_data_t calibrated;
+        mpu9250_calibrate_data(data, &calibrated);
+
+        mag_renderer_->renderVector(glm::vec3(calibrated.magno[0], calibrated.magno[1], calibrated.magno[2]));
+        accel_renderer_->renderVector(glm::vec3(calibrated.accel[0], calibrated.accel[1], calibrated.accel[2]));
     }
     return true;
 }

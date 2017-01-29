@@ -125,6 +125,6 @@ def calibration_all(data):
 
     calibration_ellipsoid(data)
 
-    print ("Performing Combination Calibration")
+    #print ("Performing Combination Calibration")
 
-    calibration_combination(data)
+    #calibration_combination(data)

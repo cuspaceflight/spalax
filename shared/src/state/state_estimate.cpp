@@ -45,7 +45,21 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
 
         const float a[2] = {0.5f, 0.5f};
 
+
         quest_estimate(observations, references, a, current_estimate.orientation_q);
+
+        Eigen::Quaternionf out;
+        out.x() = current_estimate.orientation_q[0];
+        out.y() = current_estimate.orientation_q[1];
+        out.z() = current_estimate.orientation_q[2];
+        out.w() = current_estimate.orientation_q[3];
+
+        out.inverse();
+
+        current_estimate.orientation_q[0] = out.x();
+        current_estimate.orientation_q[1] = out.y();
+        current_estimate.orientation_q[2] = out.z();
+        current_estimate.orientation_q[3] = out.w();
 
         send_state_estimate();
 
@@ -74,6 +88,12 @@ void state_estimate_thread(void *arg) {
 
     messaging_producer_init(&messaging_producer);
     messaging_consumer_init(&messaging_consumer);
+
+    // Temporary For Testing
+    has_gps = true;
+    current_estimate.latitude = 52.2053f;
+    current_estimate.longitude = 0.1218f;
+    current_estimate.altitude = 60;
 
     while (messaging_consumer_receive(&messaging_consumer, true, false) != messaging_receive_terminate);
 }

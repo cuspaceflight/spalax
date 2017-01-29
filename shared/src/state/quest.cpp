@@ -24,6 +24,26 @@ bool try_estimate(const Eigen::Vector3f& v1, const Eigen::Vector3f& v2, const Ei
     q_out[2] = Y[2] * q_mult;
     q_out[3] = q_mult;
 
+
+    // Alternative Method
+
+//    float delta = S.determinant();
+//    float k = B.adjoint().trace();
+//
+//    float alpha = lambda_max * lambda_max - sigma * sigma + k;
+//    float beta = lambda_max - sigma;
+//    float gamma = (lambda_max + sigma)* alpha - delta;
+//
+//    Eigen::Vector3f X = (alpha * Eigen::Matrix3f::Identity() + beta * S + S * S) * Z;
+//
+//    float q_new[4];
+//    float q_div = sqrtf(gamma* gamma + X.squaredNorm());
+//    q_new[0] = X.x() / q_div;
+//    q_new[1] = X.y() / q_div;
+//    q_new[2] = X.z() / q_div;
+//    q_new[3] = gamma / q_div;
+
+
 //    Eigen::Matrix4f K;
 //    Eigen::Matrix3f d = S - sigma * Eigen::Matrix3f::Identity();
 //    for (int i = 0; i < 3; i++) {
@@ -90,3 +110,56 @@ int quest_estimate(const float observations[2][3], const float references[2][3],
     }
     return -1;
 }
+
+#ifdef BUILD_Q_METHOD
+
+// Davenport's Q Method
+int davenport_q_method(const float **observations, const float **references, const float *a, float *q_out) {
+    Eigen::Vector3f v1(references[0][0], references[0][1], references[0][2]);
+    Eigen::Vector3f v2(references[1][0], references[1][1], references[1][2]);
+    Eigen::Vector3f w1(observations[0][0], observations[0][1], observations[0][2]);
+    Eigen::Vector3f w2(observations[1][0], observations[1][1], observations[1][2]);
+
+    Eigen::Matrix3f B = a[0] * (w1 * v1.transpose()) + a[1] * (w2 * v2.transpose());
+    Eigen::Matrix3f S = B + B.transpose();
+    Eigen::Vector3f Z(B(1,2) - B(2,1), B(2,0) - B(0,2), B(0,1) - B(1,0));
+
+    float sigma = B.trace();
+
+    Eigen::Matrix4f K;
+    Eigen::Matrix3f t = S - sigma *  Eigen::Matrix3f::Identity();
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            K(i,j) = t(i,j);
+
+    for (int i = 0; i < 3; i++) {
+        K(3, i) = Z(i);
+        K(i, 3) = Z(i);
+    }
+    K(3,3) = sigma;
+
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix4f> solver;
+    solver.compute(K);
+
+    auto values = solver.eigenvalues();
+
+    float max = -INFINITY;
+    int max_i = -1;
+    for (int i = 0; i < 4; i++) {
+        if (values(i) > max) {
+            max = values(i);
+            max_i = i;
+        }
+    }
+
+    auto vector = solver.eigenvectors().col(max_i);
+
+    q_out[0] = vector(0);
+    q_out[1] = vector(1);
+    q_out[2] = vector(2);
+    q_out[3] = vector(3);
+
+    return 1;
+}
+
+#endif

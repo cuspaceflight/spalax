@@ -21,8 +21,8 @@ void mpu9250_calibrate_data(const mpu9250_data_t* uncalibrated_data, mpu9250_cal
     Eigen::Vector3f calibrated_magno = magno_transform * (magno_raw - magno_offset);
     Eigen::Vector3f calibrated_accel = accel_transform * (accel_raw - accel_offset);
 
-    calibrated_data->magno[0] = calibrated_magno.x();
-    calibrated_data->magno[1] = calibrated_magno.y();
+    calibrated_data->magno[0] = calibrated_magno.y();
+    calibrated_data->magno[1] = calibrated_magno.x();
     calibrated_data->magno[2] = -calibrated_magno.z();
 
     calibrated_data->accel[0] = calibrated_accel.x();
@@ -35,7 +35,7 @@ void mpu9250_calibrate_data(const mpu9250_data_t* uncalibrated_data, mpu9250_cal
 }
 
 float mpu9250_get_heading(mpu9250_calibrated_data_t *calibrated_data) {
-    float value = -atan2f(calibrated_data->magno[0], calibrated_data->magno[1]) * 180.0f / F_PI;
+    float value = atan2f(calibrated_data->magno[1], calibrated_data->magno[0]) * 180.0f / F_PI;
     if (value < 0.0f)
         value += 360.0f;
     return value;
