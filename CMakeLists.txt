@@ -53,6 +53,8 @@ if (SPALAX_BUILD_FIRMWARE)
 endif()
 
 if (SPALAX_BUILD_GUI)
+    option( WRAPPY_BUILD_DEMOS "Build the wrappy tests" OFF)
+
     add_subdirectory(external/wrappy)
     add_subdirectory(external/Frontier.Engine)
     add_subdirectory(gui)

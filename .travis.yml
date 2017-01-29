@@ -6,7 +6,7 @@ install:
   - sudo add-apt-repository -y ppa:terry.guo/gcc-arm-embedded
   - sudo apt-get -y update
   - sudo apt-get -y install cmake gcc-arm-none-eabi
-  - sudo apt-get -y install gcc xorg-dev libgl1-mesa-dev libfreetype6-dev libglew-dev libboost-all-dev
+  - sudo apt-get -y install gcc xorg-dev libgl1-mesa-dev libfreetype6-dev libglew-dev
   - ./util/bash/glfw-install.sh
   - ./util/bash/glm-install.sh
 script:
