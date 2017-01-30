@@ -23,3 +23,6 @@ target_link_libraries(${SPALAX_CONF}.elf PUBLIC spalax.shared m)
 
 STM32_SET_TARGET_PROPERTIES(${SPALAX_CONF}.elf)
 STM32_ADD_HEX_BIN_TARGETS(${SPALAX_CONF}.elf)
+
+
+add_custom_command(TARGET ${SPALAX_CONF}.elf POST_BUILD COMMAND ${CMAKE_SIZE} ${CMAKE_BINARY_DIR}/bin/${SPALAX_CONF}.elf)

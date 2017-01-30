@@ -16,6 +16,11 @@ add_definitions(-DEIGEN_NO_MALLOC -DTIMESTAMP_YEAR=${Year} -DTIMESTAMP_WEEK=${We
 
 add_library(spalax.shared ${SOURCES})
 
+if (DEFINED ChibiOS_INCLUDE_DIRS)
+    add_custom_command(TARGET spalax.shared POST_BUILD COMMAND ${CMAKE_SIZE} ${CMAKE_BINARY_DIR}/lib/libspalax.shared.a)
+endif()
+
+
 target_include_directories (spalax.shared
         PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/src

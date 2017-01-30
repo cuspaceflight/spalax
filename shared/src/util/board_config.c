@@ -12,6 +12,7 @@ board_config_t board_configs[BoardConfigMax] = {
                 .has_mpu9250 = true,
                 .has_ms5611 = true,
                 .has_sdcard = false,
+                .run_state_estimators = false,
         },
         {
                 .name = BoardConfigM3Booster,
@@ -21,6 +22,7 @@ board_config_t board_configs[BoardConfigMax] = {
                 .has_mpu9250 = true,
                 .has_ms5611 = true,
                 .has_sdcard = false,
+                .run_state_estimators = false,
         },
         {
                 .name = BoardConfigSpalax,
@@ -30,6 +32,7 @@ board_config_t board_configs[BoardConfigMax] = {
                 .has_mpu9250 = true,
                 .has_ms5611 = true,
                 .has_sdcard = false,
+                .run_state_estimators = true,
 
                 .mpu9250_magno_transform = {3.83654358e-03f,  -3.16423517e-05f,   1.81636820e-05f,
                                             -3.16423517e-05f,   3.84013596e-03f,   4.12319935e-05f,
@@ -51,6 +54,7 @@ board_config_t board_configs[BoardConfigMax] = {
                 .has_mpu9250 = true,
                 .has_ms5611 = true,
                 .has_sdcard = false,
+                .run_state_estimators = false,
         }
 };
 

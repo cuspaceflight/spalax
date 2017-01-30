@@ -4,7 +4,6 @@
 #include <Eigen/Geometry>
 #include "state_estimate.h"
 #include "Eigen/Core"
-#include "wmm_util.h"
 #include "quest.h"
 
 // Forward Declarations
@@ -17,7 +16,9 @@ state_estimate_t current_estimate;
 
 #define VEC3_NORM(name) sqrtf(name[0] * name[0] + name[1] * name[1] + name[2] * name[2]);
 
-static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
+float reference_vectors[2][3];
+
+static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
     if (packet->header.id == ts_mpu9250_data) {
         if (!has_gps)
             return true;
@@ -26,27 +27,21 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         mpu9250_calibrated_data_t calibrated_data;
         mpu9250_calibrate_data(data, &calibrated_data);
 
-        MagneticFieldParams params;
-        wmm_util_get_magnetic_field(current_estimate.latitude,current_estimate.longitude,current_estimate.altitude, &params);
-
-        auto mag_ref_norm = VEC3_NORM(params.field_vector);
         auto mag_norm = VEC3_NORM(calibrated_data.magno);
         auto accel_norm = VEC3_NORM(calibrated_data.accel);
 
         const float observations[2][3] = {
-                {calibrated_data.accel[0] / accel_norm, calibrated_data.accel[1]/accel_norm, calibrated_data.accel[2]/accel_norm},
-                {calibrated_data.magno[0] / mag_norm, calibrated_data.magno[1]/mag_norm, calibrated_data.magno[2]/mag_norm}
-        };
-
-        const float references[2][3] = {
-                {0.0, 0.0, 1.0f},
-                {params.field_vector[0]/mag_ref_norm, params.field_vector[1]/mag_ref_norm, -params.field_vector[2]/mag_ref_norm}
+                {calibrated_data.accel[0] / accel_norm, calibrated_data.accel[1] / accel_norm,
+                                                                                             calibrated_data.accel[2] /
+                                                                                             accel_norm},
+                {calibrated_data.magno[0] / mag_norm,   calibrated_data.magno[1] / mag_norm, calibrated_data.magno[2] /
+                                                                                             mag_norm}
         };
 
         const float a[2] = {0.5f, 0.5f};
 
 
-        quest_estimate(observations, references, a, current_estimate.orientation_q);
+        quest_estimate(observations, reference_vectors, a, current_estimate.orientation_q);
 
         Eigen::Quaternionf out;
         out.x() = current_estimate.orientation_q[0];
@@ -84,8 +79,6 @@ MESSAGING_CONSUMER(messaging_consumer, ts_m3imu, ts_m3imu_mask, 0, 0, getPacket,
 void state_estimate_thread(void *arg) {
     platform_set_thread_name("State Estimate");
 
-    wmm_util_init(TIMESTAMP_YEAR + TIMESTAMP_WEEK / 52.0 + TIMESTAMP_DAY_OF_WEEK / (52.0 * 7.0));
-
     messaging_producer_init(&messaging_producer);
     messaging_consumer_init(&messaging_consumer);
 
@@ -95,15 +88,24 @@ void state_estimate_thread(void *arg) {
     current_estimate.longitude = 0.1218f;
     current_estimate.altitude = 60;
 
+    reference_vectors[0][0] = 0;
+    reference_vectors[0][1] = 0;
+    reference_vectors[0][2] = 1;
+    reference_vectors[1][0] = 0.39134267f;
+    reference_vectors[1][1] = -0.00455851434f;
+    reference_vectors[1][2] = -0.920233727f;
+
     while (messaging_consumer_receive(&messaging_consumer, true, false) != messaging_receive_terminate);
 }
 
 static void send_state_estimate() {
-    messaging_producer_send(&messaging_producer, message_flags_dont_send_over_usb, (const uint8_t *) &current_estimate);
+    messaging_producer_send(&messaging_producer, 0, (const uint8_t *) &current_estimate);
 }
 
 #ifdef MESSAGING_OS_STD
+
 void state_estimate_terminate() {
     messaging_consumer_terminate(&messaging_consumer);
 }
+
 #endif

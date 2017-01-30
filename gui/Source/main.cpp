@@ -23,8 +23,6 @@ int main() {
         component_state_start(update_handler, true);
         messaging_all_start();
 
-        std::thread state_estimate(state_estimate_thread, nullptr);
-
         FTEngine::getFileManager()->addSearchPath("Resources");
 
         auto scene = std::static_pointer_cast<FTScene>(std::make_shared<MainScene>());
@@ -32,10 +30,6 @@ int main() {
         scene.reset();
 
         ret = FTEngine::run();
-
-        state_estimate_terminate();
-
-        state_estimate.join();
 
         FTEngine::cleanup();
     }

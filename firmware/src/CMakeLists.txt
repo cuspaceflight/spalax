@@ -6,6 +6,7 @@ set(SOURCES ${SOURCES}
         ${CMAKE_CURRENT_SOURCE_DIR}/ms5611.c
         ${CMAKE_CURRENT_SOURCE_DIR}/ublox.c
         ${CMAKE_CURRENT_SOURCE_DIR}/main.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/stubs.c
         PARENT_SCOPE)
 
 set(HEADERS ${HEADERS}
