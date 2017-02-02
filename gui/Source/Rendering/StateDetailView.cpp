@@ -12,8 +12,11 @@
 
 
 static StateDetailView* s_instance = nullptr;
-static const int num_labels = 13;
+static const int num_labels = 15;
 float values[num_labels];
+
+int mpu9250_update_count = 0;
+int state_estimate_update_count = 0;
 
 
 static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
@@ -38,6 +41,8 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[11] = calibrated.magno[2];
 
         values[12] = mpu9250_get_heading(&calibrated);
+
+        mpu9250_update_count++;
     }
     else if (packet->header.id == ts_ms5611_data) {
         FTAssert(packet->header.length == sizeof(ms5611data_t), "Incorrect Packet Size");
@@ -46,6 +51,8 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[0] = (float)data->pressure;
         values[1] = ms5611_get_altitude(data);
         values[2] = (float)data->temperature;
+
+        state_estimate_update_count++;
     }
     return true;
 }
@@ -64,7 +71,7 @@ StateDetailView::StateDetailView() {
         L"MPU9250 Accel X", L"MPU9250 Accel Y", L"MPU9250 Accel Z", 
         L"MPU9250 Gyro X", L"MPU9250 Gyro Y", L"MPU9250 Gyro Z", 
         L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z",
-        L"MPU9250 Heading"};
+        L"MPU9250 Heading", L"MPU9250 Update Rate", L"State Estimate Update Rate"};
 
     auto window_size_node = std::make_shared<FTWindowSizeNode>();
     window_size_node->setAnchorPoint(glm::vec2(0, -1.0f));
@@ -111,7 +118,17 @@ StateDetailView::~StateDetailView() {
 	FTEngine::getInputManager()->getKeyState("ToggleDetails", GLFW_KEY_SEMICOLON)->unregisterOnPressDelegate(this, &StateDetailView::toggleDetails);
 }
 
-void StateDetailView::updateDisplay() {
+void StateDetailView::updateDisplay(const FTUpdateEvent& event) {
+    static float accumulator = 1.0f;
+    accumulator += (float)event.delta_time_;
+    if (accumulator >= 5.0) {
+        accumulator -= 5.0f;
+        values[13] = mpu9250_update_count / 5.0f;
+        values[14] = state_estimate_update_count / 5.0f;
+        mpu9250_update_count = 0;
+        state_estimate_update_count = 0;
+    }
+
     while (messaging_consumer_receive(&messaging_consumer, false, false) == messaging_receive_ok);
 
     static wchar_t buff[24];

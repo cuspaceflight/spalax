@@ -7,7 +7,6 @@
 #include <util/board_config.h>
 #include <thread>
 #include "messaging_all.h"
-#include "state/state_estimate.h"
 
 void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
 	if (state == state_error)

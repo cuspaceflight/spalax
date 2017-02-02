@@ -9,7 +9,7 @@ public:
     StateDetailView();
     ~StateDetailView();
 
-    void updateDisplay();
+    void updateDisplay(const FTUpdateEvent& event);
 
 protected:
     std::vector<FTLabel*> value_labels_;

@@ -23,7 +23,7 @@ MainScene::~MainScene() {
 }
 
 void MainScene::update(const FTUpdateEvent& event) {
-    state_detail_view_->updateDisplay();
+    state_detail_view_->updateDisplay(event);
     state_3d_renderer_->updateDisplay();
 }
 
