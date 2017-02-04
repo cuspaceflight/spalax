@@ -1,9 +1,6 @@
 #include <messaging_all.h>
 #include <util/board_config.h>
 #include <file_telemetry.h>
-#include <state/state_estimate.h>
-#include "ch.h"
-#include "hal.h"
 #include "mpu9250.h"
 #include "ms5611.h"
 #include "adis16405.h"
@@ -18,9 +15,12 @@ static THD_WORKING_AREA(waMS5611, 256);
 static THD_WORKING_AREA(waADIS, 256);
 static THD_WORKING_AREA(waGPS, 1024);
 
+#if BUILD_STATE_ESTIMATORS
+#include <state/state_estimate.h>
 // This is possibly more than it needs - but can be tweaked later
 // It will need substantially more than other threads
 static THD_WORKING_AREA(waStateEstimators, 4086);
+#endif
 
 int main(void) {
     halInit();
@@ -51,10 +51,10 @@ int main(void) {
 
     if (config->has_adis)
         chThdCreateStatic(waADIS, sizeof(waADIS), NORMALPRIO, adis16405_thread, NULL);
-
+#if BUILD_STATE_ESTIMATORS
     if (config->run_state_estimators)
         chThdCreateStatic(waStateEstimators, sizeof(waStateEstimators), NORMALPRIO, state_estimate_thread, NULL);
-
+#endif
     while (true) {
         chThdSleepMilliseconds(TIME_INFINITE);
     }

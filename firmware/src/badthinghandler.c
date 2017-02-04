@@ -32,8 +32,16 @@ void bthandler_thread(void* arg) {
     (void)arg;
     chRegSetThreadName("BadThingHandler");
 
+    int i = 0;
+
     while (true) {
         avionics_component_state_t state = component_state_get_overall_state();
+
+        i++;
+        if (i == 5) {
+            component_state_send_overall();
+            i = 0;
+        }
 #if BAD_THIND_HANDLER_HAS_SENSOR_LEDS
         const volatile uint8_t* component_states = component_state_get_states();
         setSensorOk(!(component_states[avionics_component_adis16405] == state_error || component_states[avionics_component_mpu9250] == state_error || component_states[avionics_component_ms5611] == state_error));
