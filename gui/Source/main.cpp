@@ -7,6 +7,7 @@
 #include <util/board_config.h>
 #include <thread>
 #include "messaging_all.h"
+#include "Rendering/Text/FTFontCache.h"
 
 void update_handler(avionics_component_t component, avionics_component_state_t state, int line) {
 	if (state == state_error)
@@ -23,6 +24,8 @@ int main() {
         messaging_all_start();
 
         FTEngine::getFileManager()->addSearchPath("Resources");
+        FTEngine::getDirector()->getFontCache()->loadFontStyle("DefaultText", "Resources/Fonts/Vera.ftfont", glm::vec3(1,1,1));
+        FTEngine::getDirector()->getFontCache()->loadFontStyle("DefaultTextPlaceholder", "Resources/Fonts/Vera.ftfont", glm::vec3(0.8,0.8,0.8));
 
         auto scene = std::static_pointer_cast<FTScene>(std::make_shared<MainScene>());
         FTEngine::getDirector()->setCurrentScene(scene);

@@ -36,6 +36,23 @@ State3DRenderer::State3DRenderer() :
     s_instance = this;
 
     messaging_consumer_init(&messaging_consumer);
+
+    LightDescriptor light;
+    light.position = glm::normalize(glm::vec4(1, 2, 0.2, 0));
+    light.ambientCoefficient = 0.1f;
+    light.intensity = glm::vec3(0.2, 0.2, 0.2);
+    //light.attenuation = 0.01f;
+    //light.coneAngle = 15.0f;
+    //light.coneDirection = glm::normalize(glm::vec3(0,1,-0.5));
+    light_manager_->addLight(light);
+
+    light.position = glm::normalize(glm::vec4(-1, 2, -0.2, 0));
+    light.ambientCoefficient = 0.1f;
+    light.intensity = glm::vec3(0.2, 0.2, 0.2);
+    //light.attenuation = 0.01f;
+    //light.coneAngle = 15.0f;
+    //light.coneDirection = glm::normalize(glm::vec3(0,1,-0.5));
+    light_manager_->addLight(light);
 }
 
 State3DRenderer::~State3DRenderer() {

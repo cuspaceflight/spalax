@@ -1,15 +1,8 @@
-﻿#include "RocketRenderer.h"
-
-static const glm::vec3 colors[6] = {
-    glm::vec3(0.5f, 0.5f, 0.5f),
-    glm::vec3(0.5f, 0.5f, 0.5f),
-    glm::vec3(0.7f, 0.7f, 0.7f),
-    glm::vec3(0.4f, 0.4f, 0.4f),
-    glm::vec3(0.6f, 0.6f, 0.6f),
-    glm::vec3(0.65f, 0.65f, 0.65f)};
+﻿#include <Rendering/Shader/FTVertexShaderProgramLighting.h>
+#include "RocketRenderer.h"
 
 RocketRenderer::RocketRenderer() {
-    auto renderer = std::make_shared<FTCuboid>(glm::vec3(0, 0, 0), glm::vec3(1, 1, 10), colors);
+    auto renderer = std::make_shared<FTCuboid>(glm::vec3(0, 0, 0), glm::vec3(1, 1, 10), glm::vec3(0.6f, 0.6f, 0.6f), FTCuboid::getShaderUtil<FTVertexShaderProgramLighting>());
     renderer->setAnchorPoint(glm::vec3(0.5f, 0.5f, 0.5f));
     addChild(std::move(renderer));
 }
