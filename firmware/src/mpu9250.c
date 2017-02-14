@@ -298,19 +298,20 @@ static void mpu9250_init() {
         { MPU9250_REG_SMPLRT_DIV, 0x0}, // Set Maximum Sample Rate
 
 
+
         // Set full gyro scale to +500dps
         // We enable a digital low pass filter with:
-        // - bandwidth 184Hz on gyroscope
-        // - bandwidth 188Hz on temperature
-        // Note: this reduces ODR to 1 kHz and adds a 2.9ms delay
-        { MPU9250_REG_CONFIG, 0b00000001}, // Disable FSync and set DLPF_CFG to 1
-        { MPU9250_REG_GYRO_CONFIG, 0b00001000},
+        // - bandwidth 41Hz on gyroscope
+        // - bandwidth 42Hz on temperature
+        // Note: this reduces ODR to 1 kHz and adds a 5.9ms delay
+        { MPU9250_REG_CONFIG, 0b00000011}, // Disable FSync and set DLPF_CFG to 3
+        { MPU9250_REG_GYRO_CONFIG, 0b00001000}, // Set Fchoice_b to 0 and full scale to +500dps
 
         // Set full accelerometer scale to +16g
-        // Enable a 184Hz low pass filter on accelerometer
-        // Note: this reduces ODR to 1kHz and adds a 5.8ms delay
-        { MPU9250_REG_ACCEL_CONFIG, 0b00011000},
-        { MPU9250_REG_ACCEL_CONFIG_2, 0b00000001}
+        // Enable a 41Hz low pass filter on accelerometer
+        // Note: this reduces ODR to 1kHz and adds a 11.8ms delay
+        { MPU9250_REG_ACCEL_CONFIG, 0b00011000}, // Set full scale to 16g
+        { MPU9250_REG_ACCEL_CONFIG_2, 0b00000011} // Set fchoice_b to 0 and set DLPF_CFG to 3
     };
 
     // Perform initial reset
