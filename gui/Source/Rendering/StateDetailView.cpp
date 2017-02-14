@@ -51,7 +51,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[0] = (float)data->pressure;
         values[1] = ms5611_get_altitude(data);
         values[2] = (float)data->temperature;
-
+    } else if (packet->header.id == ts_state_estimate_data) {
         state_estimate_update_count++;
     }
     return true;
