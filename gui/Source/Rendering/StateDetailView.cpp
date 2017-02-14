@@ -12,12 +12,12 @@
 
 
 static StateDetailView* s_instance = nullptr;
-static const int num_labels = 15;
+static const int num_labels = 16;
 float values[num_labels];
 
 int mpu9250_update_count = 0;
 int state_estimate_update_count = 0;
-
+int ms5611_update_count = 0;
 
 static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
     if (s_instance == nullptr)
@@ -51,6 +51,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[0] = (float)data->pressure;
         values[1] = ms5611_get_altitude(data);
         values[2] = (float)data->temperature;
+        ms5611_update_count++;
     } else if (packet->header.id == ts_state_estimate_data) {
         state_estimate_update_count++;
     }
@@ -71,7 +72,7 @@ StateDetailView::StateDetailView() {
         L"MPU9250 Accel X", L"MPU9250 Accel Y", L"MPU9250 Accel Z", 
         L"MPU9250 Gyro X", L"MPU9250 Gyro Y", L"MPU9250 Gyro Z", 
         L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z",
-        L"MPU9250 Heading", L"MPU9250 Update Rate", L"State Estimate Update Rate"};
+        L"MPU9250 Heading", L"MPU9250 Update Rate", L"State Estimate Update Rate", L"MS5611 Update Rate"};
 
     auto window_size_node = std::make_shared<FTWindowSizeNode>();
     window_size_node->setAnchorPoint(glm::vec2(0, -1.0f));
@@ -123,8 +124,10 @@ void StateDetailView::updateDisplay(const FTUpdateEvent& event) {
         accumulator -= 5.0f;
         values[13] = mpu9250_update_count / 5.0f;
         values[14] = state_estimate_update_count / 5.0f;
+        values[15] = ms5611_update_count / 5.0f;
         mpu9250_update_count = 0;
         state_estimate_update_count = 0;
+        ms5611_update_count = 0;
     }
 
     while (messaging_consumer_receive(&messaging_consumer, false, false) == messaging_receive_ok);
