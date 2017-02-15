@@ -10,7 +10,9 @@ extern "C" {
 
 void kalman_init(float accel_reference[3], float magno_reference[3]);
 
-void kalman_predict(state_estimate_t next_estimate, float dt);
+void kalman_predict(float dt);
+
+void kalman_get_state(state_estimate_t* state);
 
 void kalman_new_accel(const float accel[3]);
 

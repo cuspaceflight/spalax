@@ -133,6 +133,16 @@ inline void update_attitude() {
     ATTITUDE_ERROR(prior_state_vector) = Vector3f::Zero();
 }
 
+void kalman_get_state(state_estimate_t *state) {
+    Eigen::Map<Vector3f>(state->angular_velocity) = ANGULAR_VELOCITY(prior_state_vector);
+
+    state->orientation_q[0] = prior_attitude.x();
+    state->orientation_q[1] = prior_attitude.y();
+    state->orientation_q[2] = prior_attitude.z();
+    state->orientation_q[3] = prior_attitude.w();
+}
+
+
 // TODO: Optimise this - large portions of H and K are zero
 static void
 do_update(const Vector3f &y, const Matrix<float, 3, num_states> &H, const DiagonalMatrix<float, 3> &sensor_covariance) {
@@ -164,7 +174,7 @@ inline void predict_attitude(float dt) {
 }
 
 
-void kalman_predict(state_estimate_t next_estimate, float dt) {
+void kalman_predict(float dt) {
     float dt2 = dt * dt;
 
     predict_attitude(dt);

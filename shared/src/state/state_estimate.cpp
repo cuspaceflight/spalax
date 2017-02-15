@@ -2,9 +2,11 @@
 #include <config/telemetry_packets.h>
 #include <calibration/mpu9250_calibration.h>
 #include <Eigen/Geometry>
+#include <time_utils.h>
 #include "state_estimate.h"
 #include "Eigen/Core"
 #include "quest.h"
+#include "kalman.h"
 
 // Forward Declarations
 static void send_state_estimate();
@@ -13,6 +15,7 @@ bool has_gps = false;
 
 state_estimate_t current_estimate;
 
+uint32_t last_mpu_time = 0;
 
 #define VEC3_NORM(name) sqrtf(name[0] * name[0] + name[1] * name[1] + name[2] * name[2]);
 
@@ -20,42 +23,44 @@ float reference_vectors[2][3];
 
 static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
     if (packet->header.id == ts_mpu9250_data) {
+        if (last_mpu_time == 0) {
+            last_mpu_time = packet->header.timestamp;
+            return true;
+        }
+        last_mpu_time = packet->header.timestamp;
+
         if (!has_gps)
             return true;
+
 
         auto data = telemetry_get_payload<mpu9250_data_t>(packet);
         mpu9250_calibrated_data_t calibrated_data;
         mpu9250_calibrate_data(data, &calibrated_data);
 
-        auto mag_norm = VEC3_NORM(calibrated_data.magno);
-        auto accel_norm = VEC3_NORM(calibrated_data.accel);
+//        auto mag_norm = VEC3_NORM(calibrated_data.magno);
+//        auto accel_norm = VEC3_NORM(calibrated_data.accel);
+//
+//        const float observations[2][3] = {
+//                {calibrated_data.accel[0] / accel_norm, calibrated_data.accel[1] / accel_norm,
+//                                                                                             calibrated_data.accel[2] /
+//                                                                                             accel_norm},
+//                {calibrated_data.magno[0] / mag_norm,   calibrated_data.magno[1] / mag_norm, calibrated_data.magno[2] /
+//                                                                                             mag_norm}
+//        };
+//
+//        const float a[2] = {0.5f, 0.5f};
 
-        const float observations[2][3] = {
-                {calibrated_data.accel[0] / accel_norm, calibrated_data.accel[1] / accel_norm,
-                                                                                             calibrated_data.accel[2] /
-                                                                                             accel_norm},
-                {calibrated_data.magno[0] / mag_norm,   calibrated_data.magno[1] / mag_norm, calibrated_data.magno[2] /
-                                                                                             mag_norm}
-        };
 
-        const float a[2] = {0.5f, 0.5f};
+        //quest_estimate(observations, reference_vectors, a, current_estimate.orientation_q);
 
+        float dt = (float)(clocks_between(last_mpu_time, packet->header.timestamp)) / CLOCK_FREQUENCY;
+        kalman_predict(dt);
 
-        quest_estimate(observations, reference_vectors, a, current_estimate.orientation_q);
+        kalman_new_accel(calibrated_data.accel);
+        kalman_new_magno(calibrated_data.magno);
+        kalman_new_gyro(calibrated_data.gyro);
 
-        Eigen::Quaternionf out;
-        out.x() = current_estimate.orientation_q[0];
-        out.y() = current_estimate.orientation_q[1];
-        out.z() = current_estimate.orientation_q[2];
-        out.w() = current_estimate.orientation_q[3];
-
-        out.inverse();
-
-        current_estimate.orientation_q[0] = out.x();
-        current_estimate.orientation_q[1] = out.y();
-        current_estimate.orientation_q[2] = out.z();
-        current_estimate.orientation_q[3] = out.w();
-
+        kalman_get_state(&current_estimate);
         send_state_estimate();
 
     } else if (packet->header.id == ts_ublox_nav) {
@@ -94,6 +99,8 @@ void state_estimate_thread(void *arg) {
     reference_vectors[1][0] = 0.39134267f;
     reference_vectors[1][1] = -0.00455851434f;
     reference_vectors[1][2] = -0.920233727f;
+
+    kalman_init(reference_vectors[0], reference_vectors[1]);
 
     while (messaging_consumer_receive(&messaging_consumer, true, false) != messaging_receive_terminate);
 }
