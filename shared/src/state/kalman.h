@@ -8,11 +8,10 @@
 extern "C" {
 #endif
 
-extern const int kalman_num_states;
-extern const int kalman_attitude_err_idx;
-extern const int kalman_angular_vel_idx;
-extern const int kalman_angular_acc_idx;
-extern const int kalman_gyro_bias_idx;
+#define KALMAN_NUM_STATES 9
+#define KALMAN_ATTITUDE_ERR_IDX 0
+#define KALMAN_ANGULAR_VEL_IDX 3
+#define KALMAN_GYRO_BIAS_IDX 6
 
 void kalman_init(float accel_reference[3], float magno_reference[3]);
 

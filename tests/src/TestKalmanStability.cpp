@@ -3,6 +3,7 @@
 #include "state/kalman.h"
 #include "math_debug_util.h"
 
+#define NUM_TESTS 100
 
 inline void setup() {
     float accel_reference[3] = {0, 0, 1};
@@ -23,10 +24,10 @@ inline void testEstimateStable(const state_estimate_t &estimate) {
     }
 }
 
-TEST(TestKalman, TestPredict) {
+TEST(TestKalmanStability, TestPredict) {
     setup();
 
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < NUM_TESTS; i++) {
         kalman_predict(1 / 1000.0f);
 
         state_estimate_t estimate;
@@ -35,14 +36,12 @@ TEST(TestKalman, TestPredict) {
     }
 }
 
-TEST(TestKalman, TestAccel) {
+TEST(TestKalmanStability, TestAccel) {
     setup();
 
     state_estimate_t estimate;
-    float P_initial[12];
-    kalman_get_covariance(P_initial);
 
-    for (int i = 0; i < 29; i++) {
+    for (int i = 0; i < NUM_TESTS; i++) {
         kalman_predict(1 / 1000.0f);
 
 
@@ -53,32 +52,22 @@ TEST(TestKalman, TestAccel) {
         testEstimateStable(estimate);
     }
 
-    float P[12];
+    float P[KALMAN_NUM_STATES];
     kalman_get_covariance(P);
 
     // We expect the covariance of the first two terms (attitude error in x and y) to be close to zero
-    EXPECT_LT(P[kalman_attitude_err_idx + 0], 1e-5f);
-    EXPECT_LT(P[kalman_attitude_err_idx + 1], 1e-5f);
-
-
-    // We expect the covariance of the third term to be close to its initial value as we haven't given it
-    // any information about this axis
-    expect_fuzzy_eq(P[kalman_attitude_err_idx + 2], P_initial[kalman_attitude_err_idx + 2]);
-
-    for (int i = 3; i < 12; i++)
-        expect_fuzzy_eq(P[i], P_initial[i]);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 0], 1e-5f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
 
     expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }
 
-TEST(TestKalman, TestMagno) {
+TEST(TestKalmanStability, TestMagno) {
     setup();
 
     state_estimate_t estimate;
-    float P_initial[12];
-    kalman_get_covariance(P_initial);
 
-    for (int i = 0; i < 29; i++) {
+    for (int i = 0; i < NUM_TESTS; i++) {
         kalman_predict(1 / 1000.0f);
 
 
@@ -89,20 +78,12 @@ TEST(TestKalman, TestMagno) {
         testEstimateStable(estimate);
     }
 
-    float P[12];
+    float P[KALMAN_NUM_STATES];
     kalman_get_covariance(P);
 
     // We expect the covariance of the second two terms (attitude error in x and y) to be close to zero
-    EXPECT_LT(P[kalman_attitude_err_idx + 1], 1e-5f);
-    EXPECT_LT(P[kalman_attitude_err_idx + 2], 1e-5f);
-
-
-    // We expect the covariance of the first term to be close to its initial value as we haven't given it
-    // any information about this axis
-    expect_fuzzy_eq(P[kalman_attitude_err_idx + 0], P_initial[kalman_attitude_err_idx + 0]);
-
-    for (int i = 3; i < 12; i++)
-        expect_fuzzy_eq(P[i], P_initial[i]);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-5f);
 
     expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }
@@ -111,10 +92,8 @@ TEST(TestKalmanStability, TestMagnoAccel) {
     setup();
 
     state_estimate_t estimate;
-    float P_initial[12];
-    kalman_get_covariance(P_initial);
 
-    for (int i = 0; i < 29; i++) {
+    for (int i = 0; i < NUM_TESTS; i++) {
         kalman_predict(1 / 1000.0f);
 
 
@@ -127,16 +106,13 @@ TEST(TestKalmanStability, TestMagnoAccel) {
         testEstimateStable(estimate);
     }
 
-    float P[12];
+    float P[KALMAN_NUM_STATES];
     kalman_get_covariance(P);
 
     // We expect the attitude error covariance to be close to zero
-    EXPECT_LT(P[kalman_attitude_err_idx + 0], 1e-5f);
-    EXPECT_LT(P[kalman_attitude_err_idx + 1], 1e-5f);
-    EXPECT_LT(P[kalman_attitude_err_idx + 2], 1e-5f);
-
-    for (int i = 3; i < 12; i++)
-        expect_fuzzy_eq(P[i], P_initial[i]);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 0], 1e-5f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-5f);
 
     expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }
@@ -145,10 +121,7 @@ TEST(TestKalmanStability, TestMagnoAccelGyro) {
     setup();
 
     state_estimate_t estimate;
-    float P_initial[12];
-    kalman_get_covariance(P_initial);
-
-    for (int i = 0; i < 29; i++) {
+    for (int i = 0; i < NUM_TESTS; i++) {
         kalman_predict(1 / 1000.0f);
 
 
@@ -163,27 +136,23 @@ TEST(TestKalmanStability, TestMagnoAccelGyro) {
         testEstimateStable(estimate);
     }
 
-    float P[12];
+    float P[KALMAN_NUM_STATES];
     kalman_get_covariance(P);
 
     // We expect the attitude error covariance to be close to zero
-    EXPECT_LT(P[kalman_attitude_err_idx + 0], 1e-5f);
-    EXPECT_LT(P[kalman_attitude_err_idx + 1], 1e-5f);
-    EXPECT_LT(P[kalman_attitude_err_idx + 2], 1e-5f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 0], 1e-5f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-5f);
 
     // We expect angular velocity covariance to be close to zero
-    EXPECT_LT(P[kalman_angular_vel_idx + 0], 1e-5f);
-    EXPECT_LT(P[kalman_angular_vel_idx + 1], 1e-5f);
-    EXPECT_LT(P[kalman_angular_vel_idx + 2], 1e-5f);
+    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 0], 1e-5f);
+    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 1], 1e-5f);
+    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 2], 1e-5f);
 
     // We expect gyro bias covariance to be close to zero
-    EXPECT_LT(P[kalman_gyro_bias_idx + 0], 1e-5f);
-    EXPECT_LT(P[kalman_gyro_bias_idx + 1], 1e-5f);
-    EXPECT_LT(P[kalman_gyro_bias_idx + 2], 1e-5f);
-
-    expect_fuzzy_eq(P[kalman_angular_acc_idx + 0], P_initial[kalman_angular_acc_idx + 0]);
-    expect_fuzzy_eq(P[kalman_angular_acc_idx + 1], P_initial[kalman_angular_acc_idx + 1]);
-    expect_fuzzy_eq(P[kalman_angular_acc_idx + 2], P_initial[kalman_angular_acc_idx + 2]);
+    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 0], 1e-5f);
+    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 1], 1e-5f);
+    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 2], 1e-5f);
 
     expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }

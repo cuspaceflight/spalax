@@ -5,20 +5,13 @@
 
 using namespace Eigen;
 
-const int kalman_num_states = 12;
-const int kalman_attitude_err_idx = 0;
-const int kalman_angular_vel_idx = 3;
-const int kalman_angular_acc_idx = 6;
-const int kalman_gyro_bias_idx = 9;
-
-static Matrix<float, kalman_num_states, 1> prior_state_vector;
-static DiagonalMatrix<float, kalman_num_states> P;
+static Matrix<float, KALMAN_NUM_STATES, 1> prior_state_vector;
+static DiagonalMatrix<float, KALMAN_NUM_STATES> P;
 static Eigen::Quaternionf prior_attitude;
 
-#define ATTITUDE_ERROR(state_vector) state_vector.block<3,1>(kalman_attitude_err_idx,0)
-#define ANGULAR_VELOCITY(state_vector) state_vector.block<3,1>(kalman_angular_vel_idx,0)
-#define ANGULAR_ACCELERATION(state_vector) state_vector.block<3,1>(kalman_angular_acc_idx,0)
-#define GYRO_BIAS(state_vector) state_vector.block<3,1>(gyro_bias_index,0)
+#define ATTITUDE_ERROR(state_vector) state_vector.block<3,1>(KALMAN_ATTITUDE_ERR_IDX,0)
+#define ANGULAR_VELOCITY(state_vector) state_vector.block<3,1>(KALMAN_ANGULAR_VEL_IDX,0)
+#define GYRO_BIAS(state_vector) state_vector.block<3,1>(KALMAN_GYRO_BIAS_IDX,0)
 
 static Eigen::Vector3f g_reference;
 static Eigen::Vector3f b_reference;
@@ -27,7 +20,7 @@ static Eigen::DiagonalMatrix<float, 3> accelerometer_covariance;
 static Eigen::DiagonalMatrix<float, 3> magno_covariance;
 static Eigen::DiagonalMatrix<float, 3> gyro_covariance;
 
-static DiagonalMatrix<float, kalman_num_states> process_noise;
+static DiagonalMatrix<float, KALMAN_NUM_STATES> process_noise;
 
 inline Quaternionf mrpToQuat(const Vector3f &mrp) {
     Quaternionf q;
@@ -66,7 +59,7 @@ inline Vector3f quatToMrp(const Quaternionf &q) {
 }
 
 void kalman_init(float accel_reference[3], float magno_reference[3]) {
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < KALMAN_NUM_STATES; i++) {
         prior_state_vector(i) = 0;
     }
 
@@ -74,21 +67,18 @@ void kalman_init(float accel_reference[3], float magno_reference[3]) {
 
     for (int i = 0; i < 3; i++) {
         accelerometer_covariance.diagonal()[i] = 0.001f;
-        magno_covariance.diagonal()[i] = 0.00001f;
+        magno_covariance.diagonal()[i] = 0.001f;
         gyro_covariance.diagonal()[i] = 0.00001f;
 
         // Attitude Error
-        P.diagonal()[i] = 0.616850275068084f;
-        process_noise.diagonal()[i] = 1e-5f;
+        P.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 0.616850275068084f;
+        process_noise.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 1e-5f;
         // Angular Velocity
-        P.diagonal()[i + 3] = 4;
-        process_noise.diagonal()[i + 3] = 3e-5f;
-        // Angular Acceleration
-        P.diagonal()[i + 6] = 25;
-        process_noise.diagonal()[i + 6] = 1e-5f;
+        P.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 4;
+        process_noise.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 3e-3f;
         // Gyro Bias
-        P.diagonal()[i + 9] = 1;
-        process_noise.diagonal()[i + 9] = 1e-7f;
+        P.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1;
+        process_noise.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1e-5f;
 
         g_reference[i] = accel_reference[i];
         b_reference[i] = magno_reference[i];
@@ -99,7 +89,7 @@ inline Matrix3f mrp_application_jacobian(const Vector3f &mrp, const Vector3f &ta
     // TODO: Verify this is numerically stable
     Matrix3f ret;
     Vector3f v0 = mrpToQuat(mrp) * target_vector;
-    const float epsilon = 1e-3f;
+    const double epsilon = 1e-5f;
     for (int i = 0; i < 3; i++) {
         Vector3f altered_mrp = mrp;
         altered_mrp[i] += epsilon;
@@ -113,7 +103,7 @@ inline Matrix3f mrp_application_jacobian(const Vector3f &mrp, const Vector3f &ta
 inline Matrix3f q_target_jacobian(const Vector3f &target_vector, const Quaternionf &quat) {
     Matrix3f ret;
     Vector3f v0 = quat * target_vector;
-    const float epsilon = 1e-3f;
+    const float epsilon = 1e-5f;
     for (int i = 0; i < 3; i++) {
         Vector3f altered_target = target_vector;
         altered_target[i] += epsilon;
@@ -146,23 +136,25 @@ void kalman_get_state(state_estimate_t *state) {
     state->longitude = 0;
 }
 
-void kalman_get_covariance(float covar[12]) {
-    for (int i = 0; i < 12; i++)
+void kalman_get_covariance(float covar[KALMAN_NUM_STATES]) {
+    for (int i = 0; i < KALMAN_NUM_STATES; i++)
         covar[i] = P.diagonal()[i];
 }
 
 
 // TODO: Optimise this - large portions of H and K are zero
 static void
-do_update(const Vector3f &y, const Matrix<float, 3, kalman_num_states> &H, const DiagonalMatrix<float, 3> &sensor_covariance) {
+do_update(const Vector3f &y, const Matrix<float, 3, KALMAN_NUM_STATES> &H, const DiagonalMatrix<float, 3> &sensor_covariance) {
     Matrix3f S = (H * P * H.transpose());
     S.diagonal() += sensor_covariance.diagonal();
 
-    Matrix<float, 12, 3> K = P * H.transpose() * S.inverse();
+    Matrix3f inverse = S.inverse();
+
+    Matrix<float, KALMAN_NUM_STATES, 3> K = P * H.transpose() * inverse;
 
     prior_state_vector += K * y;
 
-    DiagonalMatrix<float, kalman_num_states>::DiagonalVectorType t = (K * H * P).diagonal();
+    DiagonalMatrix<float, KALMAN_NUM_STATES>::DiagonalVectorType t = (K * H * P).diagonal();
     P.diagonal() -= t;
 
     update_attitude();
@@ -189,11 +181,8 @@ void kalman_predict(float dt) {
     float dt2 = dt * dt;
 
     predict_attitude(dt);
-    ANGULAR_VELOCITY(prior_state_vector) =
-            ANGULAR_VELOCITY(prior_state_vector) + ANGULAR_ACCELERATION(prior_state_vector) * dt;
 
-
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < KALMAN_NUM_STATES; i++) {
         P.diagonal()[i] += dt * process_noise.diagonal()[i];
     }
 
@@ -210,7 +199,7 @@ void kalman_new_accel(const float accel[3]) {
 
     Vector3f y = Eigen::Map<const Vector3f>(accel) - predicted_measurement;
 
-    Matrix<float, 3, kalman_num_states> H = Matrix<float, 3, kalman_num_states>::Zero();
+    Matrix<float, 3, KALMAN_NUM_STATES> H = Matrix<float, 3, KALMAN_NUM_STATES>::Zero();
     H.block<3, 3>(0, 0) = mrp_application_jacobian(ATTITUDE_ERROR(prior_state_vector), g_prime);
 
     do_update(y, H, accelerometer_covariance);
@@ -222,7 +211,7 @@ void kalman_new_magno(const float magno[3]) {
 
     Vector3f y = Eigen::Map<const Vector3f>(magno) - predicted_measurement;
 
-    Matrix<float, 3, kalman_num_states> H = Matrix<float, 3, kalman_num_states>::Zero();
+    Matrix<float, 3, KALMAN_NUM_STATES> H = Matrix<float, 3, KALMAN_NUM_STATES>::Zero();
     H.block<3, 3>(0, 0) = mrp_application_jacobian(ATTITUDE_ERROR(prior_state_vector), b_prime);
 
     do_update(y, H, magno_covariance);
@@ -231,16 +220,16 @@ void kalman_new_magno(const float magno[3]) {
 void kalman_new_gyro(const float gyro[3]) {
     Vector3f v_prime = prior_attitude * ANGULAR_VELOCITY(prior_state_vector);
     Vector3f predicted_measurement = (mrpToQuat(ATTITUDE_ERROR(prior_state_vector)) * v_prime);
+    predicted_measurement += GYRO_BIAS(prior_state_vector);
 
     Vector3f y = Eigen::Map<const Vector3f>(gyro) - predicted_measurement;
-    Matrix<float, 3, kalman_num_states> H;
+    Matrix<float, 3, KALMAN_NUM_STATES> H;
     H.block<3, 3>(0, 0) = mrp_application_jacobian(ATTITUDE_ERROR(prior_state_vector), v_prime);
 
-    H.block<3, 3>(0, kalman_angular_vel_idx) = q_target_jacobian(ATTITUDE_ERROR(prior_state_vector),
+    H.block<3, 3>(0, KALMAN_ANGULAR_VEL_IDX) = q_target_jacobian(ATTITUDE_ERROR(prior_state_vector),
                                                                  mrpToQuat(ATTITUDE_ERROR(prior_state_vector)) *
                                                                 prior_attitude);
-    H.block<3, 3>(0, kalman_angular_acc_idx) = Matrix3f::Zero();
-    H.block<3,3>(0, kalman_gyro_bias_idx) = Matrix3f::Identity();
+    H.block<3,3>(0, KALMAN_GYRO_BIAS_IDX) = Matrix3f::Identity();
 
     do_update(y, H, gyro_covariance);
 }
