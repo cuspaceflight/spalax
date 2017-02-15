@@ -58,7 +58,7 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
         kalman_new_accel(calibrated_data.accel);
         kalman_new_magno(calibrated_data.magno);
-        kalman_new_gyro(calibrated_data.gyro);
+        //kalman_new_gyro(calibrated_data.gyro);
 
         kalman_get_state(&current_estimate);
         send_state_estimate();

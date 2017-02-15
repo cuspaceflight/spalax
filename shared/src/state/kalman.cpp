@@ -5,19 +5,19 @@
 
 using namespace Eigen;
 
-static constexpr int num_states = 12;
-static constexpr int attitude_err_index = 0;
-static constexpr int angular_velocity_index = 3;
-static constexpr int angular_acceleration_index = 6;
-static constexpr int gyro_bias_index = 9;
+const int kalman_num_states = 12;
+const int kalman_attitude_err_idx = 0;
+const int kalman_angular_vel_idx = 3;
+const int kalman_angular_acc_idx = 6;
+const int kalman_gyro_bias_idx = 9;
 
-static Matrix<float, num_states, 1> prior_state_vector;
-static DiagonalMatrix<float, num_states> P;
+static Matrix<float, kalman_num_states, 1> prior_state_vector;
+static DiagonalMatrix<float, kalman_num_states> P;
 static Eigen::Quaternionf prior_attitude;
 
-#define ATTITUDE_ERROR(state_vector) state_vector.block<3,1>(attitude_err_index,0)
-#define ANGULAR_VELOCITY(state_vector) state_vector.block<3,1>(angular_velocity_index,0)
-#define ANGULAR_ACCELERATION(state_vector) state_vector.block<3,1>(angular_acceleration_index,0)
+#define ATTITUDE_ERROR(state_vector) state_vector.block<3,1>(kalman_attitude_err_idx,0)
+#define ANGULAR_VELOCITY(state_vector) state_vector.block<3,1>(kalman_angular_vel_idx,0)
+#define ANGULAR_ACCELERATION(state_vector) state_vector.block<3,1>(kalman_angular_acc_idx,0)
 #define GYRO_BIAS(state_vector) state_vector.block<3,1>(gyro_bias_index,0)
 
 static Eigen::Vector3f g_reference;
@@ -27,7 +27,7 @@ static Eigen::DiagonalMatrix<float, 3> accelerometer_covariance;
 static Eigen::DiagonalMatrix<float, 3> magno_covariance;
 static Eigen::DiagonalMatrix<float, 3> gyro_covariance;
 
-static DiagonalMatrix<float, num_states> process_noise;
+static DiagonalMatrix<float, kalman_num_states> process_noise;
 
 inline Quaternionf mrpToQuat(const Vector3f &mrp) {
     Quaternionf q;
@@ -140,19 +140,30 @@ void kalman_get_state(state_estimate_t *state) {
     state->orientation_q[1] = prior_attitude.y();
     state->orientation_q[2] = prior_attitude.z();
     state->orientation_q[3] = prior_attitude.w();
+
+    state->altitude = 0;
+    state->latitude = 0;
+    state->longitude = 0;
+}
+
+void kalman_get_covariance(float covar[12]) {
+    for (int i = 0; i < 12; i++)
+        covar[i] = P.diagonal()[i];
 }
 
 
 // TODO: Optimise this - large portions of H and K are zero
 static void
-do_update(const Vector3f &y, const Matrix<float, 3, num_states> &H, const DiagonalMatrix<float, 3> &sensor_covariance) {
+do_update(const Vector3f &y, const Matrix<float, 3, kalman_num_states> &H, const DiagonalMatrix<float, 3> &sensor_covariance) {
     Matrix3f S = (H * P * H.transpose());
     S.diagonal() += sensor_covariance.diagonal();
 
-    auto K = P * H.transpose() * S.inverse();
+    Matrix<float, 12, 3> K = P * H.transpose() * S.inverse();
 
     prior_state_vector += K * y;
-    P.diagonal() += (K * H * P).diagonal();
+
+    DiagonalMatrix<float, kalman_num_states>::DiagonalVectorType t = (K * H * P).diagonal();
+    P.diagonal() -= t;
 
     update_attitude();
 }
@@ -199,7 +210,7 @@ void kalman_new_accel(const float accel[3]) {
 
     Vector3f y = Eigen::Map<const Vector3f>(accel) - predicted_measurement;
 
-    Matrix<float, 3, num_states> H = Matrix<float, 3, num_states>::Zero();
+    Matrix<float, 3, kalman_num_states> H = Matrix<float, 3, kalman_num_states>::Zero();
     H.block<3, 3>(0, 0) = mrp_application_jacobian(ATTITUDE_ERROR(prior_state_vector), g_prime);
 
     do_update(y, H, accelerometer_covariance);
@@ -211,7 +222,7 @@ void kalman_new_magno(const float magno[3]) {
 
     Vector3f y = Eigen::Map<const Vector3f>(magno) - predicted_measurement;
 
-    Matrix<float, 3, num_states> H = Matrix<float, 3, num_states>::Zero();
+    Matrix<float, 3, kalman_num_states> H = Matrix<float, 3, kalman_num_states>::Zero();
     H.block<3, 3>(0, 0) = mrp_application_jacobian(ATTITUDE_ERROR(prior_state_vector), b_prime);
 
     do_update(y, H, magno_covariance);
@@ -222,14 +233,16 @@ void kalman_new_gyro(const float gyro[3]) {
     Vector3f predicted_measurement = (mrpToQuat(ATTITUDE_ERROR(prior_state_vector)) * v_prime);
 
     Vector3f y = Eigen::Map<const Vector3f>(gyro) - predicted_measurement;
-    Matrix<float, 3, num_states> H;
+    Matrix<float, 3, kalman_num_states> H;
     H.block<3, 3>(0, 0) = mrp_application_jacobian(ATTITUDE_ERROR(prior_state_vector), v_prime);
 
-    H.block<3, 3>(0, angular_velocity_index) = q_target_jacobian(ATTITUDE_ERROR(prior_state_vector),
+    H.block<3, 3>(0, kalman_angular_vel_idx) = q_target_jacobian(ATTITUDE_ERROR(prior_state_vector),
                                                                  mrpToQuat(ATTITUDE_ERROR(prior_state_vector)) *
                                                                 prior_attitude);
-    H.block<3, 3>(0, angular_acceleration_index) = Matrix3f::Zero();
-    H.block<3,3>(0, gyro_bias_index) = Matrix3f::Identity();
+    H.block<3, 3>(0, kalman_angular_acc_idx) = Matrix3f::Zero();
+    H.block<3,3>(0, kalman_gyro_bias_idx) = Matrix3f::Identity();
 
     do_update(y, H, gyro_covariance);
 }
+
+
