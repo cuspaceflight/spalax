@@ -9,8 +9,9 @@ inline void setup() {
     fp accel_reference[3] = {0, 0, 1};
     fp magno_reference[3] = {1, 0, 0};
     fp quat[4] = {0, 0, 0, 1};
+    fp ang_vel[3] = {0,0,0};
 
-    kalman_init(accel_reference, magno_reference, quat);
+    kalman_init(accel_reference, magno_reference, quat, ang_vel);
 }
 
 inline void testEstimateStable(const state_estimate_t &estimate) {
@@ -61,7 +62,7 @@ TEST(TestKalmanStability, TestAccel) {
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 0], 1e-5f);
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
 
-    expect_quat_eq(Eigen::Quaternion<fp>(1, 0, 0, 0), estimate.orientation_q);
+    expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }
 
 TEST(TestKalmanStability, TestMagno) {
@@ -87,7 +88,7 @@ TEST(TestKalmanStability, TestMagno) {
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-5f);
 
-    expect_quat_eq(Eigen::Quaternion<fp>(1, 0, 0, 0), estimate.orientation_q);
+    expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }
 
 TEST(TestKalmanStability, TestMagnoAccel) {
@@ -116,7 +117,7 @@ TEST(TestKalmanStability, TestMagnoAccel) {
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-5f);
 
-    expect_quat_eq(Eigen::Quaternion<fp>(1, 0, 0, 0), estimate.orientation_q);
+    expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }
 
 TEST(TestKalmanStability, TestMagnoAccelGyro) {
@@ -156,6 +157,6 @@ TEST(TestKalmanStability, TestMagnoAccelGyro) {
     EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 1], 1e-5f);
     EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 2], 1e-5f);
 
-    expect_quat_eq(Eigen::Quaternion<fp>(1, 0, 0, 0), estimate.orientation_q);
+    expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }
 

@@ -21,10 +21,12 @@ static Eigen::DiagonalMatrix<fp, 3> gyro_covariance;
 
 static DiagonalMatrix<fp, KALMAN_NUM_STATES> process_noise;
 
-void kalman_init(fp accel_reference[3], fp magno_reference[3], fp initial_orientation[4]) {
+void kalman_init(fp accel_reference[3], fp magno_reference[3], fp initial_orientation[4], fp initial_angular_velocity[3]) {
     for (int i = 0; i < KALMAN_NUM_STATES; i++) {
         prior_state_vector(i) = 0;
     }
+
+    ANGULAR_VELOCITY(prior_state_vector) = Eigen::Map<const Matrix<fp, 3, 1>>(initial_angular_velocity);
 
     prior_attitude.x() = initial_orientation[0];
     prior_attitude.y() = initial_orientation[1];
@@ -32,16 +34,16 @@ void kalman_init(fp accel_reference[3], fp magno_reference[3], fp initial_orient
     prior_attitude.w() = initial_orientation[3];
 
     for (int i = 0; i < 3; i++) {
-        accelerometer_covariance.diagonal()[i] = 0.001f;
-        magno_covariance.diagonal()[i] = 0.001f;
+        accelerometer_covariance.diagonal()[i] = 0.00001f;
+        magno_covariance.diagonal()[i] = 0.00001f;
         gyro_covariance.diagonal()[i] = 0.00001f;
 
         // Attitude Error
         P.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 0.616850275068084f;
         process_noise.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 1e-5f;
         // Angular Velocity
-        P.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 4;
-        process_noise.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 3e-3f;
+        P.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 10;
+        process_noise.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 3e-2f;
         // Gyro Bias
         P.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1;
         process_noise.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1e-5f;
@@ -53,7 +55,6 @@ void kalman_init(fp accel_reference[3], fp magno_reference[3], fp initial_orient
 
 // Moves the MRP attitude error into the prior_attitude quaternion
 inline void update_attitude() {
-    // TODO: Determine whether temporary needed
     Quaternion<fp> t = mrpToQuat(ATTITUDE_ERROR(prior_state_vector)) * prior_attitude;
     prior_attitude = t;
 
@@ -100,33 +101,24 @@ do_update(const Matrix<fp, 3, 1> &y, const Matrix<fp, 3, KALMAN_NUM_STATES> &H, 
 inline void predict_attitude(fp dt) {
     fp omega_mag = ANGULAR_VELOCITY(prior_state_vector).norm();
     if (omega_mag > 1e-8f) {
-        // TODO: Determine whether temporary needed to avoid aliasing
+        Matrix<fp, 3, 1> axis = ANGULAR_VELOCITY(prior_state_vector).normalized();
+        Quaternionf delta = Quaternion<fp>(AngleAxis<fp>(omega_mag * dt, axis));
 
-        // The orientation stored in the kalman state is actually inverted
-        // To understand why imagine a ship travelling north. North will be at a reference of 0
-        // If it rotates 5 degrees clockwise, north will now be at a reference of 355
-        // This estimator tracks reference vectors which as shown above rotate in the opposite direction
-        // To the actual rotation of the body
-        Quaternion<fp> t = (prior_attitude *
-                         Quaternion<fp>(AngleAxis<fp>(-omega_mag * dt, ANGULAR_VELOCITY(prior_state_vector).normalized())));
+        Quaternion<fp> t = prior_attitude * delta;
         prior_attitude = t;
     }
 }
 
 
 void kalman_predict(fp dt) {
-    fp dt2 = dt * dt;
-
     predict_attitude(dt);
+
+    // TODO: Should there be some relationship between attitude error covariance and angular velocity covariance?
+    // i.e Should F be something other than the identity?
 
     for (int i = 0; i < KALMAN_NUM_STATES; i++) {
         P.diagonal()[i] += dt * process_noise.diagonal()[i];
     }
-
-    P.diagonal()[3] += dt2 * P.diagonal()[3];
-    P.diagonal()[4] += dt2 * P.diagonal()[4];
-    P.diagonal()[5] += dt2 * P.diagonal()[5];
-
     //update_attitude();
 }
 
@@ -163,9 +155,9 @@ void kalman_new_gyro(const fp gyro[3]) {
     Matrix<fp, 3, KALMAN_NUM_STATES> H;
     H.block<3, 3>(0, 0) = mrp_application_jacobian_numerical(ATTITUDE_ERROR(prior_state_vector), v_prime);
 
-    H.block<3, 3>(0, KALMAN_ANGULAR_VEL_IDX) = q_target_jacobian(ATTITUDE_ERROR(prior_state_vector),
-                                                                 mrpToQuat(ATTITUDE_ERROR(prior_state_vector)) *
-                                                                prior_attitude);
+    H.block<3, 3>(0, KALMAN_ANGULAR_VEL_IDX) = q_target_jacobian(ANGULAR_VELOCITY(prior_state_vector),
+                                                                 prior_attitude * mrpToQuat(ATTITUDE_ERROR(prior_state_vector))
+                                                                );
     H.block<3,3>(0, KALMAN_GYRO_BIAS_IDX) = Matrix<fp, 3, 3>::Identity();
 
     do_update(y, H, gyro_covariance);

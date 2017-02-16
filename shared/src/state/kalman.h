@@ -15,7 +15,7 @@ typedef float fp;
 #define KALMAN_ANGULAR_VEL_IDX 3
 #define KALMAN_GYRO_BIAS_IDX 6
 
-void kalman_init(fp accel_reference[3], fp magno_reference[3], fp initial_orientation[4]);
+void kalman_init(fp accel_reference[3], fp magno_reference[3], fp initial_orientation[4], fp initial_angular_velocity[3]);
 
 void kalman_predict(fp dt);
 
