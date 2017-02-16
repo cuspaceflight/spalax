@@ -6,9 +6,11 @@
 #define NUM_TESTS 100
 
 inline void setup() {
-    float accel_reference[3] = {0, 0, 1};
-    float magno_reference[3] = {1, 0, 0};
-    kalman_init(accel_reference, magno_reference);
+    fp accel_reference[3] = {0, 0, 1};
+    fp magno_reference[3] = {1, 0, 0};
+    fp quat[4] = {0, 0, 0, 1};
+
+    kalman_init(accel_reference, magno_reference, quat);
 }
 
 inline void testEstimateStable(const state_estimate_t &estimate) {
@@ -45,21 +47,21 @@ TEST(TestKalmanStability, TestAccel) {
         kalman_predict(1 / 1000.0f);
 
 
-        float accel[3] = {0, 0, 1};
+        fp accel[3] = {0, 0, 1};
         kalman_new_accel(accel);
 
         kalman_get_state(&estimate);
         testEstimateStable(estimate);
     }
 
-    float P[KALMAN_NUM_STATES];
+    fp P[KALMAN_NUM_STATES];
     kalman_get_covariance(P);
 
     // We expect the covariance of the first two terms (attitude error in x and y) to be close to zero
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 0], 1e-5f);
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
 
-    expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
+    expect_quat_eq(Eigen::Quaternion<fp>(1, 0, 0, 0), estimate.orientation_q);
 }
 
 TEST(TestKalmanStability, TestMagno) {
@@ -71,21 +73,21 @@ TEST(TestKalmanStability, TestMagno) {
         kalman_predict(1 / 1000.0f);
 
 
-        float magno[3] = {1, 0, 0};
+        fp magno[3] = {1, 0, 0};
         kalman_new_magno(magno);
 
         kalman_get_state(&estimate);
         testEstimateStable(estimate);
     }
 
-    float P[KALMAN_NUM_STATES];
+    fp P[KALMAN_NUM_STATES];
     kalman_get_covariance(P);
 
     // We expect the covariance of the second two terms (attitude error in x and y) to be close to zero
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-5f);
 
-    expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
+    expect_quat_eq(Eigen::Quaternion<fp>(1, 0, 0, 0), estimate.orientation_q);
 }
 
 TEST(TestKalmanStability, TestMagnoAccel) {
@@ -97,8 +99,8 @@ TEST(TestKalmanStability, TestMagnoAccel) {
         kalman_predict(1 / 1000.0f);
 
 
-        float magno[3] = {1, 0, 0};
-        float accel[3] = {0, 0, 1};
+        fp magno[3] = {1, 0, 0};
+        fp accel[3] = {0, 0, 1};
         kalman_new_magno(magno);
         kalman_new_accel(accel);
 
@@ -106,7 +108,7 @@ TEST(TestKalmanStability, TestMagnoAccel) {
         testEstimateStable(estimate);
     }
 
-    float P[KALMAN_NUM_STATES];
+    fp P[KALMAN_NUM_STATES];
     kalman_get_covariance(P);
 
     // We expect the attitude error covariance to be close to zero
@@ -114,7 +116,7 @@ TEST(TestKalmanStability, TestMagnoAccel) {
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-5f);
 
-    expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
+    expect_quat_eq(Eigen::Quaternion<fp>(1, 0, 0, 0), estimate.orientation_q);
 }
 
 TEST(TestKalmanStability, TestMagnoAccelGyro) {
@@ -125,9 +127,9 @@ TEST(TestKalmanStability, TestMagnoAccelGyro) {
         kalman_predict(1 / 1000.0f);
 
 
-        float magno[3] = {1, 0, 0};
-        float accel[3] = {0, 0, 1};
-        float gyro[3] = {0, 0, 0};
+        fp magno[3] = {1, 0, 0};
+        fp accel[3] = {0, 0, 1};
+        fp gyro[3] = {0, 0, 0};
         kalman_new_magno(magno);
         kalman_new_accel(accel);
         kalman_new_gyro(gyro);
@@ -136,7 +138,7 @@ TEST(TestKalmanStability, TestMagnoAccelGyro) {
         testEstimateStable(estimate);
     }
 
-    float P[KALMAN_NUM_STATES];
+    fp P[KALMAN_NUM_STATES];
     kalman_get_covariance(P);
 
     // We expect the attitude error covariance to be close to zero
@@ -154,6 +156,6 @@ TEST(TestKalmanStability, TestMagnoAccelGyro) {
     EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 1], 1e-5f);
     EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 2], 1e-5f);
 
-    expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
+    expect_quat_eq(Eigen::Quaternion<fp>(1, 0, 0, 0), estimate.orientation_q);
 }
 

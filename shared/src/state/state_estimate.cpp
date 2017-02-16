@@ -19,7 +19,7 @@ uint32_t last_mpu_time = 0;
 
 #define VEC3_NORM(name) sqrtf(name[0] * name[0] + name[1] * name[1] + name[2] * name[2]);
 
-float reference_vectors[2][3];
+fp reference_vectors[2][3];
 
 static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
     if (packet->header.id == ts_mpu9250_data) {
@@ -53,11 +53,11 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
         //quest_estimate(observations, reference_vectors, a, current_estimate.orientation_q);
 
-        float dt = (float)(clocks_between(last_mpu_time, packet->header.timestamp)) / CLOCK_FREQUENCY;
-        kalman_predict(dt);
+        //float dt = (float)(clocks_between(last_mpu_time, packet->header.timestamp)) / CLOCK_FREQUENCY;
+        //kalman_predict(dt);
 
-        kalman_new_accel(calibrated_data.accel);
-        kalman_new_magno(calibrated_data.magno);
+        //kalman_new_accel(calibrated_data.accel);
+        //kalman_new_magno(calibrated_data.magno);
         //kalman_new_gyro(calibrated_data.gyro);
 
         kalman_get_state(&current_estimate);
@@ -100,7 +100,7 @@ void state_estimate_thread(void *arg) {
     reference_vectors[1][1] = -0.00455851434f;
     reference_vectors[1][2] = -0.920233727f;
 
-    kalman_init(reference_vectors[0], reference_vectors[1]);
+    //kalman_init(reference_vectors[0], reference_vectors[1]);
 
     while (messaging_consumer_receive(&messaging_consumer, true, false) != messaging_receive_terminate);
 }
