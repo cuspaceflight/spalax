@@ -3,10 +3,12 @@
 #include "state/kalman.h"
 #include "math_debug_util.h"
 #include <random>
+#include <matplotlibcpp.h>
 
-#define NUM_TESTS 5000
+#define NUM_TESTS 1000
 
 using namespace Eigen;
+namespace plt = matplotlibcpp;
 
 static fp accel_reference[3] = {0, 0, 1};
 static fp magno_reference[3] = {1, 0, 0};
@@ -37,8 +39,7 @@ inline fp clampf(fp v, fp min, fp max) {
     return v;
 }
 
-void gyro_test(const Vector3f& angle_increment) {
-
+void gyro_test(const Matrix<fp, 3, 1>& angle_increment, const char* filename = nullptr) {
     state_estimate_t estimate;
 
     Matrix<fp, 3, 1> unrotated_magno = Matrix<fp, 3, 1>(1, 0, 0);
@@ -56,8 +57,13 @@ void gyro_test(const Vector3f& angle_increment) {
 
     setup(quat, time_increment * angle_increment);
 
-    Quaternion<fp> delta(AngleAxis<fp>(angle_increment.z(), Matrix<fp, 3, 1>::UnitZ()) * AngleAxis<fp>(angle_increment.y(), Matrix<fp, 3, 1>::UnitY()) * AngleAxis<fp>(angle_increment.x(), Matrix<fp, 3, 1>::UnitX()));
 
+    std::vector<float> x_velocity;
+    std::vector<float> y_velocity;
+    std::vector<float> z_velocity;
+    std::vector<float> timestamps;
+
+    Quaternion<fp> delta(AngleAxis<fp>(angle_increment.norm(), angle_increment.normalized()));
 
     for (int i = 0; i < NUM_TESTS; i++) {
         Quaternion<fp> t = quat * delta;
@@ -80,6 +86,25 @@ void gyro_test(const Vector3f& angle_increment) {
         testEstimateStable(estimate);
 
 
+        if (filename) {
+            timestamps.push_back(i / time_increment);
+
+            x_velocity.push_back(estimate.angular_velocity[0]);
+            y_velocity.push_back(estimate.angular_velocity[1]);
+            z_velocity.push_back(estimate.angular_velocity[2]);
+        }
+    }
+
+    if (filename) {
+        plt::figure();
+
+        plt::named_plot("X Velocity", timestamps, x_velocity);
+        plt::named_plot("Y Velocity", timestamps, y_velocity);
+        plt::named_plot("Z Velocity", timestamps, z_velocity);
+
+        plt::grid(true);
+        plt::legend();
+        plt::save(filename);
     }
 
     kalman_get_state(&estimate);
@@ -117,8 +142,55 @@ void gyro_test(const Vector3f& angle_increment) {
 
 TEST(TestKalmanDynamic, TestGyro) {
     // 1 rad/s
-    gyro_test(Vector3f(1.0f / 1000, 0, 0));
+    gyro_test(Matrix<fp, 3, 1>(1.0f / 1000, 0, 0));
 
     // 5 rad/s
-    gyro_test(Vector3f(5.0f / 1000, 0, 0));
+    gyro_test(Matrix<fp, 3, 1>(5.0f / 1000, 0, 0));
+
+    // 1 rad/s
+    gyro_test(Matrix<fp, 3, 1>(0, 1.0f / 1000, 0));
+
+    // 5 rad/s
+    gyro_test(Matrix<fp, 3, 1>(0, 5.0f / 1000, 0));
+
+    // 1 rad/s
+    gyro_test(Matrix<fp, 3, 1>(0, 0, 1.0f / 1000));
+
+    // 5 rad/s
+    gyro_test(Matrix<fp, 3, 1>(0, 0, 5.0f / 1000));
+}
+
+
+TEST(TestKalmanDynamic, TestGyroComplex) {
+    // 1 rad/s
+    gyro_test(Matrix<fp, 3, 1>(1.0f / 1000, 1.0f / 1000, 0));
+
+    // 5 rad/s
+    gyro_test(Matrix<fp, 3, 1>(5.0f / 1000, 5.0f / 1000, 0));
+
+
+    // 1 rad/s
+    gyro_test(Matrix<fp, 3, 1>(0, 1.0f / 1000, 1.0f / 1000));
+
+    // 5 rad/s
+    gyro_test(Matrix<fp, 3, 1>(0, 5.0f / 1000, 5.0f / 1000));
+
+
+    // 1 rad/s
+    gyro_test(Matrix<fp, 3, 1>(1.0f / 1000, 0, 1.0f / 1000));
+
+    // 5 rad/s
+    gyro_test(Matrix<fp, 3, 1>(5.0f / 1000, 0, 5.0f / 1000));
+}
+
+TEST(TestKalmanDynamic, TestGyroFull) {
+    // 1 rad/s
+    gyro_test(Matrix<fp, 3, 1>(1.0f / 1000, 1.0f / 1000, 1.0f / 1000));
+
+    // 5 rad/s
+    gyro_test(Matrix<fp, 3, 1>(5.0f / 1000, 5.0f / 1000, 5.0f / 1000), "TestGyroFull");
+}
+
+TEST(TestKalmanDynamic, TestAngularVelocity) {
+    gyro_test(Matrix<fp, 3, 1>(1.0f / 1000, 1.0f / 1000, 1.0f / 1000));
 }
