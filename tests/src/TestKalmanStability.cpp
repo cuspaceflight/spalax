@@ -59,8 +59,8 @@ TEST(TestKalmanStability, TestAccel) {
     kalman_get_covariance(P);
 
     // We expect the covariance of the first two terms (attitude error in x and y) to be close to zero
-    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 0], 1e-5f);
-    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 0], 1e-3f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-3f);
 
     expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }
@@ -85,8 +85,8 @@ TEST(TestKalmanStability, TestMagno) {
     kalman_get_covariance(P);
 
     // We expect the covariance of the second two terms (attitude error in x and y) to be close to zero
-    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
-    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-5f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-3f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-3f);
 
     expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }
@@ -113,9 +113,9 @@ TEST(TestKalmanStability, TestMagnoAccel) {
     kalman_get_covariance(P);
 
     // We expect the attitude error covariance to be close to zero
-    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 0], 1e-5f);
-    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
-    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-5f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 0], 1e-3f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-3f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-3f);
 
     expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }
@@ -143,19 +143,19 @@ TEST(TestKalmanStability, TestMagnoAccelGyro) {
     kalman_get_covariance(P);
 
     // We expect the attitude error covariance to be close to zero
-    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 0], 1e-5f);
-    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-5f);
-    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-5f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 0], 1e-3f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 1], 1e-3f);
+    EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], 1e-3f);
 
     // We expect angular velocity covariance to be close to zero
-    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 0], 1e-5f);
-    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 1], 1e-5f);
-    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 2], 1e-5f);
+    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 0], 1e-3f);
+    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 1], 1e-3f);
+    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 2], 1e-3f);
 
     // We expect gyro bias covariance to be close to zero
-    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 0], 1e-5f);
-    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 1], 1e-5f);
-    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 2], 1e-5f);
+    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 0], 1e-3f);
+    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 1], 1e-3f);
+    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 2], 1e-3f);
 
     expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }

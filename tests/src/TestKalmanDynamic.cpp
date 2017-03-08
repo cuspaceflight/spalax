@@ -11,7 +11,7 @@ using namespace Eigen;
 namespace plt = matplotlibcpp;
 
 static fp accel_reference[3] = {0, 0, 1};
-static fp magno_reference[3] = {1, 0, 0};
+static fp magno_reference[3] = {0.39134267f, -0.00455851434f, -0.920233727f};
 
 inline void setup(Quaternion<fp>& quat, const Vector3f& angular_velocity) {
     fp quat_arr[4] = {quat.x(), quat.y(), quat.z(), quat.w()};
@@ -42,8 +42,8 @@ inline fp clampf(fp v, fp min, fp max) {
 void gyro_test(const Matrix<fp, 3, 1>& angle_increment, const char* filename = nullptr) {
     state_estimate_t estimate;
 
-    Matrix<fp, 3, 1> unrotated_magno = Matrix<fp, 3, 1>(1, 0, 0);
-    Matrix<fp, 3, 1> unrotated_accel = Matrix<fp, 3, 1>(0, 0, 1);
+    Matrix<fp, 3, 1> unrotated_magno = Matrix<fp, 3, 1>(magno_reference[0], magno_reference[1], magno_reference[2]);
+    Matrix<fp, 3, 1> unrotated_accel = Matrix<fp, 3, 1>(accel_reference[0] , accel_reference[1], accel_reference[2]);
 
     std::default_random_engine generator(3452456);
 

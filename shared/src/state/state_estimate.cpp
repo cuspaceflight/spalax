@@ -27,6 +27,8 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
             last_mpu_time = packet->header.timestamp;
             return true;
         }
+        float dt = (float)(clocks_between(last_mpu_time, packet->header.timestamp)) / CLOCK_FREQUENCY;
+
         last_mpu_time = packet->header.timestamp;
 
         if (!has_gps)
@@ -49,16 +51,16 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 //        };
 //
 //        const float a[2] = {0.5f, 0.5f};
+//
+//
+//        quest_estimate(observations, reference_vectors, a, current_estimate.orientation_q);
 
 
-        //quest_estimate(observations, reference_vectors, a, current_estimate.orientation_q);
+        kalman_predict(dt);
 
-        //float dt = (float)(clocks_between(last_mpu_time, packet->header.timestamp)) / CLOCK_FREQUENCY;
-        //kalman_predict(dt);
-
-        //kalman_new_accel(calibrated_data.accel);
-        //kalman_new_magno(calibrated_data.magno);
-        //kalman_new_gyro(calibrated_data.gyro);
+        kalman_new_accel(calibrated_data.accel);
+        kalman_new_magno(calibrated_data.magno);
+        kalman_new_gyro(calibrated_data.gyro);
 
         kalman_get_state(&current_estimate);
         send_state_estimate();
@@ -100,7 +102,10 @@ void state_estimate_thread(void *arg) {
     reference_vectors[1][1] = -0.00455851434f;
     reference_vectors[1][2] = -0.920233727f;
 
-    //kalman_init(reference_vectors[0], reference_vectors[1]);
+    float initial_orientation[4] = {0, 0, 0, 1};
+    float initial_velocity[3] = {0,0,0};
+
+    kalman_init(reference_vectors[0], reference_vectors[1], initial_orientation, initial_velocity);
 
     while (messaging_consumer_receive(&messaging_consumer, true, false) != messaging_receive_terminate);
 }

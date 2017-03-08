@@ -1,6 +1,6 @@
 #include "kalman.h"
 #include <cfloat>
-#include "impl/math_util.h"
+#include "math_util.h"
 
 using namespace Eigen;
 
@@ -21,6 +21,10 @@ static Eigen::DiagonalMatrix<fp, 3> gyro_covariance;
 
 static DiagonalMatrix<fp, KALMAN_NUM_STATES> process_noise;
 
+fp kalman_magno_cov = 0.01f;
+fp kalman_accelerometer_cov = 0.01f;
+fp kalman_gyro_cov = 0.001f;
+
 void kalman_init(fp accel_reference[3], fp magno_reference[3], fp initial_orientation[4], fp initial_angular_velocity[3]) {
     for (int i = 0; i < KALMAN_NUM_STATES; i++) {
         prior_state_vector(i) = 0;
@@ -34,19 +38,19 @@ void kalman_init(fp accel_reference[3], fp magno_reference[3], fp initial_orient
     prior_attitude.w() = initial_orientation[3];
 
     for (int i = 0; i < 3; i++) {
-        accelerometer_covariance.diagonal()[i] = 0.00001f;
-        magno_covariance.diagonal()[i] = 0.00001f;
-        gyro_covariance.diagonal()[i] = 0.00001f;
+        accelerometer_covariance.diagonal()[i] = kalman_accelerometer_cov;
+        magno_covariance.diagonal()[i] = kalman_magno_cov;
+        gyro_covariance.diagonal()[i] = kalman_gyro_cov;
 
         // Attitude Error
-        P.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 0.616850275068084f;
-        process_noise.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 1e-5f;
+        P.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 10;
+        process_noise.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 1e-2f;
         // Angular Velocity
         P.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 10;
-        process_noise.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 3e-2f;
+        process_noise.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 1e-3f;
         // Gyro Bias
         P.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1;
-        process_noise.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1e-5f;
+        process_noise.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1e-3f;
 
         g_reference[i] = accel_reference[i];
         b_reference[i] = magno_reference[i];
