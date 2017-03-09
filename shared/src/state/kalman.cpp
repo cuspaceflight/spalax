@@ -23,9 +23,10 @@ static DiagonalMatrix<fp, KALMAN_NUM_STATES> process_noise;
 
 fp kalman_magno_cov = 0.01f;
 fp kalman_accelerometer_cov = 0.01f;
-fp kalman_gyro_cov = 0.001f;
+fp kalman_gyro_cov = 0.01f;
 
-void kalman_init(fp accel_reference[3], fp magno_reference[3], fp initial_orientation[4], fp initial_angular_velocity[3]) {
+void kalman_init(fp accel_reference[3], fp magno_reference[3],
+                 fp initial_orientation[4], fp initial_angular_velocity[3]) {
     for (int i = 0; i < KALMAN_NUM_STATES; i++) {
         prior_state_vector(i) = 0;
     }
@@ -86,8 +87,8 @@ void kalman_get_covariance(fp covar[KALMAN_NUM_STATES]) {
 
 
 // TODO: Optimise this - large portions of H and K are zero
-static void
-do_update(const Matrix<fp, 3, 1> &y, const Matrix<fp, 3, KALMAN_NUM_STATES> &H, const DiagonalMatrix<fp, 3> &sensor_covariance) {
+inline void do_update(const Matrix<fp, 3, 1> &y, const Matrix<fp, 3, KALMAN_NUM_STATES> &H,
+                      const DiagonalMatrix<fp, 3> &sensor_covariance) {
     Matrix<fp, 3, 3> S = (H * P * H.transpose());
     S.diagonal() += sensor_covariance.diagonal();
 
@@ -160,9 +161,10 @@ void kalman_new_gyro(const fp gyro[3]) {
     H.block<3, 3>(0, 0) = mrp_application_jacobian_numerical(ATTITUDE_ERROR(prior_state_vector), v_prime);
 
     H.block<3, 3>(0, KALMAN_ANGULAR_VEL_IDX) = q_target_jacobian(ANGULAR_VELOCITY(prior_state_vector),
-                                                                 prior_attitude * mrpToQuat(ATTITUDE_ERROR(prior_state_vector))
-                                                                );
-    H.block<3,3>(0, KALMAN_GYRO_BIAS_IDX) = Matrix<fp, 3, 3>::Identity();
+                                                                 prior_attitude *
+                                                                 mrpToQuat(ATTITUDE_ERROR(prior_state_vector))
+    );
+    H.block<3, 3>(0, KALMAN_GYRO_BIAS_IDX) = Matrix<fp, 3, 3>::Identity();
 
     do_update(y, H, gyro_covariance);
 }

@@ -12,7 +12,7 @@
 
 
 static StateDetailView* s_instance = nullptr;
-static const int num_labels = 16;
+static const int num_labels = 19;
 float values[num_labels];
 
 int mpu9250_update_count = 0;
@@ -54,6 +54,11 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         ms5611_update_count++;
     } else if (packet->header.id == ts_state_estimate_data) {
         state_estimate_update_count++;
+        auto state = telemetry_get_payload<state_estimate_t>(packet);
+        values[16] = state->angular_velocity[0];
+        values[17] = state->angular_velocity[1];
+        values[18] = state->angular_velocity[2];
+
     }
     return true;
 }
@@ -72,7 +77,8 @@ StateDetailView::StateDetailView() {
         L"MPU9250 Accel X", L"MPU9250 Accel Y", L"MPU9250 Accel Z", 
         L"MPU9250 Gyro X", L"MPU9250 Gyro Y", L"MPU9250 Gyro Z", 
         L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z",
-        L"MPU9250 Heading", L"MPU9250 Update Rate", L"State Estimate Update Rate", L"MS5611 Update Rate"};
+        L"MPU9250 Heading", L"MPU9250 Update Rate", L"State Estimate Update Rate", L"MS5611 Update Rate",
+        L"SE Angular Velocity X", L"SE Angular Velocity Y", L"SE Angular Velocity Z"};
 
     auto window_size_node = std::make_shared<FTWindowSizeNode>();
     window_size_node->setAnchorPoint(glm::vec2(0, -1.0f));
