@@ -5,7 +5,7 @@
 #include <random>
 #include <matplotlibcpp.h>
 
-#define NUM_TESTS 10
+#define NUM_TESTS 1000
 
 using namespace Eigen;
 namespace plt = matplotlibcpp;
