@@ -21,9 +21,9 @@ static Eigen::DiagonalMatrix<fp, 3> gyro_covariance;
 
 static DiagonalMatrix<fp, KALMAN_NUM_STATES> process_noise;
 
-fp kalman_magno_cov = 0.1f;
-fp kalman_accelerometer_cov = 0.1f;
-fp kalman_gyro_cov = 0.1f;
+fp kalman_magno_cov = 0.03f;
+fp kalman_accelerometer_cov = 0.02f;
+fp kalman_gyro_cov = 0.002f;
 
 void kalman_init(fp accel_reference[3], fp magno_reference[3],
                  fp initial_orientation[4], fp initial_angular_velocity[3]) {
@@ -48,7 +48,7 @@ void kalman_init(fp accel_reference[3], fp magno_reference[3],
         process_noise.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 1e-2f;
         // Angular Velocity
         P.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 10;
-        process_noise.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 1e-1f;
+        process_noise.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 1e2f;
         // Gyro Bias
         P.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1;
         process_noise.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1e-3f;
@@ -167,6 +167,11 @@ void kalman_new_gyro(const fp gyro[3]) {
     H.block<3, 3>(0, KALMAN_GYRO_BIAS_IDX) = Matrix<fp, 3, 3>::Identity();
 
     do_update(y, H, gyro_covariance);
+}
+
+void kalman_get_gyro_bias(fp bias[3]) {
+    for (int i = 0; i < 3; i++)
+        bias[i] = prior_state_vector[KALMAN_GYRO_BIAS_IDX + i];
 }
 
 

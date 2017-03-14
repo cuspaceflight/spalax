@@ -25,6 +25,8 @@ void kalman_predict(fp dt);
 
 void kalman_get_state(state_estimate_t* state);
 
+void kalman_get_gyro_bias(fp bias[3]);
+
 void kalman_get_covariance(fp covar[12]);
 
 void kalman_new_accel(const fp accel[3]);

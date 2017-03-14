@@ -13,3 +13,5 @@ add_executable(altitude altitude.cpp)
 add_executable(heading heading.cpp)
 
 add_executable(mapplotter mapplotter.cpp)
+
+add_executable(gyro gyro.cpp)

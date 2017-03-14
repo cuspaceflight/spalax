@@ -15,7 +15,6 @@ bool has_gps = false;
 
 state_estimate_t current_estimate;
 
-uint32_t last_mpu_time = 0;
 
 #define VEC3_NORM(name) sqrtf(name[0] * name[0] + name[1] * name[1] + name[2] * name[2]);
 
@@ -23,13 +22,13 @@ fp reference_vectors[2][3];
 
 static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
     if (packet->header.id == ts_mpu9250_data) {
-        if (last_mpu_time == 0) {
-            last_mpu_time = packet->header.timestamp;
+        if (current_estimate.data_timestamp == 0) {
+            current_estimate.data_timestamp = packet->header.timestamp;
             return true;
         }
-        float dt = (float)(clocks_between(last_mpu_time, packet->header.timestamp)) / CLOCK_FREQUENCY;
+        float dt = (float)(clocks_between(current_estimate.data_timestamp, packet->header.timestamp)) / CLOCK_FREQUENCY;
 
-        last_mpu_time = packet->header.timestamp;
+        current_estimate.data_timestamp = packet->header.timestamp;
 
         if (!has_gps)
             return true;
@@ -64,6 +63,7 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
 
         kalman_get_state(&current_estimate);
+
         send_state_estimate();
 
     } else if (packet->header.id == ts_ublox_nav) {
