@@ -133,9 +133,9 @@ static void gyro_test(const Matrix<fp, 3, 1>& angle_increment, const char* filen
     EXPECT_LT(angle, 1.0f);
     EXPECT_LT(angle2, 1.0f);
 
-    expect_fuzzy_eq(estimate.angular_velocity[0], angle_increment[0] * time_increment, 0.00005f, kalman_gyro_cov);
-    expect_fuzzy_eq(estimate.angular_velocity[1], angle_increment[1] * time_increment, 0.00005f, kalman_gyro_cov);
-    expect_fuzzy_eq(estimate.angular_velocity[2], angle_increment[2] * time_increment, 0.00005f, kalman_gyro_cov);
+    expect_fuzzy_eq(estimate.angular_velocity[0], angle_increment[0] * time_increment, 0.00005f, 0.05);
+    expect_fuzzy_eq(estimate.angular_velocity[1], angle_increment[1] * time_increment, 0.00005f, 0.05);
+    expect_fuzzy_eq(estimate.angular_velocity[2], angle_increment[2] * time_increment, 0.00005f, 0.05);
 }
 
 TEST(TestKalmanGyro, TestGyro) {

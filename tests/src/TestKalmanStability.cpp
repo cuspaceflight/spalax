@@ -148,14 +148,14 @@ TEST(TestKalmanStability, TestMagnoAccelGyro) {
     EXPECT_LT(P[KALMAN_ATTITUDE_ERR_IDX + 2], kalman_magno_cov);
 
     // We expect angular velocity covariance to be close to zero
-    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 0], kalman_gyro_cov);
-    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 1], kalman_gyro_cov);
-    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 2], kalman_gyro_cov);
+    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 0], 0.01);
+    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 1], 0.01);
+    EXPECT_LT(P[KALMAN_ANGULAR_VEL_IDX + 2], 0.01);
 
     // We expect gyro bias covariance to be close to zero
-    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 0], kalman_gyro_cov);
-    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 1], kalman_gyro_cov);
-    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 2], kalman_gyro_cov);
+    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 0], 0.01);
+    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 1], 0.01);
+    EXPECT_LT(P[KALMAN_GYRO_BIAS_IDX + 2], 0.01);
 
     expect_quat_eq(Eigen::Quaternionf(1, 0, 0, 0), estimate.orientation_q);
 }
