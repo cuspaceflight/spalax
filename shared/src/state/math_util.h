@@ -60,6 +60,7 @@ inline Matrix<fp, 3, 3> mrp_application_jacobian_numerical(const Matrix<fp, 3, 1
     return ret;
 }
 
+// The 3x3 Jacobian of the rotation of the target vector by the quaternion w.r.t the target vector
 inline Matrix<fp, 3, 3> q_target_jacobian(const Matrix<fp, 3, 1> &target_vector, const Quaternion<fp> &quat) {
     Matrix<fp, 3, 3> ret;
     Matrix<fp, 3, 1> v0 = quat * target_vector;

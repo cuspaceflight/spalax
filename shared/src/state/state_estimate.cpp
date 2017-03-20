@@ -11,8 +11,6 @@
 // Forward Declarations
 static void send_state_estimate();
 
-bool has_gps = false;
-
 state_estimate_t current_estimate;
 
 
@@ -29,10 +27,6 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         float dt = (float)(clocks_between(current_estimate.data_timestamp, packet->header.timestamp)) / CLOCK_FREQUENCY;
 
         current_estimate.data_timestamp = packet->header.timestamp;
-
-        if (!has_gps)
-            return true;
-
 
         auto data = telemetry_get_payload<mpu9250_data_t>(packet);
         mpu9250_calibrated_data_t calibrated_data;
@@ -67,16 +61,13 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         send_state_estimate();
 
     } else if (packet->header.id == ts_ublox_nav) {
-        auto data = telemetry_get_payload<ublox_nav_t>(packet);
-        // Disabled for testing indoors
+        // auto data = telemetry_get_payload<ublox_nav_t>(packet);
         //auto v_mag = sqrtf(data->velE * data->velE + data->velN * data->velN);
         //if (data->fix_type != 3 || data->num_sv < 8 || data->p_dop > 300 || data->v_acc > v_mag / 2.0f)
         //    return true;
 
-        current_estimate.latitude = data->lat;
-        current_estimate.longitude = data->lon;
-        current_estimate.altitude = data->height;
-        has_gps = true;
+        // TODO: Complete me!
+
     }
     return true;
 }
@@ -90,12 +81,6 @@ void state_estimate_thread(void *arg) {
     messaging_producer_init(&messaging_producer);
     messaging_consumer_init(&messaging_consumer);
 
-    // Temporary For Testing
-    has_gps = true;
-    current_estimate.latitude = 52.2053f;
-    current_estimate.longitude = 0.1218f;
-    current_estimate.altitude = 60;
-
     reference_vectors[0][0] = 0;
     reference_vectors[0][1] = 0;
     reference_vectors[0][2] = 1;
@@ -105,8 +90,9 @@ void state_estimate_thread(void *arg) {
 
     float initial_orientation[4] = {0, 0, 0, 1};
     float initial_velocity[3] = {0,0,0};
+    float initial_acceleration[3] = {0,0,0};
 
-    kalman_init(reference_vectors[0], reference_vectors[1], initial_orientation, initial_velocity);
+    kalman_init(reference_vectors[0], reference_vectors[1], initial_orientation, initial_velocity, initial_acceleration);
 
     while (messaging_consumer_receive(&messaging_consumer, true, false) != messaging_receive_terminate);
 }
