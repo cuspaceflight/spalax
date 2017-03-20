@@ -113,9 +113,16 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &acce
     EXPECT_LT(angle, 1.0f);
     EXPECT_LT(angle2, 1.0f);
 
-    expect_fuzzy_eq(estimate.angular_velocity[0], angle_increment[0] * time_increment, 0.00005f, 0.05);
-    expect_fuzzy_eq(estimate.angular_velocity[1], angle_increment[1] * time_increment, 0.00005f, 0.05);
-    expect_fuzzy_eq(estimate.angular_velocity[2], angle_increment[2] * time_increment, 0.00005f, 0.05);
+    float time = NUM_TESTS / time_increment;
+
+    for (int i = 0; i < 3; i++) {
+        expect_fuzzy_eq(estimate.angular_velocity[i], angle_increment[i] * time_increment, 0.00005f, 0.05);
+        expect_fuzzy_eq(estimate.position[i], 0.5f * accel[i] * time * time, 0.00005f, 0.05);
+        expect_fuzzy_eq(estimate.velocity[i], accel[i] * time, 0.00005f, 0.05);
+        expect_fuzzy_eq(estimate.acceleration[i], accel[i], 0.00005f, 0.05);
+    }
+
+
 }
 
 TEST(TestKalmanAccel, TestSimple) {

@@ -145,12 +145,20 @@ inline void predict_attitude(fp dt) {
 void kalman_predict(fp dt) {
     predict_attitude(dt);
 
-    // TODO: Should there be some relationship between attitude error covariance and angular velocity covariance?
-    // i.e Should F be something other than the identity?
+    // Whilst this matrix is very large, GCC does a good job of removing the redundant multiplications by zero
+    Eigen::Matrix<fp, KALMAN_NUM_STATES, KALMAN_NUM_STATES> F = Eigen::Matrix<fp, KALMAN_NUM_STATES, KALMAN_NUM_STATES>::Identity();
 
-    for (int i = 0; i < KALMAN_NUM_STATES; i++) {
-        P.diagonal()[i] += dt * process_noise.diagonal()[i];
-    }
+    // We don't include the 2nd order terms as they are so small as to be insignificant
+    F(KALMAN_POSITION_IDX + 0, KALMAN_VELOCITY_IDX + 0) = dt;
+    F(KALMAN_POSITION_IDX + 1, KALMAN_VELOCITY_IDX + 1) = dt;
+    F(KALMAN_POSITION_IDX + 2, KALMAN_VELOCITY_IDX + 2) = dt;
+
+    F(KALMAN_VELOCITY_IDX + 0, KALMAN_ACCELERATION_IDX + 0) = dt;
+    F(KALMAN_VELOCITY_IDX + 1, KALMAN_ACCELERATION_IDX + 1) = dt;
+    F(KALMAN_VELOCITY_IDX + 2, KALMAN_ACCELERATION_IDX + 2) = dt;
+
+    prior_state_vector = F * prior_state_vector;
+    P.diagonal() = (F * P * F.transpose()).diagonal() + dt * process_noise.diagonal();
 }
 
 void kalman_new_accel(const fp accel[3]) {

@@ -18,7 +18,10 @@ bool fuzzy_eq(float A, float B, float maxRelativeError, float maxAbsoluteError) 
 }
 
 void expect_fuzzy_eq(float A, float B, float maxRelativeError, float maxAbsoluteError) {
-    EXPECT_TRUE(fuzzy_eq(A, B, maxRelativeError, maxAbsoluteError));
+    if (!fuzzy_eq(A, B, maxRelativeError, maxAbsoluteError)) {
+        printf("%f vs %f\n", A, B);
+        FAIL();
+    }
 }
 
 bool quat_eq(const Eigen::Quaternionf &q, float q_arr[4], float maxRelativeError) {
