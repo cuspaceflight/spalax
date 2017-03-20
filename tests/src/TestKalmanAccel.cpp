@@ -28,7 +28,7 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &acce
 
     const float time_increment = 1000;
 
-    kalman_test_setup(quat, time_increment * angle_increment, accel);
+    kalman_test_setup(quat, time_increment * angle_increment, Matrix<fp, 3, 1>::Zero(), Matrix<fp, 3, 1>::Zero(), accel);
 
 
     std::vector<float> x_velocity;

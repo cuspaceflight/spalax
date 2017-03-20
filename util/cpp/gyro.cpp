@@ -74,8 +74,8 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
             return true;
         }
 
-        state_timestamp += clocks_between(last_state_timestamp, data->data_timestamp);
-        last_state_timestamp = data->data_timestamp;
+        state_timestamp += clocks_between(last_state_timestamp, packet->header.timestamp);
+        last_state_timestamp = packet->header.timestamp;
 
 
         state_timestamps.push_back((float)state_timestamp / (float)platform_get_counter_frequency());

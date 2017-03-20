@@ -28,16 +28,16 @@ fp kalman_magno_cov = 0.03f;
 fp kalman_accelerometer_cov = 0.02f;
 fp kalman_gyro_cov = 0.002f;
 
-void kalman_init(fp accel_reference[3],
-                 fp magno_reference[3],
-                 fp initial_orientation[4],
-                 fp initial_angular_velocity[3],
+void kalman_init(fp accel_reference[3], fp magno_reference[3], fp initial_orientation[4],
+                 fp initial_angular_velocity[3], fp initial_position[3], fp initial_velocity[3],
                  fp initial_acceleration[3]) {
     for (int i = 0; i < KALMAN_NUM_STATES; i++) {
         prior_state_vector(i) = 0;
     }
 
     ANGULAR_VELOCITY = Eigen::Map<const Matrix<fp, 3, 1>>(initial_angular_velocity);
+    POSITION = Eigen::Map<const Matrix<fp, 3, 1>>(initial_position);
+    VELOCITY = Eigen::Map<const Matrix<fp, 3, 1>>(initial_velocity);
     ACCELERATION = Eigen::Map<const Matrix<fp, 3, 1>>(initial_acceleration);
 
     prior_attitude.x() = initial_orientation[0];
@@ -60,7 +60,7 @@ void kalman_init(fp accel_reference[3],
         P.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1;
         process_noise.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1e-3f;
         // Position
-        P.diagonal()[i + KALMAN_POSITION_IDX] = 10;
+        P.diagonal()[i + KALMAN_POSITION_IDX] = 1;
         process_noise.diagonal()[i + KALMAN_POSITION_IDX] = 1e-2f;
         // Velocity
         P.diagonal()[i + KALMAN_VELOCITY_IDX] = 1;
@@ -83,40 +83,24 @@ inline void update_attitude() {
 }
 
 void kalman_get_state(state_estimate_t *state) {
-    for (int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; i++) {
         state->angular_velocity[i] = ANGULAR_VELOCITY[i];
+        state->position[i] = POSITION[i];
+        state->velocity[i] = VELOCITY[i];
+        state->acceleration[i] = ACCELERATION[i];
+    }
 
     state->orientation_q[0] = prior_attitude.x();
     state->orientation_q[1] = prior_attitude.y();
     state->orientation_q[2] = prior_attitude.z();
     state->orientation_q[3] = prior_attitude.w();
 
-    state->north = 0;
-    state->east = 0;
-    state->down = 0;
+
 }
 
 void kalman_get_covariance(fp covar[KALMAN_NUM_STATES]) {
     for (int i = 0; i < KALMAN_NUM_STATES; i++)
         covar[i] = P.diagonal()[i];
-}
-
-
-// TODO: Optimise this - large portions of H and K are zero
-inline void do_update(const Matrix<fp, 3, 1> &y, const Matrix<fp, 3, KALMAN_NUM_STATES> &H,
-                      const DiagonalMatrix<fp, 3> &sensor_covariance) {
-    Matrix<fp, 3, 3> S = (H * P * H.transpose());
-    S.diagonal() += sensor_covariance.diagonal();
-
-    Matrix<fp, 3, 3> inverse = S.inverse();
-    Matrix<fp, KALMAN_NUM_STATES, 3> K = P * H.transpose() * inverse;
-
-    prior_state_vector += K * y;
-
-    DiagonalMatrix<fp, KALMAN_NUM_STATES>::DiagonalVectorType t = (K * H * P).diagonal();
-    P.diagonal() -= t;
-
-    update_attitude();
 }
 
 template<int N, int I = 0>

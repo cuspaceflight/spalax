@@ -25,7 +25,7 @@ extern fp kalman_gyro_cov;
 
 void
 kalman_init(fp accel_reference[3], fp magno_reference[3], fp initial_orientation[4], fp initial_angular_velocity[3],
-            fp initial_acceleration[3]);
+            fp initial_position[3], fp initial_velocity[3], fp initial_acceleration[3]);
 
 void kalman_predict(fp dt);
 

@@ -2,5 +2,5 @@
 #include <can_interface.h>
 
 TEST(TestMultipacket, TestMultipacket) {
-    can_interface_check_multipacket_definitions();
+    EXPECT_TRUE(can_interface_check_multipacket_definitions());
 }

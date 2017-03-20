@@ -13,6 +13,7 @@ static void send_state_estimate();
 
 state_estimate_t current_estimate;
 
+uint32_t data_timestamp = 0;
 
 #define VEC3_NORM(name) sqrtf(name[0] * name[0] + name[1] * name[1] + name[2] * name[2]);
 
@@ -20,13 +21,14 @@ fp reference_vectors[2][3];
 
 static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
     if (packet->header.id == ts_mpu9250_data) {
-        if (current_estimate.data_timestamp == 0) {
-            current_estimate.data_timestamp = packet->header.timestamp;
+        if (data_timestamp == 0) {
+            data_timestamp = packet->header.timestamp;
             return true;
         }
-        float dt = (float)(clocks_between(current_estimate.data_timestamp, packet->header.timestamp)) / CLOCK_FREQUENCY;
+        float dt =
+                (float) (clocks_between(data_timestamp, packet->header.timestamp)) / CLOCK_FREQUENCY;
 
-        current_estimate.data_timestamp = packet->header.timestamp;
+        data_timestamp = packet->header.timestamp;
 
         auto data = telemetry_get_payload<mpu9250_data_t>(packet);
         mpu9250_calibrated_data_t calibrated_data;
@@ -89,16 +91,19 @@ void state_estimate_thread(void *arg) {
     reference_vectors[1][2] = -0.920233727f;
 
     float initial_orientation[4] = {0, 0, 0, 1};
-    float initial_velocity[3] = {0,0,0};
-    float initial_acceleration[3] = {0,0,0};
+    float initial_angular_velocity[3] = {0, 0, 0};
+    float initial_position[3] = {0, 0, 0};
+    float initial_velocity[3] = {0, 0, 0};
+    float initial_acceleration[3] = {0, 0, 0};
 
-    kalman_init(reference_vectors[0], reference_vectors[1], initial_orientation, initial_velocity, initial_acceleration);
+    kalman_init(reference_vectors[0], reference_vectors[1], initial_orientation, initial_angular_velocity,
+                initial_position, initial_velocity, initial_acceleration);
 
     while (messaging_consumer_receive(&messaging_consumer, true, false) != messaging_receive_terminate);
 }
 
 static void send_state_estimate() {
-    messaging_producer_send(&messaging_producer, 0, (const uint8_t *) &current_estimate);
+    messaging_producer_send_timestamp(&messaging_producer, 0, (const uint8_t *) &current_estimate, data_timestamp);
 }
 
 #ifdef MESSAGING_OS_STD
