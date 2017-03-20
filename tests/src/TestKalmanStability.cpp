@@ -2,33 +2,12 @@
 #include "Eigen/Core"
 #include "state/kalman.h"
 #include "math_debug_util.h"
+#include "KalmanTestUtils.h"
 
 #define NUM_TESTS 100
 
-inline void setup() {
-    fp accel_reference[3] = {0, 0, 1};
-    fp magno_reference[3] = {1, 0, 0};
-    fp quat[4] = {0, 0, 0, 1};
-    fp ang_vel[3] = {0,0,0};
-
-    kalman_init(accel_reference, magno_reference, quat, ang_vel);
-}
-
-inline void testEstimateStable(const state_estimate_t &estimate) {
-    for (int i = 0; i < 4; i++)
-        EXPECT_FALSE(isnan(estimate.orientation_q[i]));
-
-    EXPECT_FALSE(isnan(estimate.altitude));
-    EXPECT_FALSE(isnan(estimate.latitude));
-    EXPECT_FALSE(isnan(estimate.longitude));
-
-    for (int i = 0; i < 4; i++) {
-        EXPECT_FALSE(isnan(estimate.angular_velocity[i]));
-    }
-}
-
 TEST(TestKalmanStability, TestPredict) {
-    setup();
+    kalman_test_setup();
 
     for (int i = 0; i < NUM_TESTS; i++) {
         kalman_predict(1 / 1000.0f);
@@ -40,7 +19,7 @@ TEST(TestKalmanStability, TestPredict) {
 }
 
 TEST(TestKalmanStability, TestAccel) {
-    setup();
+    kalman_test_setup();
 
     state_estimate_t estimate;
 
@@ -66,7 +45,7 @@ TEST(TestKalmanStability, TestAccel) {
 }
 
 TEST(TestKalmanStability, TestMagno) {
-    setup();
+    kalman_test_setup();
 
     state_estimate_t estimate;
 
@@ -74,7 +53,7 @@ TEST(TestKalmanStability, TestMagno) {
         kalman_predict(1 / 1000.0f);
 
 
-        fp magno[3] = {1, 0, 0};
+        fp magno[3] = {magno_reference[0], magno_reference[1], magno_reference[2]};
         kalman_new_magno(magno);
 
         kalman_get_state(&estimate);
@@ -92,7 +71,7 @@ TEST(TestKalmanStability, TestMagno) {
 }
 
 TEST(TestKalmanStability, TestMagnoAccel) {
-    setup();
+    kalman_test_setup();
 
     state_estimate_t estimate;
 
@@ -100,8 +79,8 @@ TEST(TestKalmanStability, TestMagnoAccel) {
         kalman_predict(1 / 1000.0f);
 
 
-        fp magno[3] = {1, 0, 0};
-        fp accel[3] = {0, 0, 1};
+        fp magno[3] = {magno_reference[0], magno_reference[1], magno_reference[2]};
+        fp accel[3] = {accel_reference[0], accel_reference[1], accel_reference[2]};
         kalman_new_magno(magno);
         kalman_new_accel(accel);
 
@@ -121,15 +100,15 @@ TEST(TestKalmanStability, TestMagnoAccel) {
 }
 
 TEST(TestKalmanStability, TestMagnoAccelGyro) {
-    setup();
+    kalman_test_setup();
 
     state_estimate_t estimate;
     for (int i = 0; i < NUM_TESTS; i++) {
         kalman_predict(1 / 1000.0f);
 
 
-        fp magno[3] = {1, 0, 0};
-        fp accel[3] = {0, 0, 1};
+        fp magno[3] = {magno_reference[0], magno_reference[1], magno_reference[2]};
+        fp accel[3] = {accel_reference[0], accel_reference[1], accel_reference[2]};
         fp gyro[3] = {0, 0, 0};
         kalman_new_magno(magno);
         kalman_new_accel(accel);

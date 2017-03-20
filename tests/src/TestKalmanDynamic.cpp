@@ -4,40 +4,12 @@
 #include "math_debug_util.h"
 #include <random>
 #include <matplotlibcpp.h>
+#include "KalmanTestUtils.h"
 
 #define NUM_TESTS 1000
 
 using namespace Eigen;
 namespace plt = matplotlibcpp;
-
-static fp accel_reference[3] = {0, 0, 1};
-static fp magno_reference[3] = {0.39134267f, -0.00455851434f, -0.920233727f};
-
-inline void setup(Quaternion<fp>& quat, const Vector3f& angular_velocity) {
-    fp quat_arr[4] = {quat.x(), quat.y(), quat.z(), quat.w()};
-    fp ang_vel[3] = {angular_velocity.x(), angular_velocity.y(), angular_velocity.z()};
-
-    kalman_init(accel_reference, magno_reference, quat_arr, ang_vel);
-}
-
-inline void testEstimateStable(const state_estimate_t &estimate) {
-    for (int i = 0; i < 4; i++)
-        EXPECT_FALSE(isnan(estimate.orientation_q[i]));
-
-    EXPECT_FALSE(isnan(estimate.altitude));
-    EXPECT_FALSE(isnan(estimate.latitude));
-    EXPECT_FALSE(isnan(estimate.longitude));
-
-    for (int i = 0; i < 4; i++) {
-        EXPECT_FALSE(isnan(estimate.angular_velocity[i]));
-    }
-}
-
-inline fp clampf(fp v, fp min, fp max) {
-    if (v < min) v = min;
-    if (v > max) v = max;
-    return v;
-}
 
 static void gyro_test(const Matrix<fp, 3, 1>& angle_increment, const char* filename = nullptr) {
     state_estimate_t estimate;
@@ -57,7 +29,7 @@ static void gyro_test(const Matrix<fp, 3, 1>& angle_increment, const char* filen
 
     const float time_increment = 1000;
 
-    setup(quat, time_increment * angle_increment);
+    kalman_test_setup(quat, time_increment * angle_increment);
 
     quat = quat * delta;
 

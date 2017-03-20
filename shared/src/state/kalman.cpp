@@ -103,6 +103,35 @@ inline void do_update(const Matrix<fp, 3, 1> &y, const Matrix<fp, 3, KALMAN_NUM_
     update_attitude();
 }
 
+inline void do_update_3x3(const Matrix<fp, 3, 1> &y, const Matrix<fp, 3, 3> &H,
+                      const DiagonalMatrix<fp, 3> &sensor_covariance) {
+
+    DiagonalMatrix<fp, 3, 3> Pt;
+    Pt.diagonal()[0] = P.diagonal()[0];
+    Pt.diagonal()[1] = P.diagonal()[1];
+    Pt.diagonal()[2] = P.diagonal()[2];
+
+    Matrix<fp, 3, 3> S = (H * Pt * H.transpose());
+    S.diagonal() += sensor_covariance.diagonal();
+
+    Matrix<fp, 3, 3> inverse = S.inverse();
+    Matrix<fp, 3, 3> K = Pt * H.transpose() * inverse;
+
+    auto t1 = K * y;
+    prior_state_vector[0] += t1[0];
+    prior_state_vector[1] += t1[1];
+    prior_state_vector[2] += t1[2];
+
+
+    Matrix<fp, 3, 1> t2 = (K * H * Pt).diagonal();
+
+    P.diagonal()[0] -= t2[0];
+    P.diagonal()[1] -= t2[1];
+    P.diagonal()[2] -= t2[2];
+
+    update_attitude();
+}
+
 inline void predict_attitude(fp dt) {
     fp omega_mag = ANGULAR_VELOCITY(prior_state_vector).norm();
     if (omega_mag > 1e-8f) {
@@ -133,10 +162,9 @@ void kalman_new_accel(const fp accel[3]) {
 
     Matrix<fp, 3, 1> y = Eigen::Map<const Matrix<fp, 3, 1>>(accel) - predicted_measurement;
 
-    Matrix<fp, 3, KALMAN_NUM_STATES> H = Matrix<fp, 3, KALMAN_NUM_STATES>::Zero();
-    H.block<3, 3>(0, 0) = mrp_application_jacobian_numerical(ATTITUDE_ERROR(prior_state_vector), g_prime);
+    Matrix<fp, 3, 3> H = mrp_application_jacobian_numerical(ATTITUDE_ERROR(prior_state_vector), g_prime);
 
-    do_update(y, H, accelerometer_covariance);
+    do_update_3x3(y, H, accelerometer_covariance);
 }
 
 void kalman_new_magno(const fp magno[3]) {
@@ -145,10 +173,9 @@ void kalman_new_magno(const fp magno[3]) {
 
     Matrix<fp, 3, 1> y = Eigen::Map<const Matrix<fp, 3, 1>>(magno) - predicted_measurement;
 
-    Matrix<fp, 3, KALMAN_NUM_STATES> H = Matrix<fp, 3, KALMAN_NUM_STATES>::Zero();
-    H.block<3, 3>(0, 0) = mrp_application_jacobian_numerical(ATTITUDE_ERROR(prior_state_vector), b_prime);
+    Matrix<fp, 3, 3> H = mrp_application_jacobian_numerical(ATTITUDE_ERROR(prior_state_vector), b_prime);
 
-    do_update(y, H, magno_covariance);
+    do_update_3x3(y, H, magno_covariance);
 }
 
 void kalman_new_gyro(const fp gyro[3]) {

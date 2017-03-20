@@ -12,6 +12,7 @@ set (SOURCES ${SOURCES}
         ${CMAKE_CURRENT_SOURCE_DIR}/TestStateMathUtils.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/TestKalmanGyro.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/math_debug_util.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/KalmanTestUtils.cpp
     PARENT_SCOPE)
 
 set (HEADERS ${HEADERS}
