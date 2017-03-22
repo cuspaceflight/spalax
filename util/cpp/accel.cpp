@@ -32,17 +32,13 @@ uint32_t last_mpu_timestamp = 0;
 uint64_t state_timestamp = 0;
 uint32_t last_state_timestamp = 0;
 
-std::vector<float> vel_x;
-std::vector<float> vel_y;
-std::vector<float> vel_z;
+std::vector<float> se_accel_x;
+std::vector<float> se_accel_y;
+std::vector<float> se_accel_z;
 
-std::vector<float> gyro_x;
-std::vector<float> gyro_y;
-std::vector<float> gyro_z;
-
-std::vector<float> gyro_bias_x;
-std::vector<float> gyro_bias_y;
-std::vector<float> gyro_bias_z;
+std::vector<float> accel_x;
+std::vector<float> accel_y;
+std::vector<float> accel_z;
 
 std::vector<float> mpu_timestamps;
 std::vector<float> state_timestamps;
@@ -63,9 +59,9 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         mpu9250_calibrate_data(data, &calibrated_data);
 
         mpu_timestamps.push_back((float) mpu_timestamp / (float) platform_get_counter_frequency());
-        gyro_x.push_back(calibrated_data.gyro[0]);
-        gyro_y.push_back(calibrated_data.gyro[1]);
-        gyro_z.push_back(calibrated_data.gyro[2]);
+        accel_x.push_back(calibrated_data.accel[0]);
+        accel_y.push_back(calibrated_data.accel[1]);
+        accel_z.push_back(calibrated_data.accel[2]);
     }
     else if (packet->header.id == ts_state_estimate_data) {
         auto data = telemetry_get_payload<state_estimate_t>(packet);
@@ -79,17 +75,9 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
 
 
         state_timestamps.push_back((float)state_timestamp / (float)platform_get_counter_frequency());
-        vel_x.push_back(data->angular_velocity[0]);
-        vel_y.push_back(data->angular_velocity[1]);
-        vel_z.push_back(data->angular_velocity[2]);
-
-        float bias[3];
-
-        kalman_get_gyro_bias(bias);
-        gyro_bias_x.push_back(bias[0]);
-        gyro_bias_y.push_back(bias[1]);
-        gyro_bias_z.push_back(bias[2]);
-
+        se_accel_x.push_back(data->acceleration[0]);
+        se_accel_y.push_back(data->acceleration[1]);
+        se_accel_z.push_back(data->acceleration[2]);
     }
 
 
@@ -137,18 +125,14 @@ int main(int argc, char* argv[]) {
 
     state_estimate.join();
 
-    plt::named_plot("Gyro X", mpu_timestamps, gyro_x);
-    //plt::named_plot("Gyro Y", mpu_timestamps, gyro_y);
-    //plt::named_plot("Gyro Z", mpu_timestamps, gyro_z);
+    plt::named_plot("Accel X", mpu_timestamps, accel_x);
+    //plt::named_plot("Accel Y", mpu_timestamps, accel_y);
+    //plt::named_plot("Accel Z", mpu_timestamps, accel_z);
 
-    plt::named_plot("Vel X", state_timestamps, vel_x);
-
-
-    //plt::named_plot("Vel Y", mpu_timestamps, vel_y);
-    //plt::named_plot("Vel Z", mpu_timestamps, vel_z);
-
-    plt::named_plot("Gyro Bias X", state_timestamps, gyro_bias_x);
-
+    plt::named_plot("SE Accel X", state_timestamps, se_accel_x);
+    //plt::named_plot("SE Accel Y", state_timestamps, se_accel_y);
+    //plt::named_plot("SE Accel Z", state_timestamps, se_accel_z);
+    
     plt::grid(true);
     plt::legend();
     plt::save(output);

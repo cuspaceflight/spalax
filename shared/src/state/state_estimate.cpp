@@ -9,15 +9,56 @@
 #include "kalman.h"
 
 // Forward Declarations
-static void send_state_estimate();
+static bool getPacket(const telemetry_t *packet, message_metadata_t metadata);
 
-state_estimate_t current_estimate;
+enum class StateEstimatePhase {
+    Init,
+    Calibration,
+    Estimation
+};
 
-uint32_t data_timestamp = 0;
+static StateEstimatePhase state_estimate_phase = StateEstimatePhase::Init;
 
-#define VEC3_NORM(name) sqrtf(name[0] * name[0] + name[1] * name[1] + name[2] * name[2]);
+static int remaining_calibration_samples;
+static Eigen::Matrix<fp, 3, 1> magno_calibration;
+static Eigen::Matrix<fp, 3, 1> accel_calibration;
 
-fp reference_vectors[2][3];
+static uint32_t data_timestamp = 0;
+static fp reference_vectors[2][3];
+
+MESSAGING_PRODUCER(messaging_producer, ts_state_estimate_data, sizeof(state_estimate_t), 20)
+MESSAGING_CONSUMER(messaging_consumer, ts_m3imu, ts_m3imu_mask, 0, 0, getPacket, 1024);
+
+static bool initialised = false;
+
+void state_estimate_init() {
+    if (initialised)
+        return;
+    initialised = true;
+
+    messaging_producer_init(&messaging_producer);
+    messaging_consumer_init(&messaging_consumer);
+
+    reference_vectors[0][0] = 0;
+    reference_vectors[0][1] = 0;
+    reference_vectors[0][2] = 1;
+    reference_vectors[1][0] = 0.39134267f;
+    reference_vectors[1][1] = -0.00455851434f;
+    reference_vectors[1][2] = -0.920233727f;
+
+    state_estimate_phase = StateEstimatePhase::Calibration;
+
+    remaining_calibration_samples = 1000;
+}
+
+void state_estimate_thread(void *arg) {
+    platform_set_thread_name("State Estimate");
+
+    state_estimate_init();
+
+    while (messaging_consumer_receive(&messaging_consumer, true, false) != messaging_receive_terminate);
+}
+
 
 static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
     if (packet->header.id == ts_mpu9250_data) {
@@ -34,33 +75,50 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         mpu9250_calibrated_data_t calibrated_data;
         mpu9250_calibrate_data(data, &calibrated_data);
 
-//        auto mag_norm = VEC3_NORM(calibrated_data.magno);
-//        auto accel_norm = VEC3_NORM(calibrated_data.accel);
-//
-//        const float observations[2][3] = {
-//                {calibrated_data.accel[0] / accel_norm, calibrated_data.accel[1] / accel_norm,
-//                                                                                             calibrated_data.accel[2] /
-//                                                                                             accel_norm},
-//                {calibrated_data.magno[0] / mag_norm,   calibrated_data.magno[1] / mag_norm, calibrated_data.magno[2] /
-//                                                                                             mag_norm}
-//        };
-//
-//        const float a[2] = {0.5f, 0.5f};
-//
-//
-//        quest_estimate(observations, reference_vectors, a, current_estimate.orientation_q);
 
+        if (state_estimate_phase == StateEstimatePhase::Calibration) {
+            remaining_calibration_samples--;
 
-        kalman_predict(dt);
+            magno_calibration += Eigen::Map<const Eigen::Matrix<fp, 3, 1>>(calibrated_data.magno);
+            accel_calibration += Eigen::Map<const Eigen::Matrix<fp, 3, 1>>(calibrated_data.accel);
 
-        kalman_new_gyro(calibrated_data.gyro);
-        kalman_new_accel(calibrated_data.accel);
-        kalman_new_magno(calibrated_data.magno);
+            if (remaining_calibration_samples <= 0) {
+                magno_calibration.normalize();
+                accel_calibration.normalize();
 
+                const float observations[2][3] = {
+                        {accel_calibration[0], accel_calibration[1], accel_calibration[2]},
+                        {magno_calibration[0], magno_calibration[1], magno_calibration[2]}
+                };
 
-        kalman_get_state(&current_estimate);
+                const float a[2] = {0.5f, 0.5f};
 
-        send_state_estimate();
+                float initial_orientation[4];
+                float initial_angular_velocity[3] = {0, 0, 0};
+                float initial_position[3] = {0, 0, 0};
+                float initial_velocity[3] = {0, 0, 0};
+                float initial_acceleration[3] = {0, 0, 0};
+
+                quest_estimate(observations, reference_vectors, a, initial_orientation);
+
+                kalman_init(reference_vectors[0], reference_vectors[1], initial_orientation, initial_angular_velocity,
+                            initial_position, initial_velocity, initial_acceleration);
+
+                state_estimate_phase = StateEstimatePhase::Estimation;
+            }
+        } else if (state_estimate_phase == StateEstimatePhase::Estimation) {
+            kalman_predict(dt);
+
+            kalman_new_gyro(calibrated_data.gyro);
+            kalman_new_magno(calibrated_data.magno);
+            kalman_new_accel(calibrated_data.accel);
+
+            state_estimate_t current_estimate;
+
+            kalman_get_state(&current_estimate);
+
+            messaging_producer_send_timestamp(&messaging_producer, 0, (const uint8_t *) &current_estimate, data_timestamp);
+        }
 
     } else if (packet->header.id == ts_ublox_nav) {
         // auto data = telemetry_get_payload<ublox_nav_t>(packet);
@@ -72,38 +130,6 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
     }
     return true;
-}
-
-MESSAGING_PRODUCER(messaging_producer, ts_state_estimate_data, sizeof(state_estimate_t), 20)
-MESSAGING_CONSUMER(messaging_consumer, ts_m3imu, ts_m3imu_mask, 0, 0, getPacket, 1024);
-
-void state_estimate_thread(void *arg) {
-    platform_set_thread_name("State Estimate");
-
-    messaging_producer_init(&messaging_producer);
-    messaging_consumer_init(&messaging_consumer);
-
-    reference_vectors[0][0] = 0;
-    reference_vectors[0][1] = 0;
-    reference_vectors[0][2] = 1;
-    reference_vectors[1][0] = 0.39134267f;
-    reference_vectors[1][1] = -0.00455851434f;
-    reference_vectors[1][2] = -0.920233727f;
-
-    float initial_orientation[4] = {0, 0, 0, 1};
-    float initial_angular_velocity[3] = {0, 0, 0};
-    float initial_position[3] = {0, 0, 0};
-    float initial_velocity[3] = {0, 0, 0};
-    float initial_acceleration[3] = {0, 0, 0};
-
-    kalman_init(reference_vectors[0], reference_vectors[1], initial_orientation, initial_angular_velocity,
-                initial_position, initial_velocity, initial_acceleration);
-
-    while (messaging_consumer_receive(&messaging_consumer, true, false) != messaging_receive_terminate);
-}
-
-static void send_state_estimate() {
-    messaging_producer_send_timestamp(&messaging_producer, 0, (const uint8_t *) &current_estimate, data_timestamp);
 }
 
 #ifdef MESSAGING_OS_STD

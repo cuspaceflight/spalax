@@ -35,7 +35,7 @@ void mpu9250_calibrate_data(const mpu9250_data_t* uncalibrated_data, mpu9250_cal
 }
 
 float mpu9250_get_heading(mpu9250_calibrated_data_t *calibrated_data) {
-    float value = atan2f(calibrated_data->magno[1], calibrated_data->magno[0]) * 180.0f / F_PI;
+    float value = atan2f(-calibrated_data->magno[0], calibrated_data->magno[1]) * 180.0f / F_PI;
     if (value < 0.0f)
         value += 360.0f;
     return value;

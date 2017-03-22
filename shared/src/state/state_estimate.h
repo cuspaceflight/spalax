@@ -7,6 +7,8 @@
 extern "C" {
 #endif
 
+void state_estimate_init();
+
 void state_estimate_thread(void *arg);
 
 
