@@ -13,7 +13,7 @@ bool try_estimate(const Eigen::Vector3f& v1, const Eigen::Vector3f& v2, const Ei
 
     float sigma = B.trace();
     Eigen::Matrix3f to_invert = (lambda_max + sigma) * Eigen::Matrix3f::Identity() - S;
-    if (to_invert.determinant() < 0.1f)
+    if (to_invert.determinant() < 0.01f)
         return false;
 
     Eigen::Vector3f Y = to_invert.inverse() * Z;

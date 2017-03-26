@@ -9,10 +9,12 @@
 #include <calibration/mpu9250_calibration.h>
 #include <calibration/adis16405_calibration.h>
 #include <Event/Input/FTInputManager.h>
+#include <state/kalman.h>
+#include <state/math_util.h>
 
 
 static StateDetailView* s_instance = nullptr;
-static const int num_labels = 28;
+static const int num_labels = 31;
 float values[num_labels];
 
 int mpu9250_update_count = 0;
@@ -55,23 +57,27 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
     } else if (packet->header.id == ts_state_estimate_data) {
         state_estimate_update_count++;
         auto state = telemetry_get_payload<state_estimate_t>(packet);
-        values[16] = state->angular_velocity[0];
-        values[17] = state->angular_velocity[1];
-        values[18] = state->angular_velocity[2];
 
-        values[19] = state->position[0];
-        values[20] = state->position[1];
-        values[21] = state->position[2];
+        Eigen::Vector3f euler = quat_to_euler(Eigen::Quaternionf(state->orientation_q[3], state->orientation_q[0], state->orientation_q[1], state->orientation_q[2]));
+        values[16] = euler.x();
+        values[17] = euler.y();
+        values[18] = euler.z();
 
-        values[22] = state->velocity[0];
-        values[23] = state->velocity[1];
-        values[24] = state->velocity[2];
+        values[19] = state->angular_velocity[0];
+        values[20] = state->angular_velocity[1];
+        values[21] = state->angular_velocity[2];
 
-        values[25] = state->acceleration[0];
-        values[26] = state->acceleration[1];
-        values[27] = state->acceleration[2];
+        values[22] = state->position[0];
+        values[23] = state->position[1];
+        values[24] = state->position[2];
 
+        values[25] = state->velocity[0];
+        values[26] = state->velocity[1];
+        values[27] = state->velocity[2];
 
+        values[28] = state->acceleration[0];
+        values[29] = state->acceleration[1];
+        values[30] = state->acceleration[2];
     }
     return true;
 }
@@ -91,6 +97,7 @@ StateDetailView::StateDetailView() {
         L"MPU9250 Gyro X", L"MPU9250 Gyro Y", L"MPU9250 Gyro Z", 
         L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z",
         L"MPU9250 Heading", L"MPU9250 Update Rate", L"State Estimate Update Rate", L"MS5611 Update Rate",
+        L"SE Rotation X", L"SE Rotation Y", L"SE Rotation Z",
         L"SE Angular Velocity X", L"SE Angular Velocity Y", L"SE Angular Velocity Z",
         L"SE Position X", L"SE Position X", L"SE Position X",
         L"SE Velocity X", L"SE Velocity X", L"SE Velocity X",

@@ -144,11 +144,10 @@ TEST(TestQuest, TestRotation) {
     out.z() = q_out[2];
     out.w() = q_out[3];
 
-    out = out.inverse();
 
     for (int i = 0; i < 2; i++) {
-        Eigen::Vector3f test = Eigen::Vector3f(observations[i][0], observations[i][1], observations[i][2]) -
-                               out * Eigen::Vector3f(references[i][0], references[i][1], references[i][2]);
+        Eigen::Vector3f test = out * Eigen::Vector3f(observations[i][0], observations[i][1], observations[i][2]) -
+                               Eigen::Vector3f(references[i][0], references[i][1], references[i][2]);
         expect_fuzzy_eq(test.norm(), 0);
     }
 }
@@ -186,11 +185,10 @@ TEST(TestQuest, TestRotation2) {
     out.z() = q_out[2];
     out.w() = q_out[3];
 
-    out = out.inverse();
 
     for (int i = 0; i < 2; i++) {
-        Eigen::Vector3f test = Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
-                               out * Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
+        Eigen::Vector3f test = out * Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
+                               Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
         expect_fuzzy_eq(test.norm(), 0);
     }
 }
@@ -228,11 +226,9 @@ TEST(TestQuest, TestRotation3) {
     out.z() = q_out[2];
     out.w() = q_out[3];
 
-    out = out.inverse();
-
     for (int i = 0; i < 2; i++) {
-        Eigen::Vector3f test = Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
-                               out * Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
+        Eigen::Vector3f test = out * Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
+                               Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
         expect_fuzzy_eq(test.norm(), 0);
     }
 }
@@ -271,11 +267,9 @@ TEST(TestQuest, TestRotation4) {
         out.z() = q_out[2];
         out.w() = q_out[3];
 
-        out = out.inverse();
-
         for (int i = 0; i < 2; i++) {
-            Eigen::Vector3f test = Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
-                                   out * Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
+            Eigen::Vector3f test = out * Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
+                                   Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
             expect_fuzzy_eq(test.norm(), 0);
         }
     }
@@ -315,11 +309,9 @@ TEST(TestQuest, TestRotation5) {
         out.z() = q_out[2];
         out.w() = q_out[3];
 
-        out = out.inverse();
-
         for (int i = 0; i < 2; i++) {
-            Eigen::Vector3f test = Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
-                                   out * Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
+            Eigen::Vector3f test = out * Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
+                                   Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
             expect_fuzzy_eq(test.norm(), 0);
         }
     }
@@ -359,11 +351,9 @@ TEST(TestQuest, TestRotation6) {
         out.z() = q_out[2];
         out.w() = q_out[3];
 
-        out = out.inverse();
-
         for (int i = 0; i < 2; i++) {
-            Eigen::Vector3f test = Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
-                                   out * Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
+            Eigen::Vector3f test = out * Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
+                                   Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
             expect_fuzzy_eq(test.norm(), 0);
         }
     }
@@ -403,11 +393,9 @@ TEST(TestQuest, TestRotationRandom) {
         out.z() = q_out[2];
         out.w() = q_out[3];
 
-        out = out.inverse();
-
         for (int i = 0; i < 2; i++) {
-            Eigen::Vector3f test = Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
-                                   out * Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
+            Eigen::Vector3f test = out * Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
+                                   Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
             expect_fuzzy_eq(test.norm(), 0);
         }
     }
@@ -447,11 +435,9 @@ TEST(TestQuest, TestRotationRandom2) {
         out.z() = q_out[2];
         out.w() = q_out[3];
 
-        out = out.inverse();
-
         for (int i = 0; i < 2; i++) {
-            Eigen::Vector3f test = Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
-                                   out * Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
+            Eigen::Vector3f test = out * Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
+                                   Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
             expect_fuzzy_eq(test.norm(), 0);
         }
     }

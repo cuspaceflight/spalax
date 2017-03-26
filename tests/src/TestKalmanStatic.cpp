@@ -8,6 +8,8 @@
 using namespace Eigen;
 
 void accelMagnoTest(const Quaternion<fp>& quat) {
+    kalman_test_setup(quat.inverse());
+
     state_estimate_t estimate;
 
     Matrix<fp, 3, 1> unrotated_magno = Matrix<fp, 3, 1>(magno_reference[0], magno_reference[1], magno_reference[2]);
@@ -50,12 +52,13 @@ void accelMagnoTest(const Quaternion<fp>& quat) {
     Quaternion<fp> out(estimate.orientation_q[3], estimate.orientation_q[0], estimate.orientation_q[1],
                     estimate.orientation_q[2]);
 
-    Matrix<fp, 3, 1> magno_test = out * unrotated_magno;
-    Matrix<fp, 3, 1> accel_test = out * unrotated_accel;
+    // The output should rotate the observations onto the references
+    Matrix<fp, 3, 1> magno_test = out * (quat * unrotated_magno);
+    Matrix<fp, 3, 1> accel_test = out * (quat * unrotated_accel);
 
     // Clampf is necessary due to occasional rounding errors leading to results slight out of the range (-1, 1)
-    fp angle = acos(clampf(magno_test.normalized().transpose() * rotated_magno.normalized(), -1, 1)) * 180.0f / (fp)M_PI;
-    fp angle2 = acos(clampf(accel_test.normalized().transpose() * rotated_accel.normalized(), -1, 1)) * 180.0f / (fp)M_PI;
+    fp angle = acos(clampf(magno_test.normalized().transpose() * unrotated_magno.normalized(), -1, 1)) * 180.0f / (fp)M_PI;
+    fp angle2 = acos(clampf(accel_test.normalized().transpose() * unrotated_accel.normalized(), -1, 1)) * 180.0f / (fp)M_PI;
 
     // We expect accuracy to a degree - any less is unreasonable with 32-bit fping point
     EXPECT_LT(angle, 1.f);
@@ -64,8 +67,6 @@ void accelMagnoTest(const Quaternion<fp>& quat) {
 
 TEST(TestKalmanStatic, TestAccelMagno) {
     Quaternion<fp> quat(AngleAxis<fp>(1.2f, Matrix<fp, 3, 1>(1, 0, 0)));
-    kalman_test_setup(quat);
-
     accelMagnoTest(quat);
 }
 
@@ -73,24 +74,17 @@ TEST(TestKalmanStatic, TestAccelMagno) {
 
 TEST(TestKalmanStatic, TestAccelMagno2) {
     Quaternion<fp> quat(AngleAxis<fp>(1.2f, Matrix<fp, 3, 1>(0, 1, 0)));
-    kalman_test_setup(quat);
-
     accelMagnoTest(quat);
 }
 
 TEST(TestKalmanStatic, TestAccelMagno3) {
     Quaternion<fp> quat(-0.66327167417264843f, -0.34436319883409405f, 0.039508389760580714f, -0.66326748802235758f);
-    kalman_test_setup(quat);
-
     accelMagnoTest(quat);
 }
 
 TEST(TestKalmanStatic, TestAccelMagnoRandom) {
     for (int i = 0; i < 1; i++) {
         Quaternion<fp> quat(AngleAxis<fp>(get_rand(), Matrix<fp, 3, 1>::UnitZ()) * AngleAxis<fp>(get_rand(), Matrix<fp, 3, 1>::UnitY()) * AngleAxis<fp>(get_rand(), Matrix<fp, 3, 1>::UnitX()));
-
-        kalman_test_setup(quat);
-
         accelMagnoTest(quat);
     }
 }

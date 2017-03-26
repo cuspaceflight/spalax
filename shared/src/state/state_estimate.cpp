@@ -3,6 +3,7 @@
 #include <calibration/mpu9250_calibration.h>
 #include <Eigen/Geometry>
 #include <time_utils.h>
+#include <component_state.h>
 #include "state_estimate.h"
 #include "Eigen/Core"
 #include "quest.h"
@@ -19,12 +20,12 @@ enum class StateEstimatePhase {
 
 static StateEstimatePhase state_estimate_phase = StateEstimatePhase::Init;
 
+#define NUM_CALIBRATION_SAMPLES 1000
 static int remaining_calibration_samples;
 static Eigen::Matrix<fp, 3, 1> magno_calibration;
 static Eigen::Matrix<fp, 3, 1> accel_calibration;
 
 static uint32_t data_timestamp = 0;
-static fp reference_vectors[2][3];
 
 MESSAGING_PRODUCER(messaging_producer, ts_state_estimate_data, sizeof(state_estimate_t), 20)
 MESSAGING_CONSUMER(messaging_consumer, ts_m3imu, ts_m3imu_mask, 0, 0, getPacket, 1024);
@@ -39,16 +40,9 @@ void state_estimate_init() {
     messaging_producer_init(&messaging_producer);
     messaging_consumer_init(&messaging_consumer);
 
-    reference_vectors[0][0] = 0;
-    reference_vectors[0][1] = 0;
-    reference_vectors[0][2] = 1;
-    reference_vectors[1][0] = 0.39134267f;
-    reference_vectors[1][1] = -0.00455851434f;
-    reference_vectors[1][2] = -0.920233727f;
-
     state_estimate_phase = StateEstimatePhase::Calibration;
 
-    remaining_calibration_samples = 1000;
+    remaining_calibration_samples = NUM_CALIBRATION_SAMPLES;
 }
 
 void state_estimate_thread(void *arg) {
@@ -83,25 +77,49 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
             accel_calibration += Eigen::Map<const Eigen::Matrix<fp, 3, 1>>(calibrated_data.accel);
 
             if (remaining_calibration_samples <= 0) {
-                magno_calibration.normalize();
-                accel_calibration.normalize();
 
-                const float observations[2][3] = {
-                        {accel_calibration[0], accel_calibration[1], accel_calibration[2]},
-                        {magno_calibration[0], magno_calibration[1], magno_calibration[2]}
+                auto accel_norm = accel_calibration.norm();
+                auto magno_norm = magno_calibration.norm();
+
+                const float quest_reference_vectors[2][3] = {
+                        {0,           0,               1},
+                        {0.39134267f, -0.00455851434f, -0.920233727f}
+                };
+
+                const float quest_observations[2][3] = {
+                        {accel_calibration[0] / accel_norm, accel_calibration[1] / accel_norm,
+                                accel_calibration[2] / accel_norm},
+                        {magno_calibration[0] / magno_norm, magno_calibration[1] / magno_norm,
+                                magno_calibration[2] / magno_norm}
                 };
 
                 const float a[2] = {0.5f, 0.5f};
 
-                float initial_orientation[4];
+                float initial_orientation[4] = {0, 0, 0, 1};
                 float initial_angular_velocity[3] = {0, 0, 0};
                 float initial_position[3] = {0, 0, 0};
                 float initial_velocity[3] = {0, 0, 0};
                 float initial_acceleration[3] = {0, 0, 0};
 
-                quest_estimate(observations, reference_vectors, a, initial_orientation);
+                if (quest_estimate(quest_observations, quest_reference_vectors, a, initial_orientation) == -1) {
+                    COMPONENT_STATE_UPDATE(avionics_component_state_state_estimate, state_error);
+                }
 
-                kalman_init(reference_vectors[0], reference_vectors[1], initial_orientation, initial_angular_velocity,
+                const float kalman_reference_vectors[2][3] = {
+                        {0 * accel_norm / (float) NUM_CALIBRATION_SAMPLES,
+                                                                                     0 * accel_norm /
+                                                                                     (float) NUM_CALIBRATION_SAMPLES,
+                                                                                                                      1 *
+                                                                                                                      accel_norm /
+                                                                                                                      (float) NUM_CALIBRATION_SAMPLES},
+                        {0.39134267f * magno_norm / (float) NUM_CALIBRATION_SAMPLES, -0.00455851434f * magno_norm /
+                                                                                     (float) NUM_CALIBRATION_SAMPLES, -0.920233727f *
+                                                                                                                      magno_norm /
+                                                                                                                      (float) NUM_CALIBRATION_SAMPLES}
+                };
+
+                kalman_init(kalman_reference_vectors[0], kalman_reference_vectors[1], initial_orientation,
+                            initial_angular_velocity,
                             initial_position, initial_velocity, initial_acceleration);
 
                 state_estimate_phase = StateEstimatePhase::Estimation;
@@ -117,7 +135,8 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
             kalman_get_state(&current_estimate);
 
-            messaging_producer_send_timestamp(&messaging_producer, 0, (const uint8_t *) &current_estimate, data_timestamp);
+            messaging_producer_send_timestamp(&messaging_producer, 0, (const uint8_t *) &current_estimate,
+                                              data_timestamp);
         }
 
     } else if (packet->header.id == ts_ublox_nav) {

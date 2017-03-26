@@ -19,6 +19,7 @@
 #include <util/board_config.h>
 #include <state/state_estimate.h>
 #include <state/kalman.h>
+#include <state/math_util.h>
 
 
 namespace plt = matplotlibcpp;
@@ -35,6 +36,10 @@ uint32_t last_state_timestamp = 0;
 std::vector<float> se_accel_x;
 std::vector<float> se_accel_y;
 std::vector<float> se_accel_z;
+
+std::vector<float> se_rotation_x;
+std::vector<float> se_rotation_y;
+std::vector<float> se_rotation_z;
 
 std::vector<float> accel_x;
 std::vector<float> accel_y;
@@ -78,6 +83,12 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         se_accel_x.push_back(data->acceleration[0]);
         se_accel_y.push_back(data->acceleration[1]);
         se_accel_z.push_back(data->acceleration[2]);
+
+        Vector3f euler = quat_to_euler(Quaternionf(data->orientation_q[3], data->orientation_q[0], data->orientation_q[1], data->orientation_q[2]));
+        se_rotation_x.push_back(euler.x());
+        se_rotation_y.push_back(euler.y());
+        se_rotation_z.push_back(euler.z());
+
     }
 
 
@@ -132,7 +143,11 @@ int main(int argc, char* argv[]) {
     plt::named_plot("SE Accel X", state_timestamps, se_accel_x);
     //plt::named_plot("SE Accel Y", state_timestamps, se_accel_y);
     //plt::named_plot("SE Accel Z", state_timestamps, se_accel_z);
-    
+
+    plt::named_plot("SE Orientation X", state_timestamps, se_rotation_x);
+    //plt::named_plot("SE Orientation Y", state_timestamps, se_rotation_y);
+    //plt::named_plot("SE Orientation Z", state_timestamps, se_rotation_z);
+
     plt::grid(true);
     plt::legend();
     plt::save(output);

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.2)
+cmake_minimum_required(VERSION 3.2)
 
 add_subdirectory(Source)
 
@@ -7,12 +7,13 @@ add_library(spalax.gui ${HEADERS} ${SOURCES} ${CMAKELISTS})
 target_include_directories(spalax.gui PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Source
         ${FRONTIER_ENGINE_INCLUDES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../external/eigen
         )
 
 TARGET_LINK_LIBRARIES(spalax.gui
-		spalax.shared
-		${FRONTIER_ENGINE_LIBS}
-		)
+        spalax.shared
+        ${FRONTIER_ENGINE_LIBS}
+        )
 
 
 ADD_EXECUTABLE(spalax.gui.launcher Source/main.cpp)

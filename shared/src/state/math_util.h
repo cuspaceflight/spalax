@@ -149,5 +149,9 @@ inline void compute_radii_of_curvature(float latitude, float *r_meridian, float 
     *r_meridian = wgm84_re * (1 - wgm84_eccentricity2) / (t * t * t);
 }
 
+inline Vector3f quat_to_euler(const Quaternionf& quat) {
+    return quat.toRotationMatrix().eulerAngles(0, 1, 2);
+}
+
 #endif
 #endif

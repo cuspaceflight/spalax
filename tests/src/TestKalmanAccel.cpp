@@ -28,7 +28,7 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &acce
 
     const float time_increment = 1000;
 
-    kalman_test_setup(quat, time_increment * angle_increment, Matrix<fp, 3, 1>::Zero(), Matrix<fp, 3, 1>::Zero(),
+    kalman_test_setup(quat.inverse(), time_increment * angle_increment, Matrix<fp, 3, 1>::Zero(), Matrix<fp, 3, 1>::Zero(),
                       accel);
 
 
@@ -40,7 +40,7 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &acce
     Quaternion<fp> delta(AngleAxis<fp>(angle_increment.norm(), angle_increment.normalized()));
 
     for (int i = 0; i < NUM_TESTS; i++) {
-        Quaternion<fp> t = delta * quat;
+        Quaternion<fp> t = quat * delta.inverse();
         quat = t;
 
         Matrix<fp, 3, 1> rotated_magno = quat * unrotated_magno;
@@ -62,7 +62,6 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &acce
         kalman_new_gyro(gyro);
         kalman_new_magno(magno);
         kalman_new_accel(accel);
-
 
         kalman_get_state(&estimate);
         testEstimateStable(estimate);
@@ -99,21 +98,17 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &acce
     Quaternion<fp> out(estimate.orientation_q[3], estimate.orientation_q[0], estimate.orientation_q[1],
                        estimate.orientation_q[2]);
 
-    Matrix<fp, 3, 1> magno_test = out * unrotated_magno;
-    Matrix<fp, 3, 1> accel_test = out * unrotated_accel;
-
-    Matrix<fp, 3, 1> rotated_magno = quat * unrotated_magno;
-    Matrix<fp, 3, 1> rotated_accel = quat * unrotated_accel;
+    // The output should rotate the observations onto the references
+    Matrix<fp, 3, 1> magno_test = out * (quat * unrotated_magno);
+    Matrix<fp, 3, 1> accel_test = out * (quat * unrotated_accel);
 
     // Clampf is necessary due to occasional rounding errors leading to results slight out of the range (-1, 1)
-    fp angle =
-            acos(clampf(magno_test.normalized().transpose() * rotated_magno.normalized(), -1, 1)) * 180.0f / (fp) M_PI;
-    fp angle2 =
-            acos(clampf(accel_test.normalized().transpose() * rotated_accel.normalized(), -1, 1)) * 180.0f / (fp) M_PI;
+    fp angle = acos(clampf(magno_test.normalized().transpose() * unrotated_magno.normalized(), -1, 1)) * 180.0f / (fp)M_PI;
+    fp angle2 = acos(clampf(accel_test.normalized().transpose() * unrotated_accel.normalized(), -1, 1)) * 180.0f / (fp)M_PI;
 
-    // We expect accuracy to a degree - any less is unreasonable with 32-bit floating point
-    EXPECT_LT(angle, 1.0f);
-    EXPECT_LT(angle2, 1.0f);
+    // We expect accuracy to a degree - any less is unreasonable with 32-bit fping point
+    EXPECT_LT(angle, 1.f);
+    EXPECT_LT(angle2, 1.f);
 
     float time = NUM_TESTS / time_increment;
 
@@ -123,8 +118,6 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &acce
         expect_fuzzy_eq(estimate.velocity[i], accel[i] * time, 0.00005f, 0.05);
         expect_fuzzy_eq(estimate.acceleration[i], accel[i], 0.00005f, 0.05);
     }
-
-
 }
 
 TEST(TestKalmanAccel, TestSimple) {
