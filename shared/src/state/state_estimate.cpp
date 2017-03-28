@@ -24,6 +24,7 @@ static StateEstimatePhase state_estimate_phase = StateEstimatePhase::Init;
 static int remaining_calibration_samples;
 static Eigen::Matrix<fp, 3, 1> magno_calibration;
 static Eigen::Matrix<fp, 3, 1> accel_calibration;
+static Eigen::Matrix<fp, 3, 1> gyro_calibration;
 
 static uint32_t data_timestamp = 0;
 
@@ -75,15 +76,26 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
             magno_calibration += Eigen::Map<const Eigen::Matrix<fp, 3, 1>>(calibrated_data.magno);
             accel_calibration += Eigen::Map<const Eigen::Matrix<fp, 3, 1>>(calibrated_data.accel);
+            gyro_calibration += Eigen::Map<const Eigen::Matrix<fp, 3, 1>>(calibrated_data.gyro);
 
             if (remaining_calibration_samples <= 0) {
 
                 auto accel_norm = accel_calibration.norm();
                 auto magno_norm = magno_calibration.norm();
 
+                Eigen::Vector3f accel_reference(0, 0, 1);
+                Eigen::Vector3f magno_reference(0.39134267f, -0.00455851434f, -0.920233727f);
+
+                // We adjust the magnetic reference vector so that the angle between the references
+                // is the same as the angle between the observations
+                Eigen::Vector3f rot_vector = accel_reference.cross(magno_reference).normalized();
+                float angle = std::acos(accel_calibration.normalized().transpose() * magno_calibration.normalized());
+                magno_reference = Eigen::Quaternionf(Eigen::AngleAxisf(angle, rot_vector)) * accel_reference;
+
+
                 const float quest_reference_vectors[2][3] = {
-                        {0,           0,               1},
-                        {0.39134267f, -0.00455851434f, -0.920233727f}
+                        {accel_reference.x(), accel_reference.y(), accel_reference.z()},
+                        {magno_reference.x(), magno_reference.y(), magno_reference.z()}
                 };
 
                 const float quest_observations[2][3] = {
@@ -100,27 +112,32 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                 float initial_position[3] = {0, 0, 0};
                 float initial_velocity[3] = {0, 0, 0};
                 float initial_acceleration[3] = {0, 0, 0};
+                float initial_gyro_bias[3] = {
+                        gyro_calibration.x() / (float) NUM_CALIBRATION_SAMPLES,
+                        gyro_calibration.y() / (float) NUM_CALIBRATION_SAMPLES,
+                        gyro_calibration.z() / (float) NUM_CALIBRATION_SAMPLES
+                };
 
                 if (quest_estimate(quest_observations, quest_reference_vectors, a, initial_orientation) == -1) {
                     COMPONENT_STATE_UPDATE(avionics_component_state_state_estimate, state_error);
                 }
 
                 const float kalman_reference_vectors[2][3] = {
-                        {0 * accel_norm / (float) NUM_CALIBRATION_SAMPLES,
-                                                                                     0 * accel_norm /
-                                                                                     (float) NUM_CALIBRATION_SAMPLES,
-                                                                                                                      1 *
-                                                                                                                      accel_norm /
-                                                                                                                      (float) NUM_CALIBRATION_SAMPLES},
-                        {0.39134267f * magno_norm / (float) NUM_CALIBRATION_SAMPLES, -0.00455851434f * magno_norm /
-                                                                                     (float) NUM_CALIBRATION_SAMPLES, -0.920233727f *
-                                                                                                                      magno_norm /
-                                                                                                                      (float) NUM_CALIBRATION_SAMPLES}
+                        {
+                                accel_reference.x() * accel_norm / (float) NUM_CALIBRATION_SAMPLES,
+                                accel_reference.y() * accel_norm / (float) NUM_CALIBRATION_SAMPLES,
+                                accel_reference.z() * accel_norm / (float) NUM_CALIBRATION_SAMPLES
+                        },
+                        {
+                                magno_reference.x() * magno_norm / (float) NUM_CALIBRATION_SAMPLES,
+                                magno_reference.y() * magno_norm / (float) NUM_CALIBRATION_SAMPLES,
+                                magno_reference.z() * magno_norm / (float) NUM_CALIBRATION_SAMPLES
+                        }
                 };
 
                 kalman_init(kalman_reference_vectors[0], kalman_reference_vectors[1], initial_orientation,
-                            initial_angular_velocity,
-                            initial_position, initial_velocity, initial_acceleration);
+                            initial_angular_velocity, initial_position, initial_velocity, initial_acceleration,
+                            initial_gyro_bias);
 
                 state_estimate_phase = StateEstimatePhase::Estimation;
             }

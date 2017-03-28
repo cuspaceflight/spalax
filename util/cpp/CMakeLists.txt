@@ -16,4 +16,4 @@ add_executable(mapplotter mapplotter.cpp)
 
 add_executable(gyro gyro.cpp)
 
-add_executable(accel accel.cpp)
+add_executable(data_plot data_plot.cpp)

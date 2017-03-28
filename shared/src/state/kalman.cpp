@@ -24,13 +24,13 @@ static Eigen::DiagonalMatrix<fp, 3> gyro_covariance;
 
 static DiagonalMatrix<fp, KALMAN_NUM_STATES> process_noise;
 
-fp kalman_magno_cov = 0.03f;
-fp kalman_accelerometer_cov = 0.02f;
-fp kalman_gyro_cov = 0.001f;
+fp kalman_magno_cov = 0.003f;
+fp kalman_accelerometer_cov = 0.001f;
+fp kalman_gyro_cov = 1e-6f;
 
 void kalman_init(const fp accel_reference[3], const fp magno_reference[3], const fp initial_orientation[4],
                  const fp initial_angular_velocity[3], const fp initial_position[3], const fp initial_velocity[3],
-                 const fp initial_acceleration[3]) {
+                 const fp initial_acceleration[3], const fp initial_gyro_bias[3]) {
     for (int i = 0; i < KALMAN_NUM_STATES; i++) {
         prior_state_vector(i) = 0;
     }
@@ -39,6 +39,7 @@ void kalman_init(const fp accel_reference[3], const fp magno_reference[3], const
     POSITION = Eigen::Map<const Matrix<fp, 3, 1>>(initial_position);
     VELOCITY = Eigen::Map<const Matrix<fp, 3, 1>>(initial_velocity);
     ACCELERATION = Eigen::Map<const Matrix<fp, 3, 1>>(initial_acceleration);
+    GYRO_BIAS = Eigen::Map<const Matrix<fp, 3, 1>>(initial_gyro_bias);
 
     prior_attitude.x() = initial_orientation[0];
     prior_attitude.y() = initial_orientation[1];
@@ -51,23 +52,23 @@ void kalman_init(const fp accel_reference[3], const fp magno_reference[3], const
         gyro_covariance.diagonal()[i] = kalman_gyro_cov;
 
         // Attitude Error
-        P.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 1e-4f;
-        process_noise.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 1e-4f;
+        P.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 1e-5f;
+        process_noise.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 1e-6f;
         // Angular Velocity
-        P.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 1e-3f;
-        process_noise.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 1e1f;
+        P.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 1e-5f;
+        process_noise.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 1e2f;
         // Gyro Bias
-        P.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1;
-        process_noise.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1e-4f;
+        P.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1e-3f;
+        process_noise.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1e-6f;
         // Position
-        P.diagonal()[i + KALMAN_POSITION_IDX] = 1;
-        process_noise.diagonal()[i + KALMAN_POSITION_IDX] = 1e-2f;
+        P.diagonal()[i + KALMAN_POSITION_IDX] = 1e-4;
+        process_noise.diagonal()[i + KALMAN_POSITION_IDX] = 1e-7f;
         // Velocity
-        P.diagonal()[i + KALMAN_VELOCITY_IDX] = 1;
-        process_noise.diagonal()[i + KALMAN_VELOCITY_IDX] = 1e-2f;
+        P.diagonal()[i + KALMAN_VELOCITY_IDX] = 1e-4;
+        process_noise.diagonal()[i + KALMAN_VELOCITY_IDX] = 1e-7f;
         // Acceleration
-        P.diagonal()[i + KALMAN_ACCELERATION_IDX] = 1e-4f;
-        process_noise.diagonal()[i + KALMAN_ACCELERATION_IDX] = 1e1f;
+        P.diagonal()[i + KALMAN_ACCELERATION_IDX] = 1e-6f;
+        process_noise.diagonal()[i + KALMAN_ACCELERATION_IDX] = 1e2f;
 
         g_reference[i] = accel_reference[i];
         b_reference[i] = magno_reference[i];
