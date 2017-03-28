@@ -24,4 +24,5 @@ cd build.gui.spalax
 cmake .. -DCMAKE_TOOLCHAIN_FILE=../cmake/std.cmake
 make
 cd bin
-./spalax.tests
+# Tests disabled temporarily
+#./spalax.tests

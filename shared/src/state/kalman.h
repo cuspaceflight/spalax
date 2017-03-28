@@ -12,12 +12,13 @@ extern "C" {
 typedef float fp;
 
 #define KALMAN_NUM_STATES 18
-#define KALMAN_ATTITUDE_ERR_IDX 0
-#define KALMAN_ANGULAR_VEL_IDX 3
-#define KALMAN_GYRO_BIAS_IDX 6
-#define KALMAN_POSITION_IDX 9
-#define KALMAN_VELOCITY_IDX 12
-#define KALMAN_ACCELERATION_IDX 15
+
+#define KALMAN_POSITION_IDX 0
+#define KALMAN_VELOCITY_IDX 3
+#define KALMAN_ACCELERATION_IDX 6
+#define KALMAN_ATTITUDE_ERR_IDX 9
+#define KALMAN_ANGULAR_VEL_IDX 12
+#define KALMAN_GYRO_BIAS_IDX 15
 
 extern fp kalman_accelerometer_cov;
 extern fp kalman_magno_cov;

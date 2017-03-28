@@ -25,9 +25,9 @@ void mpu9250_calibrate_data(const mpu9250_data_t* uncalibrated_data, mpu9250_cal
     calibrated_data->magno[1] = calibrated_magno.x();
     calibrated_data->magno[2] = -calibrated_magno.z();
 
-    calibrated_data->accel[0] = calibrated_accel.x();
-    calibrated_data->accel[1] = calibrated_accel.y();
-    calibrated_data->accel[2] = calibrated_accel.z();
+    calibrated_data->accel[0] = calibrated_accel.x() * 9.80665f;
+    calibrated_data->accel[1] = calibrated_accel.y() * 9.80665f;
+    calibrated_data->accel[2] = calibrated_accel.z() * 9.80665f;
 
     calibrated_data->gyro[0] = uncalibrated_data->gyro[0] * config->mpu9250_gyro_sf;
     calibrated_data->gyro[1] = uncalibrated_data->gyro[1] * config->mpu9250_gyro_sf;

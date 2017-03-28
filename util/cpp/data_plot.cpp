@@ -32,6 +32,9 @@ static uint32_t last_mpu_timestamp = 0;
 static uint64_t state_timestamp = 0;
 static uint32_t last_state_timestamp = 0;
 
+static uint64_t state_debug_timestamp = 0;
+static uint32_t last_state_debug_timestamp = 0;
+
 static std::vector<float> se_accel_x;
 static std::vector<float> se_accel_y;
 static std::vector<float> se_accel_z;
@@ -60,6 +63,8 @@ static std::vector<float> magno_x;
 static std::vector<float> magno_y;
 static std::vector<float> magno_z;
 
+static std::vector<float> accel_magno_angle;
+
 static std::vector<float> se_gyro_bias_x;
 static std::vector<float> se_gyro_bias_y;
 static std::vector<float> se_gyro_bias_z;
@@ -67,12 +72,14 @@ static std::vector<float> se_gyro_bias_z;
 
 static std::vector<float> mpu_timestamps;
 static std::vector<float> state_timestamps;
+static std::vector<float> state_debug_timestamps;
 
 static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
     if (packet->header.id == ts_mpu9250_data) {
         if (last_mpu_timestamp == 0) {
             last_mpu_timestamp = packet->header.timestamp;
             last_state_timestamp = packet->header.timestamp;
+            last_state_debug_timestamp = packet->header.timestamp;
         }
 
         auto delta = clocks_between(last_mpu_timestamp, packet->header.timestamp);
@@ -95,6 +102,12 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         magno_x.push_back(calibrated_data.magno[0]);
         magno_y.push_back(calibrated_data.magno[1]);
         magno_z.push_back(calibrated_data.magno[2]);
+
+        float angle = std::acos(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.accel).normalized().transpose() *
+                                Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).normalized());
+
+        accel_magno_angle.push_back(angle);
+
     } else if (packet->header.id == ts_state_estimate_data) {
         auto data = telemetry_get_payload<state_estimate_t>(packet);
 
@@ -125,13 +138,21 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         se_ang_velocity_x.push_back(data->angular_velocity[0]);
         se_ang_velocity_y.push_back(data->angular_velocity[1]);
         se_ang_velocity_z.push_back(data->angular_velocity[2]);
+    } else if (packet->header.id == ts_state_estimate_debug_data) {
+        auto data = telemetry_get_payload<state_estimate_debug_t>(packet);
 
-        float gyro_bias[3];
-        kalman_get_gyro_bias(gyro_bias);
+        if (last_state_debug_timestamp == 0) {
+            return true;
+        }
 
-        se_gyro_bias_x.push_back(gyro_bias[0]);
-        se_gyro_bias_y.push_back(gyro_bias[1]);
-        se_gyro_bias_z.push_back(gyro_bias[2]);
+        state_debug_timestamp += clocks_between(last_state_debug_timestamp, packet->header.timestamp);
+        last_state_debug_timestamp = packet->header.timestamp;
+
+        state_debug_timestamps.push_back((float) state_debug_timestamp / (float) platform_get_counter_frequency());
+
+        se_gyro_bias_x.push_back(data->gyro_bias[0]);
+        se_gyro_bias_y.push_back(data->gyro_bias[1]);
+        se_gyro_bias_z.push_back(data->gyro_bias[2]);
     }
 
 
@@ -204,6 +225,9 @@ int main(int argc, char *argv[]) {
         else if (graph_variable == "MZ")
             plt::named_plot("Magno Z", mpu_timestamps, magno_z);
 
+        else if (graph_variable == "AMANGLE")
+            plt::named_plot("Accel Magno Angle", mpu_timestamps, accel_magno_angle);
+
         else if (graph_variable == "SEAX")
             plt::named_plot("SE Accel X", state_timestamps, se_accel_x);
         else if (graph_variable == "SEAY")
@@ -233,11 +257,11 @@ int main(int argc, char *argv[]) {
             plt::named_plot("SE Angular Velocity Z", state_timestamps, se_ang_velocity_z);
 
         else if (graph_variable == "SEGBX")
-            plt::named_plot("SE Gyro Bias X", state_timestamps, se_gyro_bias_x);
+            plt::named_plot("SE Gyro Bias X", state_debug_timestamps, se_gyro_bias_x);
         else if (graph_variable == "SEGBY")
-            plt::named_plot("SE Gyro Bias Y", state_timestamps, se_gyro_bias_y);
+            plt::named_plot("SE Gyro Bias Y", state_debug_timestamps, se_gyro_bias_y);
         else if (graph_variable == "SEGBZ")
-            plt::named_plot("SE Gyro Bias Z", state_timestamps, se_gyro_bias_z);
+            plt::named_plot("SE Gyro Bias Z", state_debug_timestamps, se_gyro_bias_z);
 
     }
 

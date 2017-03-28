@@ -29,6 +29,7 @@ static Eigen::Matrix<fp, 3, 1> gyro_calibration;
 static uint32_t data_timestamp = 0;
 
 MESSAGING_PRODUCER(messaging_producer, ts_state_estimate_data, sizeof(state_estimate_t), 20)
+MESSAGING_PRODUCER(messaging_producer_debug, ts_state_estimate_debug_data, sizeof(state_estimate_debug_t), 20)
 MESSAGING_CONSUMER(messaging_consumer, ts_m3imu, ts_m3imu_mask, 0, 0, getPacket, 1024);
 
 static bool initialised = false;
@@ -39,6 +40,7 @@ void state_estimate_init() {
     initialised = true;
 
     messaging_producer_init(&messaging_producer);
+    messaging_producer_init(&messaging_producer_debug);
     messaging_consumer_init(&messaging_consumer);
 
     state_estimate_phase = StateEstimatePhase::Calibration;
@@ -83,14 +85,17 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                 auto accel_norm = accel_calibration.norm();
                 auto magno_norm = magno_calibration.norm();
 
+                auto accel_observation = accel_calibration.normalized();
+                auto magno_observation = magno_calibration.normalized();
+
                 Eigen::Vector3f accel_reference(0, 0, 1);
                 Eigen::Vector3f magno_reference(0.39134267f, -0.00455851434f, -0.920233727f);
 
                 // We adjust the magnetic reference vector so that the angle between the references
                 // is the same as the angle between the observations
-                Eigen::Vector3f rot_vector = accel_reference.cross(magno_reference).normalized();
-                float angle = std::acos(accel_calibration.normalized().transpose() * magno_calibration.normalized());
-                magno_reference = Eigen::Quaternionf(Eigen::AngleAxisf(angle, rot_vector)) * accel_reference;
+                Eigen::Vector3f rot_vector = accel_observation.cross(magno_observation).normalized();
+                float angle = std::acos(accel_reference.normalized().transpose() * magno_reference.normalized());
+                Eigen::Vector3f magno_observation_corrected = Eigen::Quaternionf(Eigen::AngleAxisf(angle, rot_vector)) * accel_observation;
 
 
                 const float quest_reference_vectors[2][3] = {
@@ -99,10 +104,8 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                 };
 
                 const float quest_observations[2][3] = {
-                        {accel_calibration[0] / accel_norm, accel_calibration[1] / accel_norm,
-                                accel_calibration[2] / accel_norm},
-                        {magno_calibration[0] / magno_norm, magno_calibration[1] / magno_norm,
-                                magno_calibration[2] / magno_norm}
+                        {accel_observation[0], accel_observation[1], accel_observation[2]},
+                        {magno_observation_corrected[0], magno_observation_corrected[1], magno_observation_corrected[2]},
                 };
 
                 const float a[2] = {0.5f, 0.5f};
@@ -153,6 +156,11 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
             kalman_get_state(&current_estimate);
 
             messaging_producer_send_timestamp(&messaging_producer, 0, (const uint8_t *) &current_estimate,
+                                              data_timestamp);
+
+            state_estimate_debug_t debug;
+            kalman_get_gyro_bias(debug.gyro_bias);
+            messaging_producer_send_timestamp(&messaging_producer_debug, 0, (const uint8_t *) &debug,
                                               data_timestamp);
         }
 
