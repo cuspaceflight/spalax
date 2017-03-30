@@ -11,7 +11,7 @@ extern "C" {
 
 typedef float fp;
 
-#define KALMAN_NUM_STATES 24
+#define KALMAN_NUM_STATES 27
 
 #define KALMAN_POSITION_IDX 0
 #define KALMAN_VELOCITY_IDX 3
@@ -21,6 +21,7 @@ typedef float fp;
 #define KALMAN_ANGULAR_VEL_IDX 15
 #define KALMAN_GYRO_BIAS_IDX 18
 #define KALMAN_MAGNO_BIAS_IDX 21
+#define KALMAN_MAGNO_REF_ERR_IDX 24
 
 extern const fp kalman_accelerometer_cov;
 extern const fp kalman_magno_cov;
@@ -34,6 +35,7 @@ extern const fp initial_attitude_err_cov;
 extern const fp initial_angular_vel_cov;
 extern const fp initial_gyro_bias_cov;
 extern const fp initial_magno_bias_cov;
+extern const fp initial_magno_ref_err_cov;
 
 
 extern const fp position_process_noise;
@@ -44,6 +46,8 @@ extern const fp attitude_err_process_noise;
 extern const fp angular_vel_process_noise;
 extern const fp gyro_bias_process_noise;
 extern const fp magno_bias_process_noise;
+extern const fp magno_ref_err_process_noise;
+
 
 #ifdef __cplusplus
 }

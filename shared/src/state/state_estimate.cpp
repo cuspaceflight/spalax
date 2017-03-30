@@ -29,10 +29,13 @@ static Matrix<fp, 3, 1> magno_calibration;
 static Matrix<fp, 3, 1> accel_calibration;
 static Matrix<fp, 3, 1> gyro_calibration;
 
+static const Vector3f accel_reference(0, 0, 1);
+static const Vector3f magno_reference(0.39134267f, -0.00455851434f, -0.920233727f);
+
 static uint32_t data_timestamp = 0;
 
 MESSAGING_PRODUCER(messaging_producer, ts_state_estimate_data, sizeof(state_estimate_t), 20)
-MESSAGING_PRODUCER(messaging_producer_debug, ts_state_estimate_debug_data, sizeof(state_estimate_debug_t), 20)
+MESSAGING_PRODUCER(messaging_producer_debug, ts_state_estimate_debug, sizeof(state_estimate_debug_t), 20)
 MESSAGING_CONSUMER(messaging_consumer, ts_m3imu, ts_m3imu_mask, 0, 0, getPacket, 1024);
 
 static bool initialised = false;
@@ -87,9 +90,6 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
                 accel_calibration /= (float) NUM_CALIBRATION_SAMPLES;
                 magno_calibration /= (float) NUM_CALIBRATION_SAMPLES;
-
-                Vector3f accel_reference(0, 0, 1);
-                Vector3f magno_reference(0.39134267f, -0.00455851434f, -0.920233727f);
 
                 const float quest_reference_vectors[2][3] = {
                         {accel_reference.x(), accel_reference.y(), accel_reference.z()},
@@ -154,6 +154,12 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
             kalman_get_gyro_bias(debug.gyro_bias);
             kalman_get_magno_bias(debug.magno_bias);
             kalman_get_accel_bias(debug.accel_bias);
+
+            for (int i = 0; i < 3; i++) {
+                debug.accel_ref[i] = accel_reference[i];
+                debug.magno_ref[i] = magno_reference[i];
+            }
+
             messaging_producer_send_timestamp(&messaging_producer_debug, 0, (const uint8_t *) &debug,
                                               data_timestamp);
         }

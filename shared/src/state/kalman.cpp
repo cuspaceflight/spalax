@@ -189,14 +189,6 @@ void kalman_new_accel(const fp accel[3]) {
     Matrix<fp, 3, 1> predicted_measurement = prior_attitude.inverse() * (g_reference + ACCELERATION) + ACCEL_BIAS;
     Matrix<fp, 3, 1> y = Map<const Matrix<fp, 3, 1>>(accel) - predicted_measurement;
 
-    Vector3f temp = Map<const Matrix<fp, 3, 1>>(accel);
-
-    Vector3f t1 = temp.normalized();
-    Vector3f t2 = predicted_measurement.normalized();
-
-    float t3 = temp.norm();
-    float t4 = predicted_measurement.norm();
-
     Matrix<fp, 3, 9> H;
 
     H.block<3, 3>(0, KALMAN_ACCELERATION_IDX - KALMAN_ACCELERATION_IDX) =
@@ -215,16 +207,6 @@ void kalman_new_magno(const fp magno[3]) {
     // Attitude error is always 0 on entry
     Matrix<fp, 3, 1> predicted_measurement = prior_attitude.inverse() * (b_reference) + MAGNO_BIAS;
     Matrix<fp, 3, 1> y = Map<const Matrix<fp, 3, 1>>(magno) - predicted_measurement;
-
-    Vector3f temp = Map<const Matrix<fp, 3, 1>>(magno);
-
-    Vector3f t1 = temp.normalized();
-    Vector3f t2 = predicted_measurement.normalized();
-
-    float angle = std::acos(t1.dot(t2));
-
-    float t3 = temp.norm();
-    float t4 = predicted_measurement.norm();
 
     Matrix<fp, 3, 3> H = mrp_application_jacobian(ATTITUDE_ERROR, predicted_measurement) * -1;
 

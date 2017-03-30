@@ -68,6 +68,7 @@ static std::vector<float> magno_z;
 static std::vector<float> magno_norm;
 
 static std::vector<float> accel_magno_angle;
+static std::vector<float> accel_magno_reference_angle;
 
 static std::vector<float> se_gyro_bias_x;
 static std::vector<float> se_gyro_bias_y;
@@ -142,7 +143,7 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         se_accel_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(data->acceleration).norm());
 
 
-        Vector3f euler = quat_to_euler(
+        Vector3f euler = 180.0f / 3.141592653589793f * quat_to_euler(
                 Quaternionf(data->orientation_q[3], data->orientation_q[0], data->orientation_q[1],
                             data->orientation_q[2]));
         se_rotation_x.push_back(euler.x());
@@ -158,7 +159,7 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         se_ang_velocity_z.push_back(data->angular_velocity[2]);
 
         se_ang_vel_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(data->angular_velocity).norm());
-    } else if (packet->header.id == ts_state_estimate_debug_data) {
+    } else if (packet->header.id == ts_state_estimate_debug) {
         auto data = telemetry_get_payload<state_estimate_debug_t>(packet);
 
         if (last_state_debug_timestamp == 0) {
@@ -185,6 +186,11 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         se_magno_bias_z.push_back(data->magno_bias[2]);
 
         se_magno_bias_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(data->magno_bias).norm());
+
+        float angle = std::acos(Eigen::Map<const Matrix<fp, 3, 1>>(data->accel_ref).normalized().transpose() *
+                                Eigen::Map<const Matrix<fp, 3, 1>>(data->magno_ref).normalized());
+
+        accel_magno_reference_angle.push_back(angle);
     }
 
 
@@ -264,7 +270,7 @@ int main(int argc, char *argv[]) {
             else if (graph_variable == "AMANGLE")
                 plt::named_plot("Accel Magno Angle", mpu_timestamps, accel_magno_angle);
             else if (graph_variable == "MNORM")
-                plt::named_plot("Magno Normal", mpu_timestamps, magno_norm);
+                plt::named_plot("Magno Magnitude", mpu_timestamps, magno_norm);
             else if (graph_variable == "ANORM")
                 plt::named_plot("Accel Magnitude", mpu_timestamps, accel_norm);
 
@@ -324,6 +330,9 @@ int main(int argc, char *argv[]) {
                 plt::named_plot("SE Magno Bias Z", state_debug_timestamps, se_magno_bias_z);
             else if (graph_variable == "SEMBNORM")
                 plt::named_plot("SE Magno Bias Magnitude", state_debug_timestamps, se_magno_bias_norm);
+
+            else if (graph_variable == "AMRANGLE")
+                plt::named_plot("Accel Magno Reference Angle", state_debug_timestamps, accel_magno_reference_angle);
 
         }
 

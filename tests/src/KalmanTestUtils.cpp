@@ -13,8 +13,10 @@ void kalman_test_setup(Eigen::Quaternion<fp> quat, Eigen::Vector3f angular_veloc
     fp vel[3] = {velocity.x(), velocity.y(), velocity.z()};
     fp accel[3] = {acceleration.x(), acceleration.y(), acceleration.z()};
     fp initial_gyro_bias[3] = {0,0,0};
+    fp initial_accel_bias[3] = {0,0,0};
+    fp initial_magno_bias[3] = {0,0,0};
 
-    kalman_init(accel_reference, magno_reference, quat_arr, ang_vel, pos, vel, accel, initial_gyro_bias);
+    kalman_init(accel_reference, magno_reference, quat_arr, ang_vel, pos, vel, accel, initial_gyro_bias, initial_accel_bias, initial_magno_bias);
 }
 
 void testEstimateStable(const state_estimate_t &estimate) {
