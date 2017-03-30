@@ -3,6 +3,7 @@
 set (SOURCES ${SOURCES}
         ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/TestQuest.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/TestQMethod.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/TestEigen.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/TestWMM.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/TestMultipacket.cpp

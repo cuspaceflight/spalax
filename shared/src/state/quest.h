@@ -9,10 +9,7 @@ extern "C" {
 
 int quest_estimate(const float observations[2][3], const float references[2][3], const float weights[2], float q_out[4]);
 
-//#define BUILD_Q_METHOD
-#ifdef BUILD_Q_METHOD
-int davenport_q_method(const float **observations, const float **references, const float *weights, float *q_out);
-#endif
+int davenport_q_method(const float observations[][3], const float references[][3], const float a[], int n, float q_out[4]);
 
 #ifdef __cplusplus
 }

@@ -6,8 +6,11 @@
 #include <component_state.h>
 #include "state_estimate.h"
 #include "Eigen/Core"
+#include <Eigen/Geometry>
 #include "quest.h"
 #include "kalman.h"
+
+using namespace Eigen;
 
 // Forward Declarations
 static bool getPacket(const telemetry_t *packet, message_metadata_t metadata);
@@ -22,9 +25,9 @@ static StateEstimatePhase state_estimate_phase = StateEstimatePhase::Init;
 
 #define NUM_CALIBRATION_SAMPLES 1000
 static int remaining_calibration_samples;
-static Eigen::Matrix<fp, 3, 1> magno_calibration;
-static Eigen::Matrix<fp, 3, 1> accel_calibration;
-static Eigen::Matrix<fp, 3, 1> gyro_calibration;
+static Matrix<fp, 3, 1> magno_calibration;
+static Matrix<fp, 3, 1> accel_calibration;
+static Matrix<fp, 3, 1> gyro_calibration;
 
 static uint32_t data_timestamp = 0;
 
@@ -76,36 +79,29 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         if (state_estimate_phase == StateEstimatePhase::Calibration) {
             remaining_calibration_samples--;
 
-            magno_calibration += Eigen::Map<const Eigen::Matrix<fp, 3, 1>>(calibrated_data.magno);
-            accel_calibration += Eigen::Map<const Eigen::Matrix<fp, 3, 1>>(calibrated_data.accel);
-            gyro_calibration += Eigen::Map<const Eigen::Matrix<fp, 3, 1>>(calibrated_data.gyro);
+            magno_calibration += Map<const Matrix<fp, 3, 1>>(calibrated_data.magno);
+            accel_calibration += Map<const Matrix<fp, 3, 1>>(calibrated_data.accel);
+            gyro_calibration += Map<const Matrix<fp, 3, 1>>(calibrated_data.gyro);
 
             if (remaining_calibration_samples <= 0) {
 
-                auto accel_norm = accel_calibration.norm();
-                auto magno_norm = magno_calibration.norm();
+                accel_calibration /= (float) NUM_CALIBRATION_SAMPLES;
+                magno_calibration /= (float) NUM_CALIBRATION_SAMPLES;
 
-                auto accel_observation = accel_calibration.normalized();
-                auto magno_observation = magno_calibration.normalized();
-
-                Eigen::Vector3f accel_reference(0, 0, 1);
-                Eigen::Vector3f magno_reference(0.39134267f, -0.00455851434f, -0.920233727f);
-
-                // We adjust the magnetic reference vector so that the angle between the references
-                // is the same as the angle between the observations
-                Eigen::Vector3f rot_vector = accel_observation.cross(magno_observation).normalized();
-                float angle = std::acos(accel_reference.normalized().transpose() * magno_reference.normalized());
-                Eigen::Vector3f magno_observation_corrected = Eigen::Quaternionf(Eigen::AngleAxisf(angle, rot_vector)) * accel_observation;
-
+                Vector3f accel_reference(0, 0, 1);
+                Vector3f magno_reference(0.39134267f, -0.00455851434f, -0.920233727f);
 
                 const float quest_reference_vectors[2][3] = {
                         {accel_reference.x(), accel_reference.y(), accel_reference.z()},
                         {magno_reference.x(), magno_reference.y(), magno_reference.z()}
                 };
 
+                Vector3f accel_calib_norm = accel_calibration.normalized();
+                Vector3f magno_calib_norm = magno_calibration.normalized();
+
                 const float quest_observations[2][3] = {
-                        {accel_observation[0], accel_observation[1], accel_observation[2]},
-                        {magno_observation_corrected[0], magno_observation_corrected[1], magno_observation_corrected[2]},
+                        {accel_calib_norm[0], accel_calib_norm[1], accel_calib_norm[2]},
+                        {magno_calib_norm[0], magno_calib_norm[1], magno_calib_norm[2]},
                 };
 
                 const float a[2] = {0.5f, 0.5f};
@@ -115,6 +111,8 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                 float initial_position[3] = {0, 0, 0};
                 float initial_velocity[3] = {0, 0, 0};
                 float initial_acceleration[3] = {0, 0, 0};
+                float initial_accel_bias[3] = {0,0,0};
+                float initial_magno_bias[3] = {0,0,0};
                 float initial_gyro_bias[3] = {
                         gyro_calibration.x() / (float) NUM_CALIBRATION_SAMPLES,
                         gyro_calibration.y() / (float) NUM_CALIBRATION_SAMPLES,
@@ -126,21 +124,15 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                 }
 
                 const float kalman_reference_vectors[2][3] = {
-                        {
-                                accel_reference.x() * accel_norm / (float) NUM_CALIBRATION_SAMPLES,
-                                accel_reference.y() * accel_norm / (float) NUM_CALIBRATION_SAMPLES,
-                                accel_reference.z() * accel_norm / (float) NUM_CALIBRATION_SAMPLES
-                        },
-                        {
-                                magno_reference.x() * magno_norm / (float) NUM_CALIBRATION_SAMPLES,
-                                magno_reference.y() * magno_norm / (float) NUM_CALIBRATION_SAMPLES,
-                                magno_reference.z() * magno_norm / (float) NUM_CALIBRATION_SAMPLES
-                        }
+                        {accel_reference.x() * 9.80665f, accel_reference.y() * 9.80665f, accel_reference.z() * 9.80665f},
+                        {magno_reference.x(), magno_reference.y(), magno_reference.z()}
                 };
+
+
 
                 kalman_init(kalman_reference_vectors[0], kalman_reference_vectors[1], initial_orientation,
                             initial_angular_velocity, initial_position, initial_velocity, initial_acceleration,
-                            initial_gyro_bias);
+                            initial_gyro_bias, initial_accel_bias, initial_magno_bias);
 
                 state_estimate_phase = StateEstimatePhase::Estimation;
             }
@@ -148,8 +140,8 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
             kalman_predict(dt);
 
             kalman_new_gyro(calibrated_data.gyro);
-            kalman_new_magno(calibrated_data.magno);
             kalman_new_accel(calibrated_data.accel);
+            kalman_new_magno(calibrated_data.magno);
 
             state_estimate_t current_estimate;
 
@@ -160,6 +152,8 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
             state_estimate_debug_t debug;
             kalman_get_gyro_bias(debug.gyro_bias);
+            kalman_get_magno_bias(debug.magno_bias);
+            kalman_get_accel_bias(debug.accel_bias);
             messaging_producer_send_timestamp(&messaging_producer_debug, 0, (const uint8_t *) &debug,
                                               data_timestamp);
         }

@@ -4,7 +4,9 @@
 
 #define NUM_ITERATIONS 1000
 
-TEST(TestQuest, TestIdentity) {
+using namespace Eigen;
+
+TEST(TestQMethod, TestIdentity) {
     const float observations[2][3] = {
             {1.0, 0.0, 0.0f},
             {0.0, 1.0, 0.0f}
@@ -20,7 +22,7 @@ TEST(TestQuest, TestIdentity) {
 
     float q_out[4];
 
-    EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
+    EXPECT_GT(davenport_q_method(observations, references, a, 2, q_out), 0);
 
     expect_fuzzy_eq(q_out[0], 0);
     expect_fuzzy_eq(q_out[1], 0);
@@ -28,7 +30,7 @@ TEST(TestQuest, TestIdentity) {
     expect_fuzzy_eq(q_out[3], 1);
 }
 
-TEST(TestQuest, TestIdentity2) {
+TEST(TestQMethod, TestIdentity2) {
     float observations[2][3] = {
             {1.0, 0.0, 0.0f},
             {0.0, 1.0, 0.0f}
@@ -61,7 +63,7 @@ TEST(TestQuest, TestIdentity2) {
 
     float q_out[4];
 
-    EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
+    EXPECT_GT(davenport_q_method(observations, references, a, 2, q_out), 0);
 
     expect_fuzzy_eq(q_out[0], 0);
     expect_fuzzy_eq(q_out[1], 0);
@@ -69,7 +71,7 @@ TEST(TestQuest, TestIdentity2) {
     expect_fuzzy_eq(q_out[3], 1);
 }
 
-TEST(TestQuest, TestIdentity3) {
+TEST(TestQMethod, TestIdentity3) {
     float observations[2][3] = {
             {1.0, 0.0, 0.0f},
             {0.0, 1.0, 0.0f}
@@ -102,7 +104,7 @@ TEST(TestQuest, TestIdentity3) {
 
     float q_out[4];
 
-    EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
+    EXPECT_GT(davenport_q_method(observations, references, a, 2, q_out), 0);
 
     expect_fuzzy_eq(q_out[0], 0);
     expect_fuzzy_eq(q_out[1], 0);
@@ -110,7 +112,7 @@ TEST(TestQuest, TestIdentity3) {
     expect_fuzzy_eq(q_out[3], 1);
 }
 
-TEST(TestQuest, TestRotation) {
+TEST(TestQMethod, TestRotation) {
     float observations[2][3];
 
     const float references[2][3] = {
@@ -134,7 +136,7 @@ TEST(TestQuest, TestRotation) {
 
     float q_out[4];
 
-    EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
+    EXPECT_GT(davenport_q_method(observations, references, a, 2, q_out), 0);
 
     Eigen::Quaternionf out;
     out.x() = q_out[0];
@@ -150,7 +152,7 @@ TEST(TestQuest, TestRotation) {
     }
 }
 
-TEST(TestQuest, TestRotation2) {
+TEST(TestQMethod, TestRotation2) {
     float observations[2][3] = {
             {1.0, 0.0, 0.0f},
             {0.0, 1.0, 0.0f}
@@ -175,7 +177,7 @@ TEST(TestQuest, TestRotation2) {
 
     float q_out[4];
 
-    EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
+    EXPECT_GT(davenport_q_method(observations, references, a, 2, q_out), 0);
 
     Eigen::Quaternionf out;
     out.x() = q_out[0];
@@ -191,7 +193,7 @@ TEST(TestQuest, TestRotation2) {
     }
 }
 
-TEST(TestQuest, TestRotation3) {
+TEST(TestQMethod, TestRotation3) {
     float observations[2][3] = {
             {1.0, 0.0, 0.0f},
             {0.0, 1.0, 0.0f}
@@ -216,7 +218,7 @@ TEST(TestQuest, TestRotation3) {
 
     float q_out[4];
 
-    EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
+    EXPECT_GT(davenport_q_method(observations, references, a, 2, q_out), 0);
 
     Eigen::Quaternionf out;
     out.x() = q_out[0];
@@ -231,7 +233,7 @@ TEST(TestQuest, TestRotation3) {
     }
 }
 
-TEST(TestQuest, TestRotation4) {
+TEST(TestQMethod, TestRotation4) {
     for (int iter_i = 0; iter_i < NUM_ITERATIONS; iter_i++) {
         float observations[2][3] = {
                 {1.0, 0.0, 0.0f},
@@ -257,7 +259,7 @@ TEST(TestQuest, TestRotation4) {
 
         float q_out[4];
 
-        EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
+        EXPECT_GT(davenport_q_method(observations, references, a, 2, q_out), 0);
 
         Eigen::Quaternionf out;
         out.x() = q_out[0];
@@ -273,7 +275,7 @@ TEST(TestQuest, TestRotation4) {
     }
 }
 
-TEST(TestQuest, TestRotation5) {
+TEST(TestQMethod, TestRotation5) {
     for (int iter_i = 0; iter_i < NUM_ITERATIONS; iter_i++) {
         float observations[2][3] = {
                 {1.0, 0.0, 0.0f},
@@ -299,7 +301,7 @@ TEST(TestQuest, TestRotation5) {
 
         float q_out[4];
 
-        EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
+        EXPECT_GT(davenport_q_method(observations, references, a, 2, q_out), 0);
 
         Eigen::Quaternionf out;
         out.x() = q_out[0];
@@ -315,7 +317,7 @@ TEST(TestQuest, TestRotation5) {
     }
 }
 
-TEST(TestQuest, TestRotation6) {
+TEST(TestQMethod, TestRotation6) {
     for (int iter_i = 0; iter_i < NUM_ITERATIONS; iter_i++) {
         float observations[2][3] = {
                 {1.0, 0.0, 0.0f},
@@ -341,7 +343,7 @@ TEST(TestQuest, TestRotation6) {
 
         float q_out[4];
 
-        EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
+        EXPECT_GT(davenport_q_method(observations, references, a, 2, q_out), 0);
 
         Eigen::Quaternionf out;
         out.x() = q_out[0];
@@ -357,7 +359,7 @@ TEST(TestQuest, TestRotation6) {
     }
 }
 
-TEST(TestQuest, TestRotationRandom) {
+TEST(TestQMethod, TestRotationRandom) {
     for (int rand_i = 0; rand_i < NUM_ITERATIONS; rand_i++) {
         float observations[2][3] = {
                 {1.0, 0.0, 0.0f},
@@ -383,7 +385,7 @@ TEST(TestQuest, TestRotationRandom) {
 
         float q_out[4];
 
-        EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
+        EXPECT_GT(davenport_q_method(observations, references, a, 2, q_out), 0);
 
         Eigen::Quaternionf out;
         out.x() = q_out[0];
@@ -399,7 +401,7 @@ TEST(TestQuest, TestRotationRandom) {
     }
 }
 
-TEST(TestQuest, TestRotationRandom2) {
+TEST(TestQMethod, TestRotationRandom2) {
     for (int rand_i = 0; rand_i < NUM_ITERATIONS; rand_i++) {
         float observations[2][3] = {
                 {1.0, 0.0, 0.0f},
@@ -425,7 +427,7 @@ TEST(TestQuest, TestRotationRandom2) {
 
         float q_out[4];
 
-        EXPECT_GT(quest_estimate(observations, references, a, q_out), 0);
+        EXPECT_GT(davenport_q_method(observations, references, a, 2, q_out), 0);
 
         Eigen::Quaternionf out;
         out.x() = q_out[0];
@@ -436,6 +438,47 @@ TEST(TestQuest, TestRotationRandom2) {
         for (int i = 0; i < 2; i++) {
             Eigen::Vector3f test = out * Eigen::Vector3f(observations[0][0], observations[0][1], observations[0][2]) -
                                    Eigen::Vector3f(references[0][0], references[0][1], references[0][2]);
+            expect_fuzzy_eq(test.norm(), 0);
+        }
+    }
+}
+
+
+TEST(TestQMethod, TestRotationRandom3) {
+    const int num_observations = 100;
+
+    for (int rand_i = 0; rand_i < NUM_ITERATIONS; rand_i++) {
+        Eigen::Quaternionf rotation(Eigen::AngleAxisf(get_rand(), Eigen::Vector3f::UnitZ()) * Eigen::AngleAxisf(get_rand(), Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(get_rand(), Eigen::Vector3f::UnitX()));
+
+        float references[num_observations][3];
+        float observations[num_observations][3];
+        float a[num_observations];
+
+        for (int i = 0; i < num_observations; i++) {
+            Eigen::Vector3f reference = Eigen::Vector3f(get_rand(), get_rand(), get_rand()).normalized();
+            Eigen::Vector3f observation = rotation * reference;
+
+            a[i] = 1.0f / num_observations;
+            for (int j = 0; j < 3; j++) {
+                references[i][j] = reference[j];
+                observations[i][j] = observation[j];
+            }
+        }
+
+
+
+        float q_out[4];
+
+        EXPECT_GT(davenport_q_method(observations, references, a, num_observations, q_out), 0);
+
+        Eigen::Quaternionf out;
+        out.x() = q_out[0];
+        out.y() = q_out[1];
+        out.z() = q_out[2];
+        out.w() = q_out[3];
+
+        for (int i = 0; i < num_observations; i++) {
+            Vector3f test = out * Map<const Vector3f>(observations[i]) - Map<const Vector3f>(references[i]);
             expect_fuzzy_eq(test.norm(), 0);
         }
     }

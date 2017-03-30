@@ -15,3 +15,5 @@ add_executable(heading heading.cpp)
 add_executable(mapplotter mapplotter.cpp)
 
 add_executable(data_plot data_plot.cpp)
+
+add_executable(alignment_calibration alignment_calibration.cpp)

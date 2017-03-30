@@ -34,15 +34,23 @@ board_config_t board_configs[BoardConfigMax] = {
                 .has_sdcard = false,
                 .run_state_estimators = false,
 
-                .mpu9250_magno_transform = {3.83654358e-03f,  -3.16423517e-05f,   1.81636820e-05f,
-                                            -3.16423517e-05f,   3.84013596e-03f,   4.12319935e-05f,
-                                            1.81636820e-05f,   4.12319935e-05f,  3.70062710e-03f},
-                .mpu9250_magno_offset = {-135.21782686f, -261.42029277f,  383.75197833f},
+                .mpu9250_magno_transform = {  0.00376175f, -2.16389e-05f,   -4.693e-05f,
+                                              -8.92487e-05f,   0.00352811f,  5.92323e-05f,
+                                              3.01523e-05f, -1.34296e-05f,   0.00358605f},
 
-                .mpu9250_accel_transform = {4.91349087e-04f,   4.30897731e-06f,  -7.38765621e-07f,
-                                            4.30897731e-06f,   4.98870383e-04f,  -2.67767187e-06f,
-                                            -7.38765621e-07f, -2.67767187e-06f,   4.83404457e-04f,},
-                .mpu9250_accel_offset = {-20.62997267f,  19.17199868f,  60.14190283f},
+                // Pre alignment calibration
+//                .mpu9250_magno_transform = {3.76252290e-03f, -5.43825032e-05f, -9.86020881e-06f,
+//                                            -5.43825032e-05f, 3.52770399e-03f, 2.26720785e-05f,
+//                                            -9.86020881e-06f, 2.26720785e-05f, 3.58676152e-03f},
+
+                .mpu9250_magno_offset = {-256.02417377f, -139.64831065f, -376.54883754f,},
+
+                .mpu9250_accel_transform = {
+                        4.91349087e-04f, 4.30897731e-06f, -7.38765621e-07f,
+                        4.30897731e-06f, 4.98870383e-04f, -2.67767187e-06f,
+                        -7.38765621e-07f, -2.67767187e-06f, 4.83404457e-04f,
+                },
+                .mpu9250_accel_offset = {-20.62997267f, 19.17199868f, 60.14190283f},
 
                 .mpu9250_gyro_sf = 500.0f * 0.01745329251f / 32767.0f,
         },
@@ -59,7 +67,7 @@ board_config_t board_configs[BoardConfigMax] = {
 };
 
 #if defined(MESSAGING_OS_STD)
-static uint32_t board_id[3] = {0,0,0};
+static uint32_t board_id[3] = {0, 0, 0};
 
 void setBoardConfig(BoardConfig config_name) {
     for (int i = 0; i < BoardConfigMax; i++) {
@@ -84,7 +92,7 @@ static void getBoardID(uint32_t data[3]) {
 #endif
 
 board_config_t *getBoardConfig(void) {
-    static board_config_t* cached = NULL;
+    static board_config_t *cached = NULL;
     if (cached)
         return cached;
 
