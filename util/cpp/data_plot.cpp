@@ -232,6 +232,8 @@ int main(int argc, char *argv[]) {
 
     state_estimate.join();
 
+    printf("Plotting Graphs\n");
+
     for (int k = 2; k < argc; k+= 2) {
         const char *output = argv[k];
         std::istringstream f(argv[k+1]);

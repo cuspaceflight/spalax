@@ -26,10 +26,6 @@ static DiagonalMatrix<fp, 3> gyro_covariance;
 
 static DiagonalMatrix<fp, KALMAN_NUM_STATES> process_noise;
 
-fp kalman_magno_cov = 0.002f;
-fp kalman_accelerometer_cov = 0.002f;
-fp kalman_gyro_cov = 1e-2f;
-
 void kalman_init(const fp accel_reference[3], const fp magno_reference[3], const fp initial_orientation[4],
                  const fp initial_angular_velocity[3], const fp initial_position[3], const fp initial_velocity[3],
                  const fp initial_acceleration[3], const fp initial_gyro_bias[3], const fp initial_accel_bias[3],
@@ -57,29 +53,29 @@ void kalman_init(const fp accel_reference[3], const fp magno_reference[3], const
         gyro_covariance.diagonal()[i] = kalman_gyro_cov;
 
         // Attitude Error
-        P.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 1e-2f;
-        process_noise.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = 1e-5f;
+        P.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = initial_attitude_err_cov;
+        process_noise.diagonal()[i + KALMAN_ATTITUDE_ERR_IDX] = attitude_err_process_noise;
         // Angular Velocity
-        P.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 1e-5f;
-        process_noise.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = 1e1f;
+        P.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = initial_angular_vel_cov;
+        process_noise.diagonal()[i + KALMAN_ANGULAR_VEL_IDX] = angular_vel_process_noise;
         // Position
-        P.diagonal()[i + KALMAN_POSITION_IDX] = 1e-4;
-        process_noise.diagonal()[i + KALMAN_POSITION_IDX] = 1e-7f;
+        P.diagonal()[i + KALMAN_POSITION_IDX] = initial_position_cov;
+        process_noise.diagonal()[i + KALMAN_POSITION_IDX] = position_process_noise;
         // Velocity
-        P.diagonal()[i + KALMAN_VELOCITY_IDX] = 1e-4;
-        process_noise.diagonal()[i + KALMAN_VELOCITY_IDX] = 1e-7f;
+        P.diagonal()[i + KALMAN_VELOCITY_IDX] = initial_velocity_cov;
+        process_noise.diagonal()[i + KALMAN_VELOCITY_IDX] = velocity_process_noise;
         // Acceleration
-        P.diagonal()[i + KALMAN_ACCELERATION_IDX] = 1e-8f;
-        process_noise.diagonal()[i + KALMAN_ACCELERATION_IDX] = 1e2f;
+        P.diagonal()[i + KALMAN_ACCELERATION_IDX] = initial_acceleration_cov;
+        process_noise.diagonal()[i + KALMAN_ACCELERATION_IDX] = acceleration_process_noise;
         // Accel Bias
-        P.diagonal()[i + KALMAN_ACCEL_BIAS_IDX] = 1e0f;
-        process_noise.diagonal()[i + KALMAN_ACCEL_BIAS_IDX] = 1e-2f;
+        P.diagonal()[i + KALMAN_ACCEL_BIAS_IDX] = initial_accel_bias_cov;
+        process_noise.diagonal()[i + KALMAN_ACCEL_BIAS_IDX] = accel_bias_process_noise;
         // Gyro Bias
-        P.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1e-6f;
-        process_noise.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = 1e-3f;
+        P.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = initial_gyro_bias_cov;
+        process_noise.diagonal()[i + KALMAN_GYRO_BIAS_IDX] = gyro_bias_process_noise;
         // Magno Bias
-        P.diagonal()[i + KALMAN_MAGNO_BIAS_IDX] = 1e2f;
-        process_noise.diagonal()[i + KALMAN_MAGNO_BIAS_IDX] = 1e-5f;
+        P.diagonal()[i + KALMAN_MAGNO_BIAS_IDX] = initial_magno_bias_cov;
+        process_noise.diagonal()[i + KALMAN_MAGNO_BIAS_IDX] = magno_bias_process_noise;
 
         g_reference[i] = accel_reference[i];
         b_reference[i] = magno_reference[i];

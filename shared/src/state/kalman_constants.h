@@ -1,0 +1,52 @@
+#ifndef KALMAN_CONSTANTS_H
+#define KALMAN_CONSTANTS_H
+
+#include <stdint.h>
+#include <config/telemetry_packets.h>
+#include "compilermacros.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+typedef float fp;
+
+#define KALMAN_NUM_STATES 24
+
+#define KALMAN_POSITION_IDX 0
+#define KALMAN_VELOCITY_IDX 3
+#define KALMAN_ACCELERATION_IDX 6
+#define KALMAN_ACCEL_BIAS_IDX 9
+#define KALMAN_ATTITUDE_ERR_IDX 12
+#define KALMAN_ANGULAR_VEL_IDX 15
+#define KALMAN_GYRO_BIAS_IDX 18
+#define KALMAN_MAGNO_BIAS_IDX 21
+
+extern const fp kalman_accelerometer_cov;
+extern const fp kalman_magno_cov;
+extern const fp kalman_gyro_cov;
+
+extern const fp initial_position_cov;
+extern const fp initial_velocity_cov;
+extern const fp initial_acceleration_cov;
+extern const fp initial_accel_bias_cov;
+extern const fp initial_attitude_err_cov;
+extern const fp initial_angular_vel_cov;
+extern const fp initial_gyro_bias_cov;
+extern const fp initial_magno_bias_cov;
+
+
+extern const fp position_process_noise;
+extern const fp velocity_process_noise;
+extern const fp acceleration_process_noise;
+extern const fp accel_bias_process_noise;
+extern const fp attitude_err_process_noise;
+extern const fp angular_vel_process_noise;
+extern const fp gyro_bias_process_noise;
+extern const fp magno_bias_process_noise;
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif
