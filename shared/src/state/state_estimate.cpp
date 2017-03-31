@@ -38,20 +38,21 @@ MESSAGING_PRODUCER(messaging_producer, ts_state_estimate_data, sizeof(state_esti
 MESSAGING_PRODUCER(messaging_producer_debug, ts_state_estimate_debug, sizeof(state_estimate_debug_t), 20)
 MESSAGING_CONSUMER(messaging_consumer, ts_m3imu, ts_m3imu_mask, 0, 0, getPacket, 1024);
 
-static bool initialised = false;
-
 void state_estimate_init() {
-    if (initialised)
-        return;
-    initialised = true;
+    state_estimate_phase = StateEstimatePhase::Calibration;
+
+    remaining_calibration_samples = NUM_CALIBRATION_SAMPLES;
+
+    data_timestamp = 0;
+    remaining_calibration_samples = 0;
+    magno_calibration = Vector3f::Zero();
+    accel_calibration = Vector3f::Zero();
+    gyro_calibration = Vector3f::Zero();
+
 
     messaging_producer_init(&messaging_producer);
     messaging_producer_init(&messaging_producer_debug);
     messaging_consumer_init(&messaging_consumer);
-
-    state_estimate_phase = StateEstimatePhase::Calibration;
-
-    remaining_calibration_samples = NUM_CALIBRATION_SAMPLES;
 }
 
 void state_estimate_thread(void *arg) {
@@ -123,9 +124,11 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                     COMPONENT_STATE_UPDATE(avionics_component_state_state_estimate, state_error);
                 }
 
+                float t1 = magno_calibration.norm();
+
                 const float kalman_reference_vectors[2][3] = {
                         {accel_reference.x() * 9.80665f, accel_reference.y() * 9.80665f, accel_reference.z() * 9.80665f},
-                        {magno_reference.x(), magno_reference.y(), magno_reference.z()}
+                        {magno_reference.x() * t1, magno_reference.y() * t1, magno_reference.z() * t1}
                 };
 
 

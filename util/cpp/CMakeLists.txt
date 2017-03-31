@@ -14,6 +14,8 @@ add_executable(heading heading.cpp)
 
 add_executable(mapplotter mapplotter.cpp)
 
-add_executable(data_plot data_plot.cpp)
+add_executable(data_plot data_plot.cpp data_extractor.cpp data_plotter.cpp)
 
 add_executable(alignment_calibration alignment_calibration.cpp)
+
+add_executable(kalman_calibrator kalman_calibrator.cpp data_extractor.cpp data_plotter.cpp)
