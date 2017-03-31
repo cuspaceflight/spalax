@@ -1,59 +1,82 @@
 #pragma once
 #include <vector>
 
+struct DataItem {
+    bool enabled;
+    std::vector<float> data;
 
-extern std::vector<float> se_accel_x;
-extern std::vector<float> se_accel_y;
-extern std::vector<float> se_accel_z;
-extern std::vector<float> se_accel_norm;
+    DataItem() : enabled(true) {
 
-extern std::vector<float> se_rotation_x;
-extern std::vector<float> se_rotation_y;
-extern std::vector<float> se_rotation_z;
+    }
 
-extern std::vector<float> se_ang_velocity_x;
-extern std::vector<float> se_ang_velocity_y;
-extern std::vector<float> se_ang_velocity_z;
-extern std::vector<float> se_ang_vel_norm;
+    void push_back(float t) {
+        if (enabled)
+            data.push_back(t);
+    }
 
-extern std::vector<float> se_velocity_x;
-extern std::vector<float> se_velocity_y;
-extern std::vector<float> se_velocity_z;
+    std::vector<float>::iterator begin() {
+        return data.begin();
+    }
 
-extern std::vector<float> accel_x;
-extern std::vector<float> accel_y;
-extern std::vector<float> accel_z;
-extern std::vector<float> accel_norm;
+    std::vector<float>::iterator end() {
+        return data.end();
+    }
+};
 
-extern std::vector<float> gyro_x;
-extern std::vector<float> gyro_y;
-extern std::vector<float> gyro_z;
-extern std::vector<float> gyro_norm;
+struct DataExtractor {
+    DataItem se_accel_x;
+    DataItem se_accel_y;
+    DataItem se_accel_z;
+    DataItem se_accel_norm;
 
-extern std::vector<float> magno_x;
-extern std::vector<float> magno_y;
-extern std::vector<float> magno_z;
-extern std::vector<float> magno_norm;
+    DataItem se_rotation_x;
+    DataItem se_rotation_y;
+    DataItem se_rotation_z;
 
-extern std::vector<float> accel_magno_angle;
-extern std::vector<float> accel_magno_reference_angle;
+    DataItem se_ang_velocity_x;
+    DataItem se_ang_velocity_y;
+    DataItem se_ang_velocity_z;
+    DataItem se_ang_vel_norm;
 
-extern std::vector<float> se_gyro_bias_x;
-extern std::vector<float> se_gyro_bias_y;
-extern std::vector<float> se_gyro_bias_z;
+    DataItem se_velocity_x;
+    DataItem se_velocity_y;
+    DataItem se_velocity_z;
 
-extern std::vector<float> se_accel_bias_x;
-extern std::vector<float> se_accel_bias_y;
-extern std::vector<float> se_accel_bias_z;
-extern std::vector<float> se_accel_bias_norm;
+    DataItem accel_x;
+    DataItem accel_y;
+    DataItem accel_z;
+    DataItem accel_norm;
 
-extern std::vector<float> se_magno_bias_x;
-extern std::vector<float> se_magno_bias_y;
-extern std::vector<float> se_magno_bias_z;
-extern std::vector<float> se_magno_bias_norm;
+    DataItem gyro_x;
+    DataItem gyro_y;
+    DataItem gyro_z;
+    DataItem gyro_norm;
 
-extern std::vector<float> mpu_timestamps;
-extern std::vector<float> state_timestamps;
-extern std::vector<float> state_debug_timestamps;
+    DataItem magno_x;
+    DataItem magno_y;
+    DataItem magno_z;
+    DataItem magno_norm;
 
-void run_data_extractor(const char* input);
+    DataItem accel_magno_angle;
+    DataItem accel_magno_reference_angle;
+
+    DataItem se_gyro_bias_x;
+    DataItem se_gyro_bias_y;
+    DataItem se_gyro_bias_z;
+
+    DataItem se_accel_bias_x;
+    DataItem se_accel_bias_y;
+    DataItem se_accel_bias_z;
+    DataItem se_accel_bias_norm;
+
+    DataItem se_magno_bias_x;
+    DataItem se_magno_bias_y;
+    DataItem se_magno_bias_z;
+    DataItem se_magno_bias_norm;
+
+    std::vector<float> mpu_timestamps;
+    std::vector<float> state_timestamps;
+    std::vector<float> state_debug_timestamps;
+};
+
+void run_data_extractor(const char* input, DataExtractor* extractor);

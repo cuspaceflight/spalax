@@ -4,7 +4,6 @@
 #include <component_state.h>
 #include <matplotlibcpp.h>
 #include "Eigen/Core"
-#include <Eigen/Geometry>
 #include <util/board_config.h>
 #include "data_extractor.h"
 #include "state/kalman_constants.h"
@@ -75,7 +74,17 @@ float angle_delta_mean(T a_begin, T a_end, T b_begin, T b_end) {
 
 
 float compute_score() {
-    run_data_extractor(input);
+    DataExtractor de;
+
+    de.se_rotation_x.enabled = true;
+    de.se_rotation_y.enabled = true;
+    de.se_rotation_z.enabled = true;
+
+    de.se_accel_x.enabled = true;
+    de.se_accel_y.enabled = true;
+    de.se_accel_z.enabled = true;
+
+    run_data_extractor(input, &de);
 
     float score = 0;
 
@@ -86,48 +95,48 @@ float compute_score() {
 
     // We want the acceleration at the start to be similar to the acceleration at the end
 
-    score += std::abs(delta_mean(se_accel_x.begin() + settle_time, se_accel_x.begin() + settle_time + average_length,
-                        se_accel_x.end() - average_length, se_accel_x.end()));
+    score += std::abs(delta_mean(de.se_accel_x.begin() + settle_time, de.se_accel_x.begin() + settle_time + average_length,
+                                 de.se_accel_x.end() - average_length, de.se_accel_x.end()));
 
-    score += std::abs(delta_mean(se_accel_y.begin() + settle_time, se_accel_y.begin() + settle_time + average_length,
-                        se_accel_y.end() - average_length, se_accel_y.end()));
+    score += std::abs(delta_mean(de.se_accel_y.begin() + settle_time, de.se_accel_y.begin() + settle_time + average_length,
+                                 de.se_accel_y.end() - average_length, de.se_accel_y.end()));
 
-    score += std::abs(delta_mean(se_accel_z.begin() + settle_time, se_accel_z.begin() + settle_time + average_length,
-                        se_accel_z.end() - average_length, se_accel_z.end()));
+    score += std::abs(delta_mean(de.se_accel_z.begin() + settle_time, de.se_accel_z.begin() + settle_time + average_length,
+                                 de.se_accel_z.end() - average_length, de.se_accel_z.end()));
 
     // We want the acceleration at the start to be similar to the acceleration at 21 seconds
 
-    score += std::abs(delta_mean(se_accel_x.begin() + settle_time, se_accel_x.begin() + settle_time + average_length,
-                                 se_accel_x.begin() + 21000, se_accel_x.begin() + 21000 + average_length));
+    score += std::abs(delta_mean(de.se_accel_x.begin() + settle_time, de.se_accel_x.begin() + settle_time + average_length,
+                                 de.se_accel_x.begin() + 21000, de.se_accel_x.begin() + 21000 + average_length));
 
-    score += std::abs(delta_mean(se_accel_y.begin() + settle_time, se_accel_y.begin() + settle_time + average_length,
-                                 se_accel_y.begin() + 21000, se_accel_y.begin() + 21000 + average_length));
+    score += std::abs(delta_mean(de.se_accel_y.begin() + settle_time, de.se_accel_y.begin() + settle_time + average_length,
+                                 de.se_accel_y.begin() + 21000, de.se_accel_y.begin() + 21000 + average_length));
 
-    score += std::abs(delta_mean(se_accel_z.begin() + settle_time, se_accel_z.begin() + settle_time + average_length,
-                                 se_accel_z.begin() + 21000, se_accel_z.begin() + 21000 + average_length));
+    score += std::abs(delta_mean(de.se_accel_z.begin() + settle_time, de.se_accel_z.begin() + settle_time + average_length,
+                                 de.se_accel_z.begin() + 21000, de.se_accel_z.begin() + 21000 + average_length));
 
     // We want the rotation at the start to be similar to the acceleration at the end
 
-    score += std::abs(angle_delta_mean(se_rotation_x.begin() + settle_time, se_rotation_x.begin() + settle_time + average_length,
-                                 se_rotation_x.end() - average_length, se_rotation_x.end())) / 360.0f;
+    score += std::abs(angle_delta_mean(de.se_rotation_x.begin() + settle_time, de.se_rotation_x.begin() + settle_time + average_length,
+                                       de.se_rotation_x.end() - average_length, de.se_rotation_x.end())) / 360.0f;
 
-    score += std::abs(angle_delta_mean(se_rotation_y.begin() + settle_time, se_rotation_y.begin() + settle_time + average_length,
-                                 se_rotation_y.end() - average_length, se_rotation_y.end())) / 360.0f;
+    score += std::abs(angle_delta_mean(de.se_rotation_y.begin() + settle_time, de.se_rotation_y.begin() + settle_time + average_length,
+                                       de.se_rotation_y.end() - average_length, de.se_rotation_y.end())) / 360.0f;
 
-    score += std::abs(angle_delta_mean(se_rotation_z.begin() + settle_time, se_rotation_z.begin() + settle_time + average_length,
-                                 se_rotation_z.end() - average_length, se_rotation_z.end())) / 360.0f;
+    score += std::abs(angle_delta_mean(de.se_rotation_z.begin() + settle_time, de.se_rotation_z.begin() + settle_time + average_length,
+                                       de.se_rotation_z.end() - average_length, de.se_rotation_z.end())) / 360.0f;
 
 
     // We want the acceleration at the end to be roughly constant
 
-    score += std::abs(delta_mean(se_accel_x.end() - 2000, se_accel_x.end() - 2000 + average_length,
-                                 se_accel_x.end() - average_length, se_accel_x.end()));
+    score += std::abs(delta_mean(de.se_accel_x.end() - 2000, de.se_accel_x.end() - 2000 + average_length,
+                                 de.se_accel_x.end() - average_length, de.se_accel_x.end()));
 
-    score += std::abs(delta_mean(se_accel_y.end() - 2000, se_accel_y.end() - 2000 + average_length,
-                                 se_accel_y.end() - average_length, se_accel_y.end()));
+    score += std::abs(delta_mean(de.se_accel_y.end() - 2000, de.se_accel_y.end() - 2000 + average_length,
+                                 de.se_accel_y.end() - average_length, de.se_accel_y.end()));
 
-    score += std::abs(delta_mean(se_accel_z.end() - 2000, se_accel_z.end() - 2000 + average_length,
-                                 se_accel_z.end() - average_length, se_accel_z.end()));
+    score += std::abs(delta_mean(de.se_accel_z.end() - 2000, de.se_accel_z.end() - 2000 + average_length,
+                                 de.se_accel_z.end() - average_length, de.se_accel_z.end()));
 
     return score;
 }
@@ -271,6 +280,14 @@ int main(int argc, char *argv[]) {
         print_constants();
     }
 
-    plot_data(argc, argv);
+    std::cout << "Generating Graph Data" << std::endl;
+
+    DataExtractor extractor;
+
+    enable_streams(argc, argv, &extractor);
+
+    run_data_extractor(input, &extractor);
+
+    plot_data(argc, argv, &extractor);
     return 0;
 }

@@ -28,9 +28,12 @@ int main(int argc, char *argv[]) {
     component_state_start(update_handler, false);
     messaging_all_start_options(false, false);
 
-    run_data_extractor(input);
-    run_data_extractor(input);
+    DataExtractor extractor;
 
-    plot_data(argc, argv);
+    enable_streams(argc, argv, &extractor);
+
+    run_data_extractor(input, &extractor);
+
+    plot_data(argc, argv, &extractor);
     return 0;
 }
