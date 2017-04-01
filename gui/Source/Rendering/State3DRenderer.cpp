@@ -22,7 +22,7 @@ State3DRenderer::State3DRenderer() :
     FTAssert(s_instance == nullptr, "Only one State3DRenderer instance can exist at once");
 
     auto camera = std::make_shared<FTCameraFPS>();
-    camera->setPosition(glm::vec3(-30, 0, 0));
+    camera->setPosition(glm::vec3(-10, 0, 0));
     // The state estimate uses z as up and x as forwards so we adjust to match
     camera->setAxes(glm::vec3(0, 0, 1), glm::vec3(1, 0, 0));
     setCamera(std::move(camera));
@@ -38,17 +38,17 @@ State3DRenderer::State3DRenderer() :
     messaging_consumer_init(&messaging_consumer);
 
     LightDescriptor light;
-    light.position = glm::normalize(glm::vec4(1, 2, 0.2, 0));
+    light.position = glm::normalize(glm::vec4(1, 0, 0, 0));
     light.ambientCoefficient = 0.1f;
-    light.intensity = glm::vec3(0.2, 0.2, 0.2);
+    light.intensity = glm::vec3(0.4, 0, 0);
     //light.attenuation = 0.01f;
     //light.coneAngle = 15.0f;
     //light.coneDirection = glm::normalize(glm::vec3(0,1,-0.5));
     light_manager_->addLight(light);
 
-    light.position = glm::normalize(glm::vec4(-1, 2, -0.2, 0));
+    light.position = glm::normalize(glm::vec4(-1, 0, 0, 0));
     light.ambientCoefficient = 0.1f;
-    light.intensity = glm::vec3(0.2, 0.2, 0.2);
+    light.intensity = glm::vec3(0, 0, 0.4);
     //light.attenuation = 0.01f;
     //light.coneAngle = 15.0f;
     //light.coneDirection = glm::normalize(glm::vec3(0,1,-0.5));

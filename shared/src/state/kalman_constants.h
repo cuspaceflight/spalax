@@ -26,25 +26,23 @@ extern fp kalman_accelerometer_cov;
 extern fp kalman_magno_cov;
 extern fp kalman_gyro_cov;
 
-extern const fp initial_position_cov;
-extern const fp initial_velocity_cov;
-extern const fp initial_acceleration_cov;
-extern const fp initial_accel_bias_cov;
-extern const fp initial_attitude_err_cov;
-extern const fp initial_angular_vel_cov;
-extern const fp initial_gyro_bias_cov;
-extern const fp initial_magno_bias_cov;
+extern fp initial_position_cov;
+extern fp initial_velocity_cov;
+extern fp initial_acceleration_cov;
+extern fp initial_accel_bias_cov;
+extern fp initial_attitude_err_cov;
+extern fp initial_angular_vel_cov;
+extern fp initial_gyro_bias_cov;
+extern fp initial_magno_bias_cov;
 
-
-extern const fp position_process_noise;
-extern const fp velocity_process_noise;
+extern fp position_process_noise;
+extern fp velocity_process_noise;
 extern fp acceleration_process_noise;
 extern fp angular_vel_process_noise;
 extern fp gyro_bias_process_noise;
 extern fp magno_bias_process_noise;
 extern fp accel_bias_process_noise;
 extern fp attitude_err_process_noise;
-
 
 #ifdef __cplusplus
 }

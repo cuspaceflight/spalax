@@ -83,6 +83,7 @@ float compute_score() {
     de.se_accel_x.enabled = true;
     de.se_accel_y.enabled = true;
     de.se_accel_z.enabled = true;
+    de.se_accel_norm.enabled = true;
 
     run_data_extractor(input, &de);
 
@@ -107,24 +108,13 @@ float compute_score() {
     // We want the acceleration at the start to be similar to the acceleration at 21 seconds
 
     score += std::abs(delta_mean(de.se_accel_x.begin() + settle_time, de.se_accel_x.begin() + settle_time + average_length,
-                                 de.se_accel_x.begin() + 21000, de.se_accel_x.begin() + 21000 + average_length));
+                                 de.se_accel_x.begin() + 21000, de.se_accel_x.begin() + 21000 + average_length)) * 2;
 
     score += std::abs(delta_mean(de.se_accel_y.begin() + settle_time, de.se_accel_y.begin() + settle_time + average_length,
-                                 de.se_accel_y.begin() + 21000, de.se_accel_y.begin() + 21000 + average_length));
+                                 de.se_accel_y.begin() + 21000, de.se_accel_y.begin() + 21000 + average_length))  * 2;
 
     score += std::abs(delta_mean(de.se_accel_z.begin() + settle_time, de.se_accel_z.begin() + settle_time + average_length,
-                                 de.se_accel_z.begin() + 21000, de.se_accel_z.begin() + 21000 + average_length));
-
-    // We want the rotation at the start to be similar to the acceleration at the end
-
-    score += std::abs(angle_delta_mean(de.se_rotation_x.begin() + settle_time, de.se_rotation_x.begin() + settle_time + average_length,
-                                       de.se_rotation_x.end() - average_length, de.se_rotation_x.end())) / 360.0f;
-
-    score += std::abs(angle_delta_mean(de.se_rotation_y.begin() + settle_time, de.se_rotation_y.begin() + settle_time + average_length,
-                                       de.se_rotation_y.end() - average_length, de.se_rotation_y.end())) / 360.0f;
-
-    score += std::abs(angle_delta_mean(de.se_rotation_z.begin() + settle_time, de.se_rotation_z.begin() + settle_time + average_length,
-                                       de.se_rotation_z.end() - average_length, de.se_rotation_z.end())) / 360.0f;
+                                 de.se_accel_z.begin() + 21000, de.se_accel_z.begin() + 21000 + average_length))  * 2;
 
 
     // We want the acceleration at the end to be roughly constant
@@ -138,20 +128,20 @@ float compute_score() {
     score += std::abs(delta_mean(de.se_accel_z.end() - 2000, de.se_accel_z.end() - 2000 + average_length,
                                  de.se_accel_z.end() - average_length, de.se_accel_z.end()));
 
+    // We want the mean acceleration to be as small as possible
+    score += mean(de.se_accel_norm.begin(), de.se_accel_norm.end()) * 2;
+
     return score;
 }
 
-#define NUM_TUNING_CONSTANTS 8
+#define NUM_TUNING_CONSTANTS 5
 
 float *tuning_constants[NUM_TUNING_CONSTANTS] = {
-        &kalman_magno_cov,
-        &kalman_accelerometer_cov,
-        &kalman_gyro_cov,
-        &angular_vel_process_noise,
-        &attitude_err_process_noise,
-        &gyro_bias_process_noise,
         &accel_bias_process_noise,
-        &magno_bias_process_noise
+        &magno_bias_process_noise,
+        &gyro_bias_process_noise,
+        &initial_gyro_bias_cov,
+        &attitude_err_process_noise,
 };
 
 const float initial_delta_mult = 1.f;
@@ -213,7 +203,7 @@ int main(int argc, char *argv[]) {
     }
     input = argv[1];
 
-    setBoardConfig(BoardConfigSpalax);
+    setBoardConfig(BoardConfigSpalaxBrokenSD);
 
     component_state_start(update_handler, false);
     messaging_all_start_options(false, false);

@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
     const char* input = argv[1];
     const char* output = argv[2];
 
-    setBoardConfig(BoardConfigSpalax);
+    setBoardConfig(BoardConfigSpalaxBrokenSD);
 
     wmm_util_init(2016.860655737705);
 

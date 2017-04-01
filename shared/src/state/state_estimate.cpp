@@ -124,11 +124,9 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                     COMPONENT_STATE_UPDATE(avionics_component_state_state_estimate, state_error);
                 }
 
-                float t1 = magno_calibration.norm();
-
                 const float kalman_reference_vectors[2][3] = {
                         {accel_reference.x() * 9.80665f, accel_reference.y() * 9.80665f, accel_reference.z() * 9.80665f},
-                        {magno_reference.x() * t1, magno_reference.y() * t1, magno_reference.z() * t1}
+                        {magno_reference.x(), magno_reference.y(), magno_reference.z()}
                 };
 
 
@@ -143,8 +141,9 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
             kalman_predict(dt);
 
             kalman_new_gyro(calibrated_data.gyro);
-            kalman_new_accel(calibrated_data.accel);
             kalman_new_magno(calibrated_data.magno);
+            kalman_new_accel(calibrated_data.accel);
+
 
             state_estimate_t current_estimate;
 

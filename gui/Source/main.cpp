@@ -19,7 +19,7 @@ int main() {
     int ret = -1;
 
     if (FTEngine::setup()) {
-        setBoardConfig(BoardConfigSpalax);
+        setBoardConfig(BoardConfigSpalaxBrokenSD);
 
         component_state_start(update_handler, true);
         messaging_all_start();

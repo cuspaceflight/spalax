@@ -45,28 +45,24 @@ inline Matrix<fp, 3, 1> quatToMrp(const Quaternion<fp> &q) {
     return mrp;
 }
 
-inline Matrix<fp, 3, 1> angleAxisToMrp(const AngleAxis<fp>& a) {
+inline Matrix<fp, 3, 1> angleAxisToMrp(const AngleAxis<fp> &a) {
     return a.axis() * std::tan(a.angle() / 4);
 };
 
 // The 3x3 Jacobian of the rotation the target vector by the MRP rotatation w.r.t the MRP rotation
+// Assumes an MRP of zero
 inline Matrix<fp, 3, 3>
 mrp_application_jacobian(const Matrix<fp, 3, 1> &mrp, const Matrix<fp, 3, 1> &target_vector) {
     Matrix<fp, 3, 3> ret;
-    Matrix<fp, 3, 1> v0 = mrpToQuat(mrp) * target_vector;
-    const fp epsilon = 1e-6f;
-    for (int i = 0; i < 3; i++) {
-        Matrix<fp, 3, 1> altered_mrp = mrp;
-        altered_mrp[i] += epsilon;
-        Matrix<fp, 3, 1> v1 = mrpToQuat(altered_mrp) * target_vector;
+    ret << 0, target_vector.z() * 4, -target_vector.y() * 4,
+            -target_vector.z() * 4, 0, target_vector.x() * 4,
+            target_vector.y() * 4, -target_vector.x() * 4, 0;
 
-        ret.block<3, 1>(0, i) = (v1 - v0) / epsilon;
-    }
     return ret;
 }
 
 // mrp = velocity.normalized() * tan(velocity.norm() * dt / 4)
-inline Matrix<fp, 3, 1> angular_velocity_to_mrp(const Matrix<fp, 3, 1>& velocity, float dt) {
+inline Matrix<fp, 3, 1> angular_velocity_to_mrp(const Matrix<fp, 3, 1> &velocity, float dt) {
     fp omega_mag = velocity.norm();
     if (omega_mag > 1e-8f) {
         Matrix<fp, 3, 1> axis = velocity.normalized();
@@ -80,7 +76,7 @@ inline Matrix<fp, 3, 1> angular_velocity_to_mrp(const Matrix<fp, 3, 1>& velocity
 // The 3x3 Jacobian of the conversion of an angular velocity to mrp
 // For small angles this is mrp = velocity.normalized() * velocity.norm() / 4
 inline Matrix<fp, 3, 3>
-angular_velocity_jacobian(const Matrix<fp, 3, 1>& velocity, float dt) {
+angular_velocity_jacobian(const Matrix<fp, 3, 1> &velocity, float dt) {
     // TODO: if velocity magnitude small can use small angle approximation
     Matrix<fp, 3, 3> ret;
     Matrix<fp, 3, 1> v0 = angular_velocity_to_mrp(velocity, dt);
@@ -97,16 +93,12 @@ angular_velocity_jacobian(const Matrix<fp, 3, 1>& velocity, float dt) {
 
 // The 3x3 Jacobian of the rotation of the target vector by the quaternion w.r.t the target vector
 inline Matrix<fp, 3, 3> q_target_jacobian(const Matrix<fp, 3, 1> &target_vector, const Quaternion<fp> &quat) {
-    Matrix<fp, 3, 3> ret;
-    Matrix<fp, 3, 1> v0 = quat * target_vector;
-    const fp epsilon = 1e-6f;
-    for (int i = 0; i < 3; i++) {
-        Matrix<fp, 3, 1> altered_target = target_vector;
-        altered_target[i] += epsilon;
-        Matrix<fp, 3, 1> v1 = quat * altered_target;
+    (void) target_vector;
 
-        ret.block<3, 1>(0, i) = (v1 - v0) / epsilon;
-    }
+    Matrix3f ret;
+    ret.block<3, 1>(0, 0) = quat * Vector3f(1, 0, 0);
+    ret.block<3, 1>(0, 1) = quat * Vector3f(0, 1, 0);
+    ret.block<3, 1>(0, 2) = quat * Vector3f(0, 0, 1);
     return ret;
 }
 
@@ -149,7 +141,7 @@ inline void compute_radii_of_curvature(float latitude, float *r_meridian, float 
     *r_meridian = wgm84_re * (1 - wgm84_eccentricity2) / (t * t * t);
 }
 
-inline Vector3f quat_to_euler(const Quaternionf& quat) {
+inline Vector3f quat_to_euler(const Quaternionf &quat) {
     return quat.toRotationMatrix().eulerAngles(0, 1, 2);
 }
 
