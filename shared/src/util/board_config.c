@@ -25,6 +25,16 @@ board_config_t board_configs[BoardConfigMax] = {
                 .run_state_estimators = false,
         },
         {
+                .name = BoardConfigM3Dart2,
+                .board_id = {3342426, 859197701, 959525687},
+                .has_adis = false,
+                .has_gps = false,
+                .has_mpu9250 = true,
+                .has_ms5611 = true,
+                .has_sdcard = false,
+                .run_state_estimators = false,
+        },
+        {
                 .name = BoardConfigSpalax,
                 .board_id = {3407919, 875778316, 808991032},
                 .has_adis = false,
@@ -60,11 +70,9 @@ board_config_t board_configs[BoardConfigMax] = {
                 .has_sdcard = false,
                 .run_state_estimators = false,
 
-                .mpu9250_magno_transform = {
-                        3.56769423e-03f, -4.70400756e-06f, -2.17556609e-05f,
-                        -4.70400756e-06f, 3.54416567e-03f, 8.99719186e-06f,
-                        -2.17556609e-05f, 8.99719186e-06f, 3.39979642e-03f
-                },
+                .mpu9250_magno_transform = {  0.00356189f,   5.5954e-05f,  0.000142585f,
+                                              -7.67756e-05f,   0.00353788f,   0.00021073f,
+                                              -0.00018975f, -0.000203796f,   0.00339035f},
 
                 .mpu9250_magno_offset = {-161.21354731f, -71.48453403f, -396.80383599f},
 

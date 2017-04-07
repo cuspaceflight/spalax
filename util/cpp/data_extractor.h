@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <state/kalman_constants.h>
 
 struct DataItem {
     bool enabled;
@@ -73,6 +74,17 @@ struct DataExtractor {
     DataItem se_magno_bias_y;
     DataItem se_magno_bias_z;
     DataItem se_magno_bias_norm;
+
+    DataItem se_magno_ref_bias_x;
+    DataItem se_magno_ref_bias_y;
+    DataItem se_magno_ref_bias_z;
+    DataItem se_magno_ref_bias_norm;
+
+    DataItem se_gyro_sf_x;
+    DataItem se_gyro_sf_y;
+    DataItem se_gyro_sf_z;
+
+    DataItem P[KALMAN_NUM_STATES];
 
     std::vector<float> mpu_timestamps;
     std::vector<float> state_timestamps;

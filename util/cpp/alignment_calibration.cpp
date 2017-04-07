@@ -110,25 +110,6 @@ int main(int argc, char *argv[]) {
     Vector3f magno_reference(0.39134267f, -0.00455851434f, -0.920233727f);
 
 
-    Vector3f accel_calibration = Vector3f::Zero();
-    Vector3f magno_calibration = Vector3f::Zero();
-
-
-    // We initialize the references based on the first 100 samples
-    for (int i = 0; i < 100; i++) {
-        accel_calibration += accel_all[i];
-        magno_calibration += magno_all[i];
-    }
-    accel_calibration.normalize();
-    magno_calibration.normalize();
-
-
-    Vector3f rot_vector = accel_reference.cross(magno_reference).normalized();
-    float angle = std::acos(accel_calibration.normalized().transpose() * magno_calibration.normalized());
-    magno_reference = Eigen::Quaternionf(Eigen::AngleAxisf(angle, rot_vector)) * accel_reference;
-
-
-
     Vector3f magno_s[num_samples];
     Vector3f accel_s[num_samples];
 

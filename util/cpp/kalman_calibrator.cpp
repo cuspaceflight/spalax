@@ -105,43 +105,17 @@ float compute_score() {
     score += std::abs(delta_mean(de.se_accel_z.begin() + settle_time, de.se_accel_z.begin() + settle_time + average_length,
                                  de.se_accel_z.end() - average_length, de.se_accel_z.end()));
 
-    // We want the acceleration at the start to be similar to the acceleration at 21 seconds
-
-    score += std::abs(delta_mean(de.se_accel_x.begin() + settle_time, de.se_accel_x.begin() + settle_time + average_length,
-                                 de.se_accel_x.begin() + 21000, de.se_accel_x.begin() + 21000 + average_length)) * 2;
-
-    score += std::abs(delta_mean(de.se_accel_y.begin() + settle_time, de.se_accel_y.begin() + settle_time + average_length,
-                                 de.se_accel_y.begin() + 21000, de.se_accel_y.begin() + 21000 + average_length))  * 2;
-
-    score += std::abs(delta_mean(de.se_accel_z.begin() + settle_time, de.se_accel_z.begin() + settle_time + average_length,
-                                 de.se_accel_z.begin() + 21000, de.se_accel_z.begin() + 21000 + average_length))  * 2;
-
-
-    // We want the acceleration at the end to be roughly constant
-
-    score += std::abs(delta_mean(de.se_accel_x.end() - 2000, de.se_accel_x.end() - 2000 + average_length,
-                                 de.se_accel_x.end() - average_length, de.se_accel_x.end()));
-
-    score += std::abs(delta_mean(de.se_accel_y.end() - 2000, de.se_accel_y.end() - 2000 + average_length,
-                                 de.se_accel_y.end() - average_length, de.se_accel_y.end()));
-
-    score += std::abs(delta_mean(de.se_accel_z.end() - 2000, de.se_accel_z.end() - 2000 + average_length,
-                                 de.se_accel_z.end() - average_length, de.se_accel_z.end()));
-
     // We want the mean acceleration to be as small as possible
     score += mean(de.se_accel_norm.begin(), de.se_accel_norm.end()) * 2;
 
     return score;
 }
 
-#define NUM_TUNING_CONSTANTS 5
+#define NUM_TUNING_CONSTANTS 2
 
 float *tuning_constants[NUM_TUNING_CONSTANTS] = {
-        &accel_bias_process_noise,
         &magno_bias_process_noise,
-        &gyro_bias_process_noise,
-        &initial_gyro_bias_cov,
-        &attitude_err_process_noise,
+        &accel_bias_process_noise
 };
 
 const float initial_delta_mult = 1.f;
@@ -154,7 +128,7 @@ float compute_derivatives(float pos_derivatives[NUM_TUNING_CONSTANTS], float neg
     float original_score = compute_score();
 
     for (int i = 0; i < NUM_TUNING_CONSTANTS; i++) {
-        float delta = std::max(delta_mult * *tuning_constants[i], 1e-9f * delta_mult);
+        float delta = std::max(delta_mult * *tuning_constants[i], 1e-8f * delta_mult);
 
         float original = *tuning_constants[i];
         *tuning_constants[i] += delta;

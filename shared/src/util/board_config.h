@@ -14,6 +14,7 @@ typedef enum {
     BoardConfigM3Booster,
     BoardConfigSpalax,
     BoardConfigSpalaxBrokenSD,
+    BoardConfigM3Dart2,
     BoardConfigMax
 } BoardConfig;
 

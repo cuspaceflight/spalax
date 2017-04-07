@@ -66,6 +66,8 @@ def calibration_basic_mean(data):
 def calibration_ellipsoid(data):
     data2 = data_regularize(data)
 
+    plot_scatter(data2, "Regularized Data", 1)
+
     center, (a, b, c), evecs, v = ellipsoid_fit(data2)
     D = np.array([[1 / a, 0., 0.], [0., 1 / b, 0.], [0., 0., 1 / c]])
     transform = evecs.dot(D).dot(evecs.T)
