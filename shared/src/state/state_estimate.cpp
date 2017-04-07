@@ -36,7 +36,7 @@ static uint32_t data_timestamp = 0;
 
 MESSAGING_PRODUCER(messaging_producer, ts_state_estimate_data, sizeof(state_estimate_t), 20)
 MESSAGING_PRODUCER(messaging_producer_debug, ts_state_estimate_debug, sizeof(state_estimate_debug_t), 20)
-MESSAGING_CONSUMER(messaging_consumer, ts_m3imu, ts_m3imu_mask, 0, 0, getPacket, 1024);
+MESSAGING_CONSUMER(messaging_consumer, ts_raw_data, ts_raw_data, 0, 0, getPacket, 1024);
 
 void state_estimate_init() {
     state_estimate_phase = StateEstimatePhase::Calibration;
@@ -91,11 +91,6 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                 accel_calibration /= (float) NUM_CALIBRATION_SAMPLES;
                 magno_calibration /= (float) NUM_CALIBRATION_SAMPLES;
                 gyro_calibration /= (float) NUM_CALIBRATION_SAMPLES;
-
-                // We correct for the angle disparity between the accelerometer and magnetometer references
-                float desired_angle = std::acos(accel_reference.dot(magno_reference));
-                Vector3f rotation_vector = accel_reference.cross(magno_reference);
-                Vector3f modified_magno_reference = AngleAxisf(desired_angle, rotation_vector) * accel_reference;
 
                 const float quest_reference_vectors[2][3] = {
                         {accel_reference.x(), accel_reference.y(), accel_reference.z()},

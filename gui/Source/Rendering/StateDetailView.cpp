@@ -47,8 +47,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         mpu9250_update_count++;
     }
     else if (packet->header.id == ts_ms5611_data) {
-        FTAssert(packet->header.length == sizeof(ms5611data_t), "Incorrect Packet Size");
-        auto data = (ms5611data_t*)packet->payload;
+        auto data = telemetry_get_payload<ms5611data_t>(packet);
 
         values[0] = (float)data->pressure;
         values[1] = ms5611_get_altitude(data);

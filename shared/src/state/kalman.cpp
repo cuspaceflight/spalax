@@ -116,7 +116,7 @@ void kalman_get_state(state_estimate_t *state) {
     state->orientation_q[3] = prior_attitude.w();
 }
 
-static_assert(KALMAN_NUM_STATES == (sizeof(((state_estimate_debug_t *)0)->P) / sizeof(float)));
+static_assert(KALMAN_NUM_STATES == (sizeof(((state_estimate_debug_t *)0)->P) / sizeof(float)), "KALMAN_NUM_STATES incorrect");
 
 void kalman_get_state_debug(state_estimate_debug_t *state) {
     for (int i = 0; i < 3; i++) {
