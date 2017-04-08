@@ -12,6 +12,7 @@
 #include <state/math_util.h>
 #include <file_telemetry.h>
 #include <thread>
+#include <cpp_utils.h>
 
 
 using namespace Eigen;
@@ -165,7 +166,7 @@ static void reset() {
     last_state_debug_timestamp = 0;
 }
 
-void run_data_extractor(const char *input, DataExtractor *extractor) {
+void run_data_extractor(const char *input, bool run_state_estimators, DataExtractor *extractor) {
     assert(de == nullptr);
 
     de = extractor;
@@ -174,11 +175,15 @@ void run_data_extractor(const char *input, DataExtractor *extractor) {
 
     messaging_consumer_init(&messaging_consumer);
 
-    state_estimate_init();
+    if (run_state_estimators)
+        state_estimate_init();
 
     file_telemetry_input_start(input);
 
-    std::thread state_estimate(state_estimate_thread, nullptr);
+    std::unique_ptr<std::thread> se_thread;
+
+    if (run_state_estimators)
+        se_thread = std::make_unique<std::thread>(state_estimate_thread, nullptr);
 
     // The file_telemetry_input can disconnect but there may still be packets in the consumers buffer from when we slept
     while (file_telemetry_input_connected() ||
@@ -189,9 +194,11 @@ void run_data_extractor(const char *input, DataExtractor *extractor) {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
-    state_estimate_terminate();
+    if (run_state_estimators) {
+        state_estimate_terminate();
 
-    state_estimate.join();
+        se_thread->join();
+    }
 
     file_telemetry_input_stop();
 

@@ -91,4 +91,4 @@ struct DataExtractor {
     std::vector<float> state_debug_timestamps;
 };
 
-void run_data_extractor(const char* input, DataExtractor* extractor);
+void run_data_extractor(const char* input, bool run_state_estimators, DataExtractor* extractor);

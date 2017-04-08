@@ -7,13 +7,16 @@
 
 namespace plt = matplotlibcpp;
 
-void enable_streams(int argc, char **argv, DataExtractor *de) {
-    for (int k = 2; k < argc; k += 2) {
+static const char options_delimeter = ':';
+static const char plot_delimimeter = ';';
+
+int enable_streams(int argc, char **argv, DataExtractor *de) {
+    for (int k = 0; k < argc; k += 2) {
         std::istringstream f(argv[k + 1]);
         std::string graph_constant;
 
-        while (getline(f, graph_constant, ';')) {
-            auto it = graph_constant.find_first_of(":");
+        while (getline(f, graph_constant, plot_delimimeter)) {
+            auto it = graph_constant.find_first_of(options_delimeter);
             std::string graph_variable = graph_constant.substr(0, it);
 
             if (graph_variable == "AX")
@@ -121,20 +124,24 @@ void enable_streams(int argc, char **argv, DataExtractor *de) {
 
             else if (graph_variable[0] == 'P') {
                 int num;
-                if (sscanf(graph_variable.c_str(), "P%d", &num) != 1)
-                    exit(1);
+                if (sscanf(graph_variable.c_str(), "P%d", &num) != 1) {
+                    std::cerr << "Invalid Variable Format" << graph_variable << std::endl;
+                    return 1;
+                }
                 assert(num >= 0 && num < KALMAN_NUM_STATES);
 
                 de->P[num].enabled = true;
             } else if (graph_variable == "AMRANGLE")
                 de->accel_magno_reference_angle.enabled = true;
             else {
-                std::cout << "Unrecognised Variable " << graph_variable << std::endl;;
+                std::cerr << "Unrecognised Variable " << graph_variable << std::endl;
+                return 1;
             }
 
 
         }
     }
+    return 0;
 }
 
 static std::pair<std::vector<float>, std::vector<float>>
@@ -170,8 +177,10 @@ void plot_with_options(const std::string &name, const std::vector<float> &timest
 
     if (options.compare(0, 2, "av") == 0) {
         int num;
-        if (sscanf(options.c_str(), "av%d", &num) != 1)
+        if (sscanf(options.c_str(), "av%d", &num) != 1) {
+            std::cerr << "Invalid Option String " << options << std::endl;
             exit(1);
+        }
 
         assert(num > 0);
 
@@ -179,11 +188,11 @@ void plot_with_options(const std::string &name, const std::vector<float> &timest
         plot_name += std::to_string(num);
         plot_name += " Sample Mean";
 
-        auto pair = average_filter(data, timestamps, num);
+        auto pair = average_filter(data, timestamps, (size_t)num);
         plot_data = std::move(pair.first);
         plot_timestamps = std::move(pair.second);
     } else {
-        std::cout << "Unrecognised Options string " << options;
+        std::cerr << "Unrecognised Options String " << options;
     }
 
     plt::named_plot(plot_name, plot_timestamps, plot_data);
@@ -193,22 +202,22 @@ void plot_with_options(const std::string &name, const std::vector<float> &timest
         plt::ylabel(plot_name);
 }
 
-void plot_data(int argc, char **argv, const DataExtractor *de) {
+int plot_data(int argc, char **argv, const DataExtractor *de) {
     printf("Plotting Graphs\n");
 
-    for (int k = 2; k < argc; k += 2) {
+    for (int k = 0; k < argc; k += 2) {
         const char *output = argv[k];
         std::istringstream f(argv[k + 1]);
         std::string arg = argv[k + 1];
 
-        auto line_count = std::count(arg.begin(), arg.end(), ';') + 1;
+        auto line_count = std::count(arg.begin(), arg.end(), plot_delimimeter) + 1;
 
         std::string graph_constant;
-        while (getline(f, graph_constant, ';')) {
-            auto it = graph_constant.find_first_of(":");
+        while (getline(f, graph_constant, plot_delimimeter)) {
+            auto it = graph_constant.find_first_of(options_delimeter);
             std::string graph_variable = graph_constant.substr(0, it);
             std::string graph_options =
-                    it == std::string::npos ? "" : graph_constant.substr(it + 1, graph_options.size() - it - 1);
+                    it == std::string::npos ? "" : graph_constant.substr(it + 1, graph_constant.size() - it - 1);
 
             if (graph_variable == "AX")
                 plot_with_options("Accelerometer X $(m/s^2)$", de->mpu_timestamps, de->accel_x.data, graph_options, line_count == 1);
@@ -356,14 +365,17 @@ void plot_data(int argc, char **argv, const DataExtractor *de) {
 
             else if (graph_variable[0] == 'P') {
                 int num;
-                if (sscanf(graph_variable.c_str(), "P%d", &num) != 1)
-                    exit(1);
+                if (sscanf(graph_variable.c_str(), "P%d", &num) != 1) {
+                    std::cerr << "Invalid Variable Format" << graph_variable << std::endl;
+                    return 1;
+                }
                 assert(num >= 0 && num < KALMAN_NUM_STATES);
 
                 plot_with_options("P" + std::to_string(num), de->state_debug_timestamps, de->P[num].data,
                                   graph_options, line_count == 1);
             } else {
-                std::cout << "Unrecognised Variable " << graph_variable << std::endl;
+                std::cerr << "Unrecognised Variable " << graph_variable << std::endl;
+                return 1;
             }
 
         }
@@ -375,5 +387,5 @@ void plot_data(int argc, char **argv, const DataExtractor *de) {
         plt::save(output);
         plt::clf();
     }
-
+    return 0;
 }
