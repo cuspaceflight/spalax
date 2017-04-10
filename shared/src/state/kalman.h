@@ -13,7 +13,7 @@ extern "C" {
 void kalman_init(const fp accel_reference[3], const fp magno_reference[3], const fp initial_orientation[4],
                  const fp initial_angular_velocity[3], const fp initial_position[3], const fp initial_velocity[3],
                  const fp initial_acceleration[3], const fp initial_gyro_bias[3], const fp initial_accel_bias[3],
-                 const fp initial_magno_bias[3], const fp initial_magno_ref_bias[3]);
+                 const fp initial_magno_bias[3]);
 
 void kalman_predict(fp dt);
 

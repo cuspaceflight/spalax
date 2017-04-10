@@ -16,8 +16,6 @@ static Quaternion<fp> prior_attitude;
 #define ACCELERATION prior_state_vector.block<3,1>(KALMAN_ACCELERATION_IDX,0)
 #define ACCEL_BIAS prior_state_vector.block<3,1>(KALMAN_ACCEL_BIAS_IDX,0)
 #define MAGNO_BIAS prior_state_vector.block<3,1>(KALMAN_MAGNO_BIAS_IDX, 0)
-#define MAGNO_REF_BIAS prior_state_vector.block<3,1>(KALMAN_MAGNO_REF_IDX, 0)
-#define GYRO_SF prior_state_vector.block<3,1>(KALMAN_GYRO_SF_IDX, 0)
 
 static Matrix<fp, 3, 1> g_reference;
 static Matrix<fp, 3, 1> b_reference;
@@ -31,7 +29,7 @@ static DiagonalMatrix<fp, KALMAN_NUM_STATES> process_noise;
 void kalman_init(const fp accel_reference[3], const fp magno_reference[3], const fp initial_orientation[4],
                  const fp initial_angular_velocity[3], const fp initial_position[3], const fp initial_velocity[3],
                  const fp initial_acceleration[3], const fp initial_gyro_bias[3], const fp initial_accel_bias[3],
-                 const fp initial_magno_bias[3], const fp initial_magno_ref_bias[3]) {
+                 const fp initial_magno_bias[3]) {
     for (int i = 0; i < KALMAN_NUM_STATES; i++) {
         prior_state_vector(i) = 0;
     }
@@ -43,8 +41,6 @@ void kalman_init(const fp accel_reference[3], const fp magno_reference[3], const
     GYRO_BIAS = Map<const Matrix<fp, 3, 1>>(initial_gyro_bias);
     ACCEL_BIAS = Map<const Matrix<fp, 3, 1>>(initial_accel_bias);
     MAGNO_BIAS = Map<const Matrix<fp, 3, 1>>(initial_magno_bias);
-    MAGNO_REF_BIAS = Map<const Matrix<fp, 3, 1>>(initial_magno_ref_bias);
-    GYRO_SF = Matrix<fp, 3, 1>::Ones();
 
     prior_attitude.x() = initial_orientation[0];
     prior_attitude.y() = initial_orientation[1];
@@ -80,13 +76,6 @@ void kalman_init(const fp accel_reference[3], const fp magno_reference[3], const
         // Magno Bias
         P.diagonal()[i + KALMAN_MAGNO_BIAS_IDX] = initial_magno_bias_cov;
         process_noise.diagonal()[i + KALMAN_MAGNO_BIAS_IDX] = magno_bias_process_noise;
-        // Magno Ref Bias
-        P.diagonal()[i + KALMAN_MAGNO_REF_IDX] = initial_magno_ref_cov;
-        process_noise.diagonal()[i + KALMAN_MAGNO_REF_IDX] = magno_ref_process_noise;
-
-        // Gyro SF
-        P.diagonal()[i + KALMAN_GYRO_SF_IDX] = initial_gyro_sf_cov;
-        process_noise.diagonal()[i + KALMAN_GYRO_SF_IDX] = gyro_sf_process_noise;
 
         g_reference[i] = accel_reference[i];
         b_reference[i] = magno_reference[i];
@@ -125,8 +114,6 @@ void kalman_get_state_debug(state_estimate_debug_t *state) {
         state->magno_bias[i] = MAGNO_BIAS[i];
         state->accel_bias[i] = ACCEL_BIAS[i];
         state->gyro_bias[i] = GYRO_BIAS[i];
-        state->magno_ref_bias[i] = MAGNO_REF_BIAS[i];
-        state->gyro_sf[i] = GYRO_SF[i];
     }
 
     for (int i = 0; i < KALMAN_NUM_STATES; i++) {
@@ -234,32 +221,25 @@ void kalman_new_accel(const fp accel[3]) {
 void kalman_new_magno(const fp magno[3]) {
     // The attitude rotates the observations onto the references
     // Attitude error is always 0 on entry
-    Matrix<fp, 3, 1> predicted_measurement = (prior_attitude.inverse() * (b_reference + MAGNO_REF_BIAS)) + MAGNO_BIAS;
+    Matrix<fp, 3, 1> predicted_measurement = (prior_attitude.inverse() * b_reference) + MAGNO_BIAS;
     Matrix<fp, 3, 1> y = Map<const Matrix<fp, 3, 1>>(magno) - predicted_measurement;
 
     Matrix<fp, 3, 3> H = mrp_application_jacobian(ATTITUDE_ERROR, predicted_measurement) * -1;
 
     Matrix<fp, 3, 3> H_prime = Matrix<fp, 3, 3>::Identity();
 
-    Matrix<fp, 3, 3> H_prime2 = q_target_jacobian(b_reference + MAGNO_REF_BIAS, prior_attitude.inverse());
-
     do_update_t<3, KALMAN_ATTITUDE_ERR_IDX>(y, H, magno_covariance);
 
     do_update_t<3, KALMAN_MAGNO_BIAS_IDX>(y, H_prime, magno_covariance);
-
-    do_update_t<3, KALMAN_MAGNO_REF_IDX>(y, H_prime2, magno_covariance);
 }
 
 void kalman_new_gyro(const fp gyro[3]) {
     // The attitude rotates the observations onto the references
     // Attitude error is always 0 on entry
-    Matrix<fp, 3, 1> predicted_measurement = (prior_attitude.inverse() * ANGULAR_VELOCITY).cwiseProduct(GYRO_SF) + GYRO_BIAS;
+    Matrix<fp, 3, 1> predicted_measurement = prior_attitude.inverse() * ANGULAR_VELOCITY + GYRO_BIAS;
 
     Matrix<fp, 3, 1> y = Map<const Matrix<fp, 3, 1>>(gyro) - predicted_measurement;
     Matrix<fp, 3, 9> H;
-
-    Matrix<fp, 3, 3> H_prime = Matrix<fp, 3, 3>::Zero();
-    H_prime.diagonal() = prior_attitude.inverse() * ANGULAR_VELOCITY;
 
     H.block<3, 3>(0, KALMAN_ATTITUDE_ERR_IDX - KALMAN_ATTITUDE_ERR_IDX) =
             mrp_application_jacobian(ATTITUDE_ERROR, predicted_measurement) * -1;
@@ -268,8 +248,6 @@ void kalman_new_gyro(const fp gyro[3]) {
     H.block<3, 3>(0, KALMAN_GYRO_BIAS_IDX - KALMAN_ATTITUDE_ERR_IDX) = Matrix<fp, 3, 3>::Identity();
 
     do_update_t<9, KALMAN_ATTITUDE_ERR_IDX>(y, H, gyro_covariance);
-
-    do_update_t<3, KALMAN_GYRO_SF_IDX>(y, H_prime, gyro_covariance);
 }
 
 

@@ -19,7 +19,7 @@ static THD_WORKING_AREA(waGPS, 1024);
 #include <state/state_estimate.h>
 // This is possibly more than it needs - but can be tweaked later
 // It will need substantially more than other threads
-static THD_WORKING_AREA(waStateEstimators, 4086);
+static THD_WORKING_AREA(waStateEstimators, 4086 * 2);
 #endif
 
 int main(void) {

@@ -9,7 +9,7 @@
 // Don't need to do anything
 #elif defined MESSAGING_OS_CHIBIOS
 // Override allocators
-#define HEAP_SIZE (1024 & ~0x0F) + 16
+#define HEAP_SIZE 7000
 
 static volatile char memory_buffer[HEAP_SIZE] MEMORY_BUFFER_ATTRIBUTES;
 static memory_heap_t memory_heap;
@@ -141,12 +141,15 @@ static const model_parameter_t wmm_parameters[] = {
 };
 
 
-static MAGtype_MagneticModel* magnetic_models[EPOCHS];
 static MAGtype_MagneticModel* timed_magnetic_model;
 static MAGtype_Ellipsoid ellipsoid;
 static MAGtype_Geoid geoid;
 
+static bool is_initialized = false;
+
 void wmm_util_init(double model_time) {
+    if (is_initialized)
+        return;
     COMPONENT_STATE_UPDATE(avionics_component_world_mag_model, state_initializing);
 
     if (model_time < wmm_epoch || model_time > wmm_epoch + 5)
@@ -155,6 +158,9 @@ void wmm_util_init(double model_time) {
 #if defined MESSAGING_OS_CHIBIOS
     chHeapObjectInit(&memory_heap, (void*)memory_buffer, HEAP_SIZE);
 #endif
+    MAGtype_MagneticModel* magnetic_models[EPOCHS];
+
+
     MAGtype_MagneticModel* model = magnetic_models[0] = MAG_AllocateModelMemory(wmm_num_terms);
 
     if (model == NULL) {
@@ -207,6 +213,10 @@ void wmm_util_init(double model_time) {
     //geoid.Geoid_Initialized = 1;
 
     COMPONENT_STATE_UPDATE(avionics_component_world_mag_model, state_ok);
+
+    MAG_FreeMagneticModelMemory(magnetic_models[0]);
+
+    is_initialized = true;
 }
 
 void wmm_util_get_magnetic_field(float latitude, float longitude, float elevation, MagneticFieldParams* out) {
