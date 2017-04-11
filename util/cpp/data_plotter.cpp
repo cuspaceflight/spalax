@@ -106,22 +106,6 @@ int enable_streams(int argc, char **argv, DataExtractor *de) {
             else if (graph_variable == "SEMBNORM")
                 de->se_magno_bias_norm.enabled = true;
 
-            else if (graph_variable == "SEGSFX")
-                de->se_gyro_sf_x.enabled = true;
-            else if (graph_variable == "SEGSFY")
-                de->se_gyro_sf_y.enabled = true;
-            else if (graph_variable == "SEGSFZ")
-                de->se_gyro_sf_z.enabled = true;
-
-            else if (graph_variable == "SEMRBX")
-                de->se_magno_ref_bias_x.enabled = true;
-            else if (graph_variable == "SEMRBY")
-                de->se_magno_ref_bias_y.enabled = true;
-            else if (graph_variable == "SEMRBZ")
-                de->se_magno_ref_bias_z.enabled = true;
-            else if (graph_variable == "SEMRBNORM")
-                de->se_magno_ref_bias_norm.enabled = true;
-
             else if (graph_variable[0] == 'P') {
                 int num;
                 if (sscanf(graph_variable.c_str(), "P%d", &num) != 1) {
@@ -333,30 +317,6 @@ int plot_data(int argc, char **argv, const DataExtractor *de) {
                                   graph_options, line_count == 1);
             else if (graph_variable == "SEMBNORM")
                 plot_with_options("Magnetometer Bias Magnitude", de->state_debug_timestamps, de->se_magno_bias_norm.data,
-                                  graph_options, line_count == 1);
-
-            else if (graph_variable == "SEMRBX")
-                plot_with_options("Magnetometer Reference Bias X", de->state_debug_timestamps, de->se_magno_ref_bias_x.data,
-                                  graph_options, line_count == 1);
-            else if (graph_variable == "SEMRBY")
-                plot_with_options("Magnetometer Reference Bias Y", de->state_debug_timestamps, de->se_magno_ref_bias_y.data,
-                                  graph_options, line_count == 1);
-            else if (graph_variable == "SEMRBZ")
-                plot_with_options("Magnetometer Reference Bias Z", de->state_debug_timestamps, de->se_magno_ref_bias_z.data,
-                                  graph_options, line_count == 1);
-            else if (graph_variable == "SEMRBNORM")
-                plot_with_options("Magnetometer Reference Bias Magnitude", de->state_debug_timestamps,
-                                  de->se_magno_ref_bias_norm.data,
-                                  graph_options, line_count == 1);
-
-            else if (graph_variable == "SEGSFX")
-                plot_with_options("Gyroscope SF X", de->state_debug_timestamps, de->se_gyro_sf_x.data, graph_options,
-                                  line_count == 1);
-            else if (graph_variable == "SEGSFY")
-                plot_with_options("Gyroscope SF Y", de->state_debug_timestamps, de->se_gyro_sf_y.data, graph_options,
-                                  line_count == 1);
-            else if (graph_variable == "SEGSFZ")
-                plot_with_options("Gyroscope SF Bias Z", de->state_debug_timestamps, de->se_gyro_sf_z.data,
                                   graph_options, line_count == 1);
 
             else if (graph_variable == "AMRANGLE")

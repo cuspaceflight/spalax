@@ -131,16 +131,6 @@ bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
         de->se_magno_bias_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(data->magno_bias).norm());
 
-        de->se_magno_ref_bias_x.push_back(data->magno_ref_bias[0]);
-        de->se_magno_ref_bias_y.push_back(data->magno_ref_bias[1]);
-        de->se_magno_ref_bias_z.push_back(data->magno_ref_bias[2]);
-
-        de->se_magno_ref_bias_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(data->magno_ref_bias).norm());
-
-        de->se_gyro_sf_x.push_back(data->gyro_sf[0]);
-        de->se_gyro_sf_y.push_back(data->gyro_sf[1]);
-        de->se_gyro_sf_z.push_back(data->gyro_sf[2]);
-
         float angle = std::acos(Eigen::Map<const Matrix<fp, 3, 1>>(data->accel_ref).normalized().transpose() *
                                 Eigen::Map<const Matrix<fp, 3, 1>>(data->magno_ref).normalized());
 
