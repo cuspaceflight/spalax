@@ -146,10 +146,17 @@ static MAGtype_Ellipsoid ellipsoid;
 static MAGtype_Geoid geoid;
 
 static bool is_initialized = false;
+static double initialized_model_time;
 
 void wmm_util_init(double model_time) {
-    if (is_initialized)
-        return;
+    if (is_initialized) {
+        if (initialized_model_time == model_time)
+            return;
+
+        MAG_FreeMagneticModelMemory(timed_magnetic_model);
+    }
+
+    initialized_model_time = model_time;
     COMPONENT_STATE_UPDATE(avionics_component_world_mag_model, state_initializing);
 
     if (model_time < wmm_epoch || model_time > wmm_epoch + 5)
