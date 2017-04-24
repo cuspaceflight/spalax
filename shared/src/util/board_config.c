@@ -68,7 +68,7 @@ board_config_t board_configs[BoardConfigMax] = {
                 .has_mpu9250 = true,
                 .has_ms5611 = true,
                 .has_sdcard = false,
-                .run_state_estimators = false,
+                .run_state_estimators = true,
 
                 .mpu9250_magno_transform = {  0.00356189f,   5.5954e-05f,  0.000142585f,
                                               -7.67756e-05f,   0.00353788f,   0.00021073f,

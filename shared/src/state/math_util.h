@@ -77,17 +77,29 @@ inline Matrix<fp, 3, 1> angular_velocity_to_mrp(const Matrix<fp, 3, 1> &velocity
 // For small angles this is mrp = velocity.normalized() * velocity.norm() / 4
 inline Matrix<fp, 3, 3>
 angular_velocity_jacobian(const Matrix<fp, 3, 1> &velocity, float dt) {
-    // TODO: if velocity magnitude small can use small angle approximation
     Matrix<fp, 3, 3> ret;
-    Matrix<fp, 3, 1> v0 = angular_velocity_to_mrp(velocity, dt);
-    const fp epsilon = 1e-6f;
-    for (int i = 0; i < 3; i++) {
-        Matrix<fp, 3, 1> altered_velocity = velocity;
-        altered_velocity[i] += epsilon;
-        Matrix<fp, 3, 1> v1 = angular_velocity_to_mrp(altered_velocity, dt);
 
-        ret.block<3, 1>(0, i) = (v1 - v0) / epsilon;
-    }
+    fp x = velocity.x();
+    fp y = velocity.y();
+    fp z = velocity.z();
+
+    fp normsq = x*x + y*y + z*z;
+    fp norm = std::sqrt(normsq);
+
+    if (norm < 1e-8f)
+        return Matrix<fp, 3, 3>::Zero();
+
+
+    fp norm3 = norm * norm * norm;
+
+    fp t = std::tan((dt*norm)/4);
+    fp t2 = t*t + 1;
+    fp t3 = (4*normsq);
+
+    ret << t/norm - (x*x*t)/norm3 + (dt*x*x*t2)/t3,(dt*x*y*t2)/t3 - (x*y*t)/norm3,(dt*x*z*t2)/t3 - (x*z*t)/norm3,
+    (dt*x*y*t2)/t3 - (x*y*t)/norm3, t/norm - (y*y*t)/norm3 + (dt*y*y*t2)/t3,(dt*y*z*t2)/t3 - (y*z*t)/norm3,
+    (dt*x*z*t2)/t3 - (x*z*t)/norm3,(dt*y*z*t2)/t3 - (y*z*t)/norm3, t/norm - (z*z*t)/norm3 + (dt*z*z*t2)/t3;
+
     return ret;
 }
 

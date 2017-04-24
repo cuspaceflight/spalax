@@ -30,9 +30,3 @@ fp accel_bias_process_noise = 1e-9f;
 
 fp initial_magno_bias_cov = 1e1f;
 fp magno_bias_process_noise = 1e-5f;
-
-fp initial_magno_ref_cov = 0;//1e-3f;
-fp magno_ref_process_noise = 0;//1e-4f;
-
-fp initial_gyro_sf_cov = 0;//1e-3f;
-fp gyro_sf_process_noise = 0;//1e-5f;

@@ -85,7 +85,7 @@ float compute_score() {
     de.se_accel_z.enabled = true;
     de.se_accel_norm.enabled = true;
 
-    run_data_extractor(input, &de);
+    run_data_extractor(input, true, &de);
 
     float score = 0;
 
@@ -250,7 +250,7 @@ int main(int argc, char *argv[]) {
 
     enable_streams(argc, argv, &extractor);
 
-    run_data_extractor(input, &extractor);
+    run_data_extractor(input, true, &extractor);
 
     plot_data(argc, argv, &extractor);
     return 0;

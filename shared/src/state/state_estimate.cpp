@@ -9,6 +9,7 @@
 #include <Eigen/Geometry>
 #include "quest.h"
 #include "kalman.h"
+#include "wmm_util.h"
 
 using namespace Eigen;
 
@@ -48,6 +49,18 @@ void state_estimate_init() {
     accel_calibration = Vector3f::Zero();
     gyro_calibration = Vector3f::Zero();
 
+//
+//    wmm_util_init(TIMESTAMP_YEAR + TIMESTAMP_WEEK / 52.0 + TIMESTAMP_DAY_OF_WEEK / (52.0 * 7.0));
+//
+//    MagneticFieldParams params;
+//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
+//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
+//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
+//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
+//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
+//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
+//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
+//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
 
     messaging_producer_init(&messaging_producer);
     messaging_producer_init(&messaging_producer_debug);
@@ -130,14 +143,9 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                         {magno_reference.x(),            magno_reference.y(), magno_reference.z()}
                 };
 
-                float initial_magno_ref_bias[3] = {0,0,0};
-
-                //Map<Vector3f>initial_magno_ref_bias_v(initial_magno_ref_bias);
-                //initial_magno_ref_bias_v = modified_magno_reference - magno_reference;
-
                 kalman_init(kalman_reference_vectors[0], kalman_reference_vectors[1], initial_orientation,
-                                    initial_angular_velocity, initial_position, initial_velocity, initial_acceleration,
-                                    initial_gyro_bias, initial_accel_bias, initial_magno_bias, initial_magno_ref_bias);
+                            initial_angular_velocity, initial_position, initial_velocity, initial_acceleration,
+                            initial_gyro_bias, initial_accel_bias, initial_magno_bias);
 
                 state_estimate_phase = StateEstimatePhase::Estimation;
             }
@@ -159,7 +167,7 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
             state_estimate_debug_t debug;
             kalman_get_state_debug(&debug);
 
-            messaging_producer_send_timestamp(&messaging_producer_debug, 0, (const uint8_t *) &debug,
+            messaging_producer_send_timestamp(&messaging_producer_debug, message_flags_dont_send_over_usb, (const uint8_t *) &debug,
                                               data_timestamp);
         }
 
