@@ -14,7 +14,7 @@
 
 
 static StateDetailView* s_instance = nullptr;
-static const int num_labels = 31;
+static const int num_labels = 41;
 float values[num_labels];
 
 int mpu9250_update_count = 0;
@@ -77,6 +77,19 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[28] = state->acceleration[0];
         values[29] = state->acceleration[1];
         values[30] = state->acceleration[2];
+    } else if (packet->header.id == ts_adis16405_data) {
+        auto data = telemetry_get_payload<adis16405_data_t>(packet);
+
+        values[31] = data->supply;
+        values[32] = data->gyro[0];
+        values[33] = data->gyro[1];
+        values[34] = data->gyro[2];
+        values[35] = data->accel[0];
+        values[36] = data->accel[1];
+        values[37] = data->accel[2];
+        values[38] = data->magno[0];
+        values[39] = data->magno[1];
+        values[40] = data->magno[2];
     }
     return true;
 }
@@ -101,6 +114,10 @@ StateDetailView::StateDetailView() {
         L"SE Position X", L"SE Position X", L"SE Position X",
         L"SE Velocity X", L"SE Velocity X", L"SE Velocity X",
         L"SE Acceleration X", L"SE Acceleration X", L"SE Acceleration X",
+        L"ADIS Supply",
+        L"ADIS Gyro X", L"ADIS Gyro Y", L"ADIS Gyro Z",
+        L"ADIS Accel X", L"ADIS Accel Y", L"ADIS Accel Z",
+        L"ADIS Magno X", L"ADIS Magno Y", L"ADIS Magno Z"
     };
 
     auto window_size_node = std::make_shared<FTWindowSizeNode>();

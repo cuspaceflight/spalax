@@ -308,9 +308,11 @@ void adis16405_thread(void *arg) {
     uint32_t send_over_usb_count = adis16405_send_over_usb_count;
     uint32_t send_over_can_count = adis16405_send_over_can_count;
     while(TRUE) {
-        chSysLock();
-        chBSemWaitS(&adis16405_semaphore);
-        chSysUnlock();
+        //chSysLock();
+        //chBSemWaitS(&adis16405_semaphore);
+        //chSysUnlock();
+
+        chThdSleepMilliseconds(10);
 
         if (!adis16405_burst_read((int16_t*)&data))
             continue;

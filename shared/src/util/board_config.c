@@ -7,10 +7,10 @@ board_config_t board_configs[BoardConfigMax] = {
         {
                 .name = BoardConfigM3Dart,
                 .board_id = {3407947, 859066637, 858994999},
-                .has_adis = false,
+                .has_adis = true,
                 .has_gps = false,
-                .has_mpu9250 = true,
-                .has_ms5611 = true,
+                .has_mpu9250 = false,
+                .has_ms5611 = false,
                 .has_sdcard = false,
                 .run_state_estimators = false,
         },
@@ -37,10 +37,10 @@ board_config_t board_configs[BoardConfigMax] = {
         {
                 .name = BoardConfigSpalax,
                 .board_id = {3407919, 875778316, 808991032},
-                .has_adis = false,
+                .has_adis = true,
                 .has_gps = false,
-                .has_mpu9250 = true,
-                .has_ms5611 = true,
+                .has_mpu9250 = false,
+                .has_ms5611 = false,
                 .has_sdcard = false,
                 .run_state_estimators = false,
 
