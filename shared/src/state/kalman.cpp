@@ -260,4 +260,8 @@ void kalman_new_gyro(const fp gyro[3]) {
     do_update_t<3, KALMAN_GYRO_BIAS_IDX>(y, H3, gyro_covariance);
 }
 
+void kalman_new_gps(const fp *r, const fp *v) {
+    //TODO: Implement Me
+}
+
 

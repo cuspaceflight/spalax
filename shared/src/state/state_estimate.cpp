@@ -18,20 +18,23 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata);
 
 enum class StateEstimatePhase {
     Init,
+    WaitForGPS,
     Calibration,
     Estimation
 };
 
 static StateEstimatePhase state_estimate_phase = StateEstimatePhase::Init;
 
-#define NUM_CALIBRATION_SAMPLES 1000
-static int remaining_calibration_samples;
+#define NUM_MPU_CALIBRATION_SAMPLES 1000
+static int num_mpu_calibration_samples;
 static Matrix<fp, 3, 1> magno_calibration;
 static Matrix<fp, 3, 1> accel_calibration;
 static Matrix<fp, 3, 1> gyro_calibration;
 
-static const Vector3f accel_reference(0, 0, 1);
-static const Vector3f magno_reference(0.39134267f, -0.00455851434f, -0.920233727f);
+
+static int num_gps_calibration_samples;
+static Matrix<fp, 3, 1> gps_r_calibration;
+static Matrix<fp, 3, 1> gps_v_calibration;
 
 static uint32_t data_timestamp = 0;
 
@@ -40,27 +43,7 @@ MESSAGING_PRODUCER(messaging_producer_debug, ts_state_estimate_debug, sizeof(sta
 MESSAGING_CONSUMER(messaging_consumer, ts_raw_data, ts_raw_data, 0, 0, getPacket, 1024);
 
 void state_estimate_init() {
-    state_estimate_phase = StateEstimatePhase::Calibration;
-
-    remaining_calibration_samples = NUM_CALIBRATION_SAMPLES;
-
-    data_timestamp = 0;
-    magno_calibration = Vector3f::Zero();
-    accel_calibration = Vector3f::Zero();
-    gyro_calibration = Vector3f::Zero();
-
-//
-//    wmm_util_init(TIMESTAMP_YEAR + TIMESTAMP_WEEK / 52.0 + TIMESTAMP_DAY_OF_WEEK / (52.0 * 7.0));
-//
-//    MagneticFieldParams params;
-//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
-//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
-//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
-//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
-//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
-//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
-//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
-//    wmm_util_get_magnetic_field(52.2053, 0.1218, 0, &params);
+    state_estimate_phase = StateEstimatePhase::WaitForGPS;
 
     messaging_producer_init(&messaging_producer);
     messaging_producer_init(&messaging_producer_debug);
@@ -73,6 +56,65 @@ void state_estimate_thread(void *arg) {
     state_estimate_init();
 
     while (messaging_consumer_receive(&messaging_consumer, true, false) != messaging_receive_terminate);
+}
+
+static void finish_calibration() {
+    accel_calibration /= (float) num_mpu_calibration_samples;
+    magno_calibration /= (float) num_mpu_calibration_samples;
+    gyro_calibration /= (float) num_mpu_calibration_samples;
+
+    gps_r_calibration /= (float) num_gps_calibration_samples;
+    gps_v_calibration /= (float) num_gps_calibration_samples;
+
+    MagneticFieldParams params;
+    wmm_util_get_magnetic_field(gps_r_calibration.x(), gps_r_calibration.y(), gps_r_calibration.z(), &params);
+
+    const Vector3f accel_reference(0, 0, 1);
+    const Vector3f magno_reference = Vector3f(params.field_vector[1], params.field_vector[0], -params.field_vector[2]).normalized();
+
+    const float quest_reference_vectors[2][3] = {
+            {accel_reference.x(), accel_reference.y(), accel_reference.z()},
+            {magno_reference.x(), magno_reference.y(), magno_reference.z()}
+    };
+
+    Vector3f accel_calib_norm = accel_calibration.normalized();
+    Vector3f magno_calib_norm = magno_calibration.normalized();
+
+    const float quest_observations[2][3] = {
+            {accel_calib_norm[0], accel_calib_norm[1], accel_calib_norm[2]},
+            {magno_calib_norm[0], magno_calib_norm[1], magno_calib_norm[2]},
+    };
+
+    const float a[2] = {0.5f, 0.5f};
+
+    float initial_orientation[4] = {0, 0, 0, 1};
+    float initial_angular_velocity[3] = {0, 0, 0};
+    float initial_position[3] = {0, 0, 0};
+    float initial_velocity[3] = {0, 0, 0};
+    float initial_acceleration[3] = {0, 0, 0};
+    float initial_accel_bias[3] = {0, 0, 0};
+    float initial_magno_bias[3] = {0, 0, 0};
+    float initial_gyro_bias[3] = {
+            gyro_calibration.x(),
+            gyro_calibration.y(),
+            gyro_calibration.z()
+    };
+
+    if (quest_estimate(quest_observations, quest_reference_vectors, a, initial_orientation) == -1) {
+        COMPONENT_STATE_UPDATE(avionics_component_state_state_estimate, state_error);
+    }
+
+    const float kalman_reference_vectors[2][3] = {
+            {accel_reference.x() * 9.80665f, accel_reference.y() * 9.80665f,
+                                                                  accel_reference.z() * 9.80665f},
+            {magno_reference.x(),            magno_reference.y(), magno_reference.z()}
+    };
+
+    kalman_init(kalman_reference_vectors[0], kalman_reference_vectors[1], initial_orientation,
+                initial_angular_velocity, initial_position, initial_velocity, initial_acceleration,
+                initial_gyro_bias, initial_accel_bias, initial_magno_bias);
+
+    state_estimate_phase = StateEstimatePhase::Estimation;
 }
 
 
@@ -93,62 +135,14 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
 
         if (state_estimate_phase == StateEstimatePhase::Calibration) {
-            remaining_calibration_samples--;
+            num_mpu_calibration_samples--;
 
             magno_calibration += Map<const Matrix<fp, 3, 1>>(calibrated_data.magno);
             accel_calibration += Map<const Matrix<fp, 3, 1>>(calibrated_data.accel);
             gyro_calibration += Map<const Matrix<fp, 3, 1>>(calibrated_data.gyro);
 
-            if (remaining_calibration_samples <= 0) {
-
-                accel_calibration /= (float) NUM_CALIBRATION_SAMPLES;
-                magno_calibration /= (float) NUM_CALIBRATION_SAMPLES;
-                gyro_calibration /= (float) NUM_CALIBRATION_SAMPLES;
-
-                const float quest_reference_vectors[2][3] = {
-                        {accel_reference.x(), accel_reference.y(), accel_reference.z()},
-                        {magno_reference.x(), magno_reference.y(), magno_reference.z()}
-                };
-
-                Vector3f accel_calib_norm = accel_calibration.normalized();
-                Vector3f magno_calib_norm = magno_calibration.normalized();
-
-                const float quest_observations[2][3] = {
-                        {accel_calib_norm[0], accel_calib_norm[1], accel_calib_norm[2]},
-                        {magno_calib_norm[0], magno_calib_norm[1], magno_calib_norm[2]},
-                };
-
-                const float a[2] = {0.5f, 0.5f};
-
-                float initial_orientation[4] = {0, 0, 0, 1};
-                float initial_angular_velocity[3] = {0, 0, 0};
-                float initial_position[3] = {0, 0, 0};
-                float initial_velocity[3] = {0, 0, 0};
-                float initial_acceleration[3] = {0, 0, 0};
-                float initial_accel_bias[3] = {0, 0, 0};
-                float initial_magno_bias[3] = {0, 0, 0};
-                float initial_gyro_bias[3] = {
-                        gyro_calibration.x(),
-                        gyro_calibration.y(),
-                        gyro_calibration.z()
-                };
-
-                if (quest_estimate(quest_observations, quest_reference_vectors, a, initial_orientation) == -1) {
-                    COMPONENT_STATE_UPDATE(avionics_component_state_state_estimate, state_error);
-                }
-
-                const float kalman_reference_vectors[2][3] = {
-                        {accel_reference.x() * 9.80665f, accel_reference.y() * 9.80665f,
-                                                                              accel_reference.z() * 9.80665f},
-                        {magno_reference.x(),            magno_reference.y(), magno_reference.z()}
-                };
-
-                kalman_init(kalman_reference_vectors[0], kalman_reference_vectors[1], initial_orientation,
-                            initial_angular_velocity, initial_position, initial_velocity, initial_acceleration,
-                            initial_gyro_bias, initial_accel_bias, initial_magno_bias);
-
-                state_estimate_phase = StateEstimatePhase::Estimation;
-            }
+            if (num_mpu_calibration_samples >= NUM_MPU_CALIBRATION_SAMPLES)
+                finish_calibration();
         } else if (state_estimate_phase == StateEstimatePhase::Estimation) {
             kalman_predict(dt);
 
@@ -172,13 +166,33 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         }
 
     } else if (packet->header.id == ts_ublox_nav) {
-        // auto data = telemetry_get_payload<ublox_nav_t>(packet);
-        //auto v_mag = sqrtf(data->velE * data->velE + data->velN * data->velN);
-        //if (data->fix_type != 3 || data->num_sv < 8 || data->p_dop > 300 || data->v_acc > v_mag / 2.0f)
-        //    return true;
+        auto data = telemetry_get_payload<ublox_nav_t>(packet);
+        auto v_mag = sqrtf(data->velE * data->velE + data->velN * data->velN);
+        if (data->fix_type != 3 || data->num_sv < 8 || data->p_dop > 300 || data->v_acc > v_mag / 2.0f)
+            return true;
 
-        // TODO: Complete me!
+        if (state_estimate_phase == StateEstimatePhase::WaitForGPS) {
+            state_estimate_phase = StateEstimatePhase::Calibration;
 
+            num_gps_calibration_samples = 0;
+            num_mpu_calibration_samples = 0;
+
+            data_timestamp = 0;
+            magno_calibration = Vector3f::Zero();
+            accel_calibration = Vector3f::Zero();
+            gyro_calibration = Vector3f::Zero();
+
+            wmm_util_init(data->year + data->day / 365.0f);
+        } else if (state_estimate_phase == StateEstimatePhase::Calibration) {
+            num_gps_calibration_samples++;
+            gps_r_calibration += Vector3f(data->lat * 1e-7f, data->lon * 1e-7f, data->height * 1e-6f);
+            gps_v_calibration += Vector3f(data->velE * 1e-6f, data->velN * 1e-6f, -data->velD * 1e-6f);
+        } else if (state_estimate_phase == StateEstimatePhase::Estimation) {
+            float r[3] = {data->lat * 1e-7f, data->lon * 1e-7f, data->height * 1e-6f};
+            float v[3] = {data->velE * 1e-6f, data->velN * 1e-6f, -data->velD * 1e-6f};
+
+            kalman_new_gps(r, v);
+        }
     }
     return true;
 }
