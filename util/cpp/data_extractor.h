@@ -58,7 +58,23 @@ struct DataExtractor {
     DataItem magno_z;
     DataItem magno_norm;
 
+    DataItem adis_accel_x;
+    DataItem adis_accel_y;
+    DataItem adis_accel_z;
+    DataItem adis_accel_norm;
+
+    DataItem adis_gyro_x;
+    DataItem adis_gyro_y;
+    DataItem adis_gyro_z;
+    DataItem adis_gyro_norm;
+
+    DataItem adis_magno_x;
+    DataItem adis_magno_y;
+    DataItem adis_magno_z;
+    DataItem adis_magno_norm;
+
     DataItem accel_magno_angle;
+    DataItem adis_accel_magno_angle;
     DataItem accel_magno_reference_angle;
 
     DataItem se_gyro_bias_x;
@@ -80,6 +96,7 @@ struct DataExtractor {
     std::vector<float> mpu_timestamps;
     std::vector<float> state_timestamps;
     std::vector<float> state_debug_timestamps;
+    std::vector<float> adis_timestamps;
 };
 
 void run_data_extractor(const char* input, bool run_state_estimators, DataExtractor* extractor);

@@ -1,10 +1,9 @@
-import calibration
-import fileinput
+from scipy import signal
 
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+import fileinput, calibration
 
-format_descriptors = False
 tmp = []
 for line in fileinput.input():
     vals = line.strip().split(",")
@@ -17,11 +16,16 @@ for line in fileinput.input():
         else:
             continue
     if vals[0] == "ADIS16405Data":
-        tmp.append([float(vals[7]), float(vals[8]), float(vals[9])])
+        tmp.append(float(vals[7]))
 
-raw_data = np.array(tmp)
-tmp = []
+data = np.array(tmp)
 
-calibration.calibration_all(raw_data)
+n = len(data)
+fs = 1000.
 
+f, Pxx_den = signal.periodogram(data, fs)
+plt.semilogy(f, Pxx_den)
+plt.ylim([1e-7, 1e2])
+plt.xlabel('frequency [Hz]')
+plt.ylabel('PSD [V**2/Hz]')
 plt.show()

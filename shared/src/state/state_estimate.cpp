@@ -7,6 +7,7 @@
 #include "state_estimate.h"
 #include "Eigen/Core"
 #include <Eigen/Geometry>
+#include <calibration/adis16405_calibration.h>
 #include "quest.h"
 #include "kalman.h"
 #include "wmm_util.h"
@@ -34,6 +35,8 @@ static const Vector3f accel_reference(0, 0, 1);
 static const Vector3f magno_reference(0.39134267f, -0.00455851434f, -0.920233727f);
 
 static uint32_t data_timestamp = 0;
+
+#define USE_ADIS 1
 
 MESSAGING_PRODUCER(messaging_producer, ts_state_estimate_data, sizeof(state_estimate_t), 20)
 MESSAGING_PRODUCER(messaging_producer_debug, ts_state_estimate_debug, sizeof(state_estimate_debug_t), 20)
@@ -77,7 +80,15 @@ void state_estimate_thread(void *arg) {
 
 
 static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
-    if (packet->header.id == ts_mpu9250_data) {
+#if USE_ADIS
+    if (packet->header.id == ts_adis16405_data) {
+
+
+#else
+        if (packet->header.id == ts_mpu9250_data) {
+
+#endif
+
         if (data_timestamp == 0) {
             data_timestamp = packet->header.timestamp;
             return true;
@@ -87,11 +98,15 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
         data_timestamp = packet->header.timestamp;
 
+#if USE_ADIS
+        auto data = telemetry_get_payload<adis16405_data_t>(packet);
+        adis16405_calibrated_data_t calibrated_data;
+        adis16405_calibrate_data(data, &calibrated_data);
+#else
         auto data = telemetry_get_payload<mpu9250_data_t>(packet);
         mpu9250_calibrated_data_t calibrated_data;
         mpu9250_calibrate_data(data, &calibrated_data);
-
-
+#endif
         if (state_estimate_phase == StateEstimatePhase::Calibration) {
             remaining_calibration_samples--;
 
@@ -105,13 +120,22 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                 magno_calibration /= (float) NUM_CALIBRATION_SAMPLES;
                 gyro_calibration /= (float) NUM_CALIBRATION_SAMPLES;
 
+                // We adjust the magnetic reference vector so that the angle between the references
+                // is the same as the angle between the observations
+                Eigen::Vector3f rot_vector = accel_reference.cross(magno_reference).normalized();
+                float angle = std::acos(accel_calibration.normalized().transpose() * magno_calibration.normalized());
+                Eigen::Vector3f new_magno_reference = Eigen::Quaternionf(Eigen::AngleAxisf(angle, rot_vector)) * accel_reference;
+
                 const float quest_reference_vectors[2][3] = {
                         {accel_reference.x(), accel_reference.y(), accel_reference.z()},
-                        {magno_reference.x(), magno_reference.y(), magno_reference.z()}
+                        {new_magno_reference.x(), new_magno_reference.y(), new_magno_reference.z()}
                 };
 
-                Vector3f accel_calib_norm = accel_calibration.normalized();
-                Vector3f magno_calib_norm = magno_calibration.normalized();
+                float accel_norm = accel_calibration.norm();
+                float magno_norm = magno_calibration.norm();
+
+                Vector3f accel_calib_norm = accel_calibration / accel_norm;
+                Vector3f magno_calib_norm = magno_calibration / magno_norm;
 
                 const float quest_observations[2][3] = {
                         {accel_calib_norm[0], accel_calib_norm[1], accel_calib_norm[2]},
@@ -138,9 +162,10 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                 }
 
                 const float kalman_reference_vectors[2][3] = {
-                        {accel_reference.x() * 9.80665f, accel_reference.y() * 9.80665f,
-                                                                              accel_reference.z() * 9.80665f},
-                        {magno_reference.x(),            magno_reference.y(), magno_reference.z()}
+                        {accel_reference.x() * accel_norm, accel_reference.y() * accel_norm,
+                                accel_reference.z() * accel_norm},
+                        {new_magno_reference.x() * magno_norm, new_magno_reference.y() * magno_norm,
+                                new_magno_reference.z() * magno_norm}
                 };
 
                 kalman_init(kalman_reference_vectors[0], kalman_reference_vectors[1], initial_orientation,
@@ -167,7 +192,8 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
             state_estimate_debug_t debug;
             kalman_get_state_debug(&debug);
 
-            messaging_producer_send_timestamp(&messaging_producer_debug, message_flags_dont_send_over_usb, (const uint8_t *) &debug,
+            messaging_producer_send_timestamp(&messaging_producer_debug, message_flags_dont_send_over_usb,
+                                              (const uint8_t *) &debug,
                                               data_timestamp);
         }
 

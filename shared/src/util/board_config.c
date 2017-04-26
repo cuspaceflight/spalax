@@ -39,8 +39,8 @@ board_config_t board_configs[BoardConfigMax] = {
                 .board_id = {3407919, 875778316, 808991032},
                 .has_adis = true,
                 .has_gps = false,
-                .has_mpu9250 = false,
-                .has_ms5611 = false,
+                .has_mpu9250 = true,
+                .has_ms5611 = true,
                 .has_sdcard = false,
                 .run_state_estimators = false,
 
@@ -59,6 +59,22 @@ board_config_t board_configs[BoardConfigMax] = {
                 .mpu9250_accel_offset = {-20.62997267f, 19.17199868f, 60.14190283f},
 
                 .mpu9250_gyro_sf = 500.0f * 0.01745329251f / 32767.0f,
+
+                .adis16405_magno_transform = {
+                        9.90733836e-04f,  -1.21218939e-06f,   1.09041115e-06f,
+                        -1.21218939e-06f,   1.00988433e-03f,  -6.82266971e-08f,
+                        1.09041115e-06f,  -6.82266971e-08f,   9.96357461e-04f,
+                },
+
+                .adis16405_magno_offset = {89.78607474f, 59.85418916f, -178.81415824f},
+
+                .adis16405_accel_transform = {
+                        3.34538704e-03f,  -2.33193577e-05f,  -4.63277226e-05f,
+                        -2.33193577e-05f,   3.29961125e-03f,  -3.16361238e-05f,
+                        -4.63277226e-05f,  -3.16361238e-05f,   3.27950290e-03f,
+                },
+
+                .adis16405_accel_offset = { 12.29165588f, -15.11258878f,   4.3610087f }
         },
         {
                 .name = BoardConfigSpalaxBrokenSD,

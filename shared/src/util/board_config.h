@@ -38,6 +38,14 @@ typedef struct {
     float mpu9250_accel_transform[9];
     float mpu9250_accel_offset[3];
 
+    // Row Major 3x3 Matrix
+    float adis16405_magno_transform[9];
+    float adis16405_magno_offset[3];
+
+    // Row Major 3x3 Matrix
+    float adis16405_accel_transform[9];
+    float adis16405_accel_offset[3];
+
     float mpu9250_gyro_sf;
 } board_config_t;
 

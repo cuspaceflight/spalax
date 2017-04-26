@@ -13,7 +13,7 @@ for line in fileinput.input():
             format_descriptors = False
         else:
             continue
-    if vals[0] == "MPU9250Data":
+    if vals[0] == "ADIS16405Data":
         tmp.append([float(vals[1]), float(vals[2]), float(vals[3])])
 
 raw_data = np.array(tmp)

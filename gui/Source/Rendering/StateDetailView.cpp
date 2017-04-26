@@ -14,7 +14,7 @@
 
 
 static StateDetailView* s_instance = nullptr;
-static const int num_labels = 41;
+static const int num_labels = 44;
 float values[num_labels];
 
 int mpu9250_update_count = 0;
@@ -43,6 +43,8 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[11] = calibrated.magno[2];
 
         values[12] = mpu9250_get_heading(&calibrated);
+
+        values[43] = Eigen::Map<const Matrix<fp, 3, 1>>(calibrated.magno).norm();
 
         mpu9250_update_count++;
     }
@@ -79,17 +81,24 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[30] = state->acceleration[2];
     } else if (packet->header.id == ts_adis16405_data) {
         auto data = telemetry_get_payload<adis16405_data_t>(packet);
+        adis16405_calibrated_data_t calibrated_data;
+        adis16405_calibrate_data(data, &calibrated_data);
 
-        values[31] = data->supply;
-        values[32] = data->gyro[0];
-        values[33] = data->gyro[1];
-        values[34] = data->gyro[2];
-        values[35] = data->accel[0];
-        values[36] = data->accel[1];
-        values[37] = data->accel[2];
-        values[38] = data->magno[0];
-        values[39] = data->magno[1];
-        values[40] = data->magno[2];
+        values[31] = calibrated_data.supply;
+        values[32] = calibrated_data.gyro[0];
+        values[33] = calibrated_data.gyro[1];
+        values[34] = calibrated_data.gyro[2];
+        values[35] = calibrated_data.accel[0];
+        values[36] = calibrated_data.accel[1];
+        values[37] = calibrated_data.accel[2];
+        values[38] = calibrated_data.magno[0];
+        values[39] = calibrated_data.magno[1];
+        values[40] = calibrated_data.magno[2];
+
+        values[41] = std::acos(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.accel).normalized().transpose() *
+                                Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).normalized());
+
+        values[42] = Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).norm();
     }
     return true;
 }
@@ -117,7 +126,8 @@ StateDetailView::StateDetailView() {
         L"ADIS Supply",
         L"ADIS Gyro X", L"ADIS Gyro Y", L"ADIS Gyro Z",
         L"ADIS Accel X", L"ADIS Accel Y", L"ADIS Accel Z",
-        L"ADIS Magno X", L"ADIS Magno Y", L"ADIS Magno Z"
+        L"ADIS Magno X", L"ADIS Magno Y", L"ADIS Magno Z",
+        L"ADIS AMANGLE", L"ADIS Magno Norm", L"MPU Magno Norm",
     };
 
     auto window_size_node = std::make_shared<FTWindowSizeNode>();

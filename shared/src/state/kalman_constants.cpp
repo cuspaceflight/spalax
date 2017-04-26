@@ -1,9 +1,9 @@
 #include "kalman_constants.h"
 
 // Sensor Covariances
-fp kalman_magno_cov = 0.002f;
-fp kalman_accelerometer_cov = 0.1f;
-fp kalman_gyro_cov = 0.015;
+fp kalman_magno_cov = 0.01f;
+fp kalman_accelerometer_cov = 0.3f;
+fp kalman_gyro_cov = 0.005;
 
 // Model Covariances
 
@@ -28,5 +28,5 @@ fp gyro_bias_process_noise = 1e-4f;
 fp initial_accel_bias_cov = 1e1f;
 fp accel_bias_process_noise = 1e-9f;
 
-fp initial_magno_bias_cov = 1e1f;
-fp magno_bias_process_noise = 1e-5f;
+fp initial_magno_bias_cov = 0;
+fp magno_bias_process_noise = 0;

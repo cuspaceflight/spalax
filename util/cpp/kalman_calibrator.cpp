@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
     }
     input = argv[1];
 
-    setBoardConfig(BoardConfigSpalaxBrokenSD);
+    setBoardConfig(BoardConfigSpalax);
 
     component_state_start(update_handler, false);
     messaging_all_start_options(false, false);

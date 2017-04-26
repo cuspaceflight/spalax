@@ -13,6 +13,7 @@
 #include <file_telemetry.h>
 #include <thread>
 #include <cpp_utils.h>
+#include <calibration/adis16405_calibration.h>
 
 
 using namespace Eigen;
@@ -20,6 +21,9 @@ using namespace Eigen;
 
 static uint64_t mpu_timestamp = 0;
 static uint32_t last_mpu_timestamp = 0;
+
+static uint64_t adis_timestamp = 0;
+static uint32_t last_adis_timestamp = 0;
 
 static uint64_t state_timestamp = 0;
 static uint32_t last_state_timestamp = 0;
@@ -68,6 +72,42 @@ bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
         de->magno_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).norm());
         de->accel_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.accel).norm());
+
+    } else if (packet->header.id == ts_adis16405_data) {
+        if (last_adis_timestamp == 0) {
+            last_adis_timestamp = packet->header.timestamp;
+        }
+
+        auto delta = clocks_between(last_adis_timestamp, packet->header.timestamp);
+        adis_timestamp += delta;
+        last_adis_timestamp = packet->header.timestamp;
+
+        auto data = telemetry_get_payload<adis16405_data_t>(packet);
+        adis16405_calibrated_data_t calibrated_data;
+        adis16405_calibrate_data(data, &calibrated_data);
+
+        de->adis_timestamps.push_back((float) adis_timestamp / (float) platform_get_counter_frequency());
+        de->adis_accel_x.push_back(calibrated_data.accel[0]);
+        de->adis_accel_y.push_back(calibrated_data.accel[1]);
+        de->adis_accel_z.push_back(calibrated_data.accel[2]);
+
+        de->adis_gyro_x.push_back(calibrated_data.gyro[0]);
+        de->adis_gyro_y.push_back(calibrated_data.gyro[1]);
+        de->adis_gyro_z.push_back(calibrated_data.gyro[2]);
+        de->adis_gyro_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.gyro).norm());
+
+        de->adis_magno_x.push_back(calibrated_data.magno[0]);
+        de->adis_magno_y.push_back(calibrated_data.magno[1]);
+        de->adis_magno_z.push_back(calibrated_data.magno[2]);
+
+        float angle = std::acos(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.accel).normalized().transpose() *
+                                Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).normalized());
+
+        de->adis_accel_magno_angle.push_back(angle);
+
+        de->adis_magno_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).norm());
+        de->adis_accel_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.accel).norm());
+
 
     } else if (packet->header.id == ts_state_estimate_data) {
         auto data = telemetry_get_payload<state_estimate_t>(packet);
@@ -154,6 +194,8 @@ static void reset() {
     last_state_timestamp = 0;
     state_debug_timestamp = 0;
     last_state_debug_timestamp = 0;
+    adis_timestamp = 0;
+    last_adis_timestamp = 0;
 }
 
 void run_data_extractor(const char *input, bool run_state_estimators, DataExtractor *extractor) {

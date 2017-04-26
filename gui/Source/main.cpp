@@ -19,12 +19,12 @@ int main() {
     int ret = -1;
 
     if (FTEngine::setup()) {
-        setBoardConfig(BoardConfigSpalaxBrokenSD);
+        setBoardConfig(BoardConfigSpalax);
 
         component_state_start(update_handler, true);
         messaging_all_start();
 
-        //std::thread state_estimate(state_estimate_thread, nullptr);
+        std::thread state_estimate(state_estimate_thread, nullptr);
 
         FTEngine::getFileManager()->addSearchPath("Resources");
         FTEngine::getDirector()->getFontCache()->loadFontStyle("DefaultText", "Resources/Fonts/Vera.ftfont", glm::vec3(1,1,1));
@@ -36,9 +36,9 @@ int main() {
 
         ret = FTEngine::run();
 
-        //state_estimate_terminate();
+        state_estimate_terminate();
 
-        //state_estimate.join();
+        state_estimate.join();
 
         FTEngine::cleanup();
     }

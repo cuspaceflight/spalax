@@ -173,7 +173,8 @@ static void adis16405_init() {
     adis16405_write_u16(ADIS16405_REG_SLP_CNT,0x0000);
     chThdSleepMilliseconds(50);
     // Setting the data rate to 300 degrees per sec
-    adis16405_write_u16(ADIS16405_REG_SENS_AVG, 0x0402);
+    // And the number of filter taps to 16
+    adis16405_write_u16(ADIS16405_REG_SENS_AVG, 0x0404);
     chThdSleepMilliseconds(50);
     // Reset GPIO controls
     adis16405_write_u16(ADIS16405_REG_GPIO_CTRL, 0x0000);
@@ -194,18 +195,6 @@ static void adis16405_init() {
         COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_error);
         component_state_update(avionics_component_adis16405, state_error, errors);
     }
-
-//    config->accel_sf = 3.33f/1000.0f*9.8f;
-//    config->gyro_sf = 0.05f*3.14159265359f/180.0f;
-//
-//    // TODO: Tune these
-//    config->magno_sf[0] = 4000;
-//    config->magno_sf[1] = 4000;
-//    config->magno_sf[2] = 4000;
-//
-//    config->magno_bias[0] = 0;
-//    config->magno_bias[1] = 0;
-//    config->magno_bias[2] = 0;
 
     adis16405_initialized = true;
     memory_barrier_release();
@@ -312,7 +301,7 @@ void adis16405_thread(void *arg) {
         //chBSemWaitS(&adis16405_semaphore);
         //chSysUnlock();
 
-        chThdSleepMilliseconds(10);
+        chThdSleepMilliseconds(1);
 
         if (!adis16405_burst_read((int16_t*)&data))
             continue;

@@ -21,7 +21,7 @@ uint64_t timestamp = 0;
 uint32_t last_timestamp = 0;
 
 std::vector<float> mpu9250_altitudes;
-std::vector<float> mpu_timestamps;
+std::vector<float> data_timestamps;
 std::vector<float> ublox_altitudes;
 std::vector<float> ublox_timestamps;
 std::vector<float> ublox_error_bars;
@@ -46,7 +46,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
             delta_altitudes.push_back(std::abs(altitude - ublox_altitudes.back()));
         }
 
-        mpu_timestamps.push_back((float)timestamp / (float)platform_get_counter_frequency());
+        data_timestamps.push_back((float)timestamp / (float)platform_get_counter_frequency());
     } else if (packet->header.id == ts_ublox_nav) {
         auto data = telemetry_get_payload<ublox_nav_t>(packet);
         if (data->fix_type != 3 || data->num_sv < 8 || (data->h_acc > 5000 && ublox_altitudes.empty()))
@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
     }
 
     plt::errorbar(ublox_timestamps, ublox_altitudes, ublox_error_bars);
-    plt::named_plot("MS5611 Altitudes", mpu_timestamps, mpu9250_altitudes);
+    plt::named_plot("MS5611 Altitudes", data_timestamps, mpu9250_altitudes);
     plt::named_plot("Altitude Delta", delta_timestamps, delta_altitudes);
 
     plt::grid(true);

@@ -24,7 +24,7 @@ uint32_t last_timestamp = 0;
 #define TIMESTAMP_NOW (float)timestamp / (float)platform_get_counter_frequency()
 
 std::vector<float> mpu_headings;
-std::vector<float> mpu_timestamps;
+std::vector<float> data_timestamps;
 std::vector<float> ublox_altitudes;
 std::vector<float> ublox_timestamps;
 std::vector<float> delta_headings;
@@ -77,7 +77,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         if (magnetic_declination == FLT_MAX)
             return true;
         auto data = telemetry_get_payload<mpu9250_data_t>(packet);
-        mpu_timestamps.push_back(TIMESTAMP_NOW);
+        data_timestamps.push_back(TIMESTAMP_NOW);
         mpu_headings.push_back(mpu_compute_heading(data) - magnetic_declination);
     }
     return true;
@@ -98,7 +98,7 @@ int main(int argc, char* argv[]) {
     const char* input = argv[1];
     const char* output = argv[2];
 
-    setBoardConfig(BoardConfigSpalaxBrokenSD);
+    setBoardConfig(BoardConfigSpalax);
 
     wmm_util_init(2016.860655737705);
 
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
 
 
     plt::named_plot("Ublox Heading", ublox_timestamps, ublox_altitudes);
-    plt::named_plot("MPU Heading", mpu_timestamps, mpu_headings);
+    plt::named_plot("MPU Heading", data_timestamps, mpu_headings);
 
     plt::named_plot("Heading Delta", delta_timestamps, delta_headings);
 
