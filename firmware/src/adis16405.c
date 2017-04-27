@@ -173,15 +173,21 @@ static void adis16405_init() {
     adis16405_write_u16(ADIS16405_REG_SLP_CNT,0x0000);
     chThdSleepMilliseconds(50);
     // Setting the data rate to 300 degrees per sec
-    // And the number of filter taps to 16
-    adis16405_write_u16(ADIS16405_REG_SENS_AVG, 0x0404);
+    // And the number of filter taps to 0
+    adis16405_write_u16(ADIS16405_REG_SENS_AVG, 0x0402);
     chThdSleepMilliseconds(50);
     // Reset GPIO controls
     adis16405_write_u16(ADIS16405_REG_GPIO_CTRL, 0x0000);
     chThdSleepMilliseconds(50);
     // Enable data ready interrupt
-    adis16405_write_u16(ADIS16405_REG_MSC_CTRL, 0x00C6);
+    adis16405_write_u16(ADIS16405_REG_MSC_CTRL, 0x0086);
     chThdSleepMilliseconds(50);
+
+    uint16_t value = adis16405_read_u16(ADIS16405_REG_MSC_CTRL);
+    if (value != 0x0086) {
+        COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_error);
+    }
+
     // Disable Alarms
     adis16405_write_u16(ADIS16405_REG_ALM_CTRL, 0x0000);
     chThdSleepMilliseconds(50);

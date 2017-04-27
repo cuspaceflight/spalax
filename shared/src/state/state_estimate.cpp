@@ -36,6 +36,15 @@ static const Vector3f magno_reference(0.39134267f, -0.00455851434f, -0.920233727
 
 static uint32_t data_timestamp = 0;
 
+static float gyro_norm_exp_avg = 1;
+static float accel_norm_exp_avg = 1;
+static float magno_norm_exp_avg = 1;
+static float accel_norm_exp_avg_sq = 1;
+static float expected_accel_norm = 0;
+
+static const float exp_avg_alpha = 0.99f;
+
+
 #define USE_ADIS 1
 
 MESSAGING_PRODUCER(messaging_producer, ts_state_estimate_data, sizeof(state_estimate_t), 20)
@@ -124,10 +133,11 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                 // is the same as the angle between the observations
                 Eigen::Vector3f rot_vector = accel_reference.cross(magno_reference).normalized();
                 float angle = std::acos(accel_calibration.normalized().transpose() * magno_calibration.normalized());
-                Eigen::Vector3f new_magno_reference = Eigen::Quaternionf(Eigen::AngleAxisf(angle, rot_vector)) * accel_reference;
+                Eigen::Vector3f new_magno_reference =
+                        Eigen::Quaternionf(Eigen::AngleAxisf(angle, rot_vector)) * accel_reference;
 
                 const float quest_reference_vectors[2][3] = {
-                        {accel_reference.x(), accel_reference.y(), accel_reference.z()},
+                        {accel_reference.x(),     accel_reference.y(),     accel_reference.z()},
                         {new_magno_reference.x(), new_magno_reference.y(), new_magno_reference.z()}
                 };
 
@@ -162,11 +172,15 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                 }
 
                 const float kalman_reference_vectors[2][3] = {
-                        {accel_reference.x() * accel_norm, accel_reference.y() * accel_norm,
-                                accel_reference.z() * accel_norm},
+                        {accel_reference.x() * 9.80665f,       accel_reference.y() * 9.80665f,
+                                accel_reference.z() * 9.80665f},
                         {new_magno_reference.x() * magno_norm, new_magno_reference.y() * magno_norm,
                                 new_magno_reference.z() * magno_norm}
                 };
+
+                expected_accel_norm = accel_norm;
+                accel_norm_exp_avg = accel_norm;
+                accel_norm_exp_avg_sq = accel_norm*accel_norm;
 
                 kalman_init(kalman_reference_vectors[0], kalman_reference_vectors[1], initial_orientation,
                             initial_angular_velocity, initial_position, initial_velocity, initial_acceleration,
@@ -183,14 +197,38 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
 
             state_estimate_t current_estimate;
-
             kalman_get_state(&current_estimate);
+            state_estimate_debug_t debug;
+            kalman_get_state_debug(&debug);
+
+            gyro_norm_exp_avg = (1 - exp_avg_alpha) * (Map<const Matrix<fp, 3, 1>>(calibrated_data.gyro) -
+                                                       Map<const Matrix<fp, 3, 1>>(debug.gyro_bias)).norm() +
+                                exp_avg_alpha * gyro_norm_exp_avg;
+
+            accel_norm_exp_avg = (1 - exp_avg_alpha) * (Map<const Matrix<fp, 3, 1>>(calibrated_data.accel) -
+                                                        Map<const Matrix<fp, 3, 1>>(debug.accel_bias)).norm() +
+                                 exp_avg_alpha * accel_norm_exp_avg;
+
+            magno_norm_exp_avg = (1 - exp_avg_alpha) * (Map<const Matrix<fp, 3, 1>>(calibrated_data.magno) -
+                                                        Map<const Matrix<fp, 3, 1>>(debug.magno_bias)).norm() +
+                                 exp_avg_alpha * magno_norm_exp_avg;
+
+            accel_norm_exp_avg_sq = (1 - exp_avg_alpha) * (Map<const Matrix<fp, 3, 1>>(calibrated_data.accel) -
+                                                        Map<const Matrix<fp, 3, 1>>(debug.accel_bias)).squaredNorm() +
+                                 exp_avg_alpha * accel_norm_exp_avg_sq;
+
+            debug.gyro_norm_exp_avg = gyro_norm_exp_avg;
+            debug.accel_norm_exp_avg = accel_norm_exp_avg;
+            debug.magno_norm_exp_avg = magno_norm_exp_avg;
+
+            debug.accel_exp_variance = accel_norm_exp_avg_sq - accel_norm_exp_avg * accel_norm_exp_avg;
+
+            //if (accel_norm_exp_avg - expected_accel_norm < 0.01 && debug.accel_exp_variance < 0.5f) {
+            //    kalman_zero_accel();
+            //}
 
             messaging_producer_send_timestamp(&messaging_producer, 0, (const uint8_t *) &current_estimate,
                                               data_timestamp);
-
-            state_estimate_debug_t debug;
-            kalman_get_state_debug(&debug);
 
             messaging_producer_send_timestamp(&messaging_producer_debug, message_flags_dont_send_over_usb,
                                               (const uint8_t *) &debug,

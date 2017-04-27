@@ -136,6 +136,15 @@ int enable_streams(int argc, char **argv, DataExtractor *de) {
             else if (graph_variable == "SEMBNORM")
                 de->se_magno_bias_norm.enabled = true;
 
+            else if (graph_variable == "SEANEAV")
+                de->se_accel_norm_exp_avg.enabled = true;
+            else if (graph_variable == "SEGNEAV")
+                de->se_gyro_norm_exp_avg.enabled = true;
+            else if (graph_variable == "SEMNEAV")
+                de->se_magno_norm_exp_avg.enabled = true;
+            else if (graph_variable == "SEANEVAR")
+                de->se_accel_exp_var.enabled = true;
+
             else if (graph_variable[0] == 'P') {
                 int num;
                 if (sscanf(graph_variable.c_str(), "P%d", &num) != 1) {
@@ -173,6 +182,15 @@ average_filter(const std::vector<float> &data, const std::vector<float> &timesta
     return std::make_pair(filtered_data, filtered_timestamps);
 }
 
+static std::pair<std::vector<float>, std::vector<float>>
+offset_filter(const std::vector<float> &data, const std::vector<float> &timestamps, float n) {
+    std::vector<float> filtered_data;
+    for (auto entry : data) {
+        filtered_data.push_back(entry - n);
+    }
+    return std::make_pair(filtered_data, timestamps);
+}
+
 void plot_with_options(const std::string &name, const std::vector<float> &timestamps, const std::vector<float> &data,
                        const std::string &options, bool set_ylabel) {
     if (options == "") {
@@ -203,6 +221,22 @@ void plot_with_options(const std::string &name, const std::vector<float> &timest
         plot_name += " Sample Mean";
 
         auto pair = average_filter(data, timestamps, (size_t)num);
+        plot_data = std::move(pair.first);
+        plot_timestamps = std::move(pair.second);
+    } else if (options.compare(0,2, "of") == 0) {
+        float num;
+        if (sscanf(options.c_str(), "of%f", &num) != 1) {
+            std::cerr << "Invalid Option String " << options << std::endl;
+            exit(1);
+        }
+
+        assert(num > 0);
+
+        plot_name += " - ";
+        plot_name += " offset by ";
+        plot_name += std::to_string(num);
+
+        auto pair = offset_filter(data, timestamps, num);
         plot_data = std::move(pair.first);
         plot_timestamps = std::move(pair.second);
     } else {
@@ -386,6 +420,19 @@ int plot_data(int argc, char **argv, const DataExtractor *de) {
             else if (graph_variable == "AMRANGLE")
                 plot_with_options("Accel Magno Reference Angle ($^\\circ$)", de->state_debug_timestamps,
                                   de->accel_magno_reference_angle.data, graph_options, line_count == 1);
+
+            else if (graph_variable == "SEANEAV")
+                plot_with_options("SE Accel Norm Exponential Average", de->state_debug_timestamps,
+                                  de->se_accel_norm_exp_avg.data, graph_options, line_count == 1);
+            else if (graph_variable == "SEGNEAV")
+                plot_with_options("SE Gyro Norm Exponential Average", de->state_debug_timestamps,
+                                  de->se_gyro_norm_exp_avg.data, graph_options, line_count == 1);
+            else if (graph_variable == "SEMNEAV")
+                plot_with_options("SE Magno Norm Exponential Average", de->state_debug_timestamps,
+                                  de->se_magno_norm_exp_avg.data, graph_options, line_count == 1);
+            else if (graph_variable == "SEANEVAR")
+                plot_with_options("SE Accel Norm Exponential Variance", de->state_debug_timestamps,
+                                  de->se_accel_exp_var.data, graph_options, line_count == 1);
 
             else if (graph_variable[0] == 'P') {
                 int num;

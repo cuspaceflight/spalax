@@ -91,6 +91,11 @@ struct DataExtractor {
     DataItem se_magno_bias_z;
     DataItem se_magno_bias_norm;
 
+    DataItem se_gyro_norm_exp_avg;
+    DataItem se_accel_norm_exp_avg;
+    DataItem se_magno_norm_exp_avg;
+    DataItem se_accel_exp_var;
+
     DataItem P[KALMAN_NUM_STATES];
 
     std::vector<float> mpu_timestamps;

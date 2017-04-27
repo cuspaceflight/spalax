@@ -29,6 +29,8 @@ void kalman_new_magno(const fp magno[3]);
 
 void kalman_new_gyro(const fp gyro[3]);
 
+void kalman_zero_accel();
+
 #ifdef __cplusplus
 }
 #endif

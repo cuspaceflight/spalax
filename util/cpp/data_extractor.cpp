@@ -176,6 +176,11 @@ bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
 
         de->accel_magno_reference_angle.push_back(angle);
 
+        de->se_gyro_norm_exp_avg.push_back(data->gyro_norm_exp_avg);
+        de->se_accel_norm_exp_avg.push_back(data->accel_norm_exp_avg);
+        de->se_magno_norm_exp_avg.push_back(data->magno_norm_exp_avg);
+        de->se_accel_exp_var.push_back(data->accel_exp_variance);
+
         for (int i = 0; i < KALMAN_NUM_STATES; i++) {
             de->P[i].push_back(data->P[i]);
         }

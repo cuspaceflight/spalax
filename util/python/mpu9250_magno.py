@@ -16,8 +16,8 @@ for line in fileinput.input():
             format_descriptors = False
         else:
             continue
-    if vals[0] == "ADIS16405Data":
-        tmp.append([float(vals[7]), float(vals[8]), float(vals[9])])
+    if vals[0] == "MPU9250Data":
+        tmp.append([float(vals[8]), float(vals[7]), -float(vals[9])])
 
 raw_data = np.array(tmp)
 tmp = []

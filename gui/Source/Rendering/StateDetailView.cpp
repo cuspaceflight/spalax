@@ -14,7 +14,7 @@
 
 
 static StateDetailView* s_instance = nullptr;
-static const int num_labels = 44;
+static const int num_labels = 46;
 float values[num_labels];
 
 int mpu9250_update_count = 0;
@@ -45,6 +45,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[12] = mpu9250_get_heading(&calibrated);
 
         values[43] = Eigen::Map<const Matrix<fp, 3, 1>>(calibrated.magno).norm();
+        values[45] = Eigen::Map<const Matrix<fp, 3, 1>>(calibrated.accel).norm();
 
         mpu9250_update_count++;
     }
@@ -99,6 +100,7 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
                                 Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).normalized());
 
         values[42] = Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).norm();
+        values[44] = Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.accel).norm();
     }
     return true;
 }
@@ -128,6 +130,7 @@ StateDetailView::StateDetailView() {
         L"ADIS Accel X", L"ADIS Accel Y", L"ADIS Accel Z",
         L"ADIS Magno X", L"ADIS Magno Y", L"ADIS Magno Z",
         L"ADIS AMANGLE", L"ADIS Magno Norm", L"MPU Magno Norm",
+        L"ADIS Accel Norm", L"MPU Accel Norm"
     };
 
     auto window_size_node = std::make_shared<FTWindowSizeNode>();

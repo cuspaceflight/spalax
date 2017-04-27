@@ -1,7 +1,10 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import fileinput, calibration
+import calibration
+import fileinput
 
+import matplotlib.pyplot as plt
+import numpy as np
+
+format_descriptors = False
 tmp = []
 for line in fileinput.input():
     vals = line.strip().split(",")
@@ -13,8 +16,8 @@ for line in fileinput.input():
             format_descriptors = False
         else:
             continue
-    if vals[0] == "MPU9250Data":
-        tmp.append([float(vals[1]), float(vals[2]), float(vals[3])])
+    if vals[0] == "ADIS16405Data":
+        tmp.append([float(vals[7]), float(vals[8]), float(vals[9])])
 
 raw_data = np.array(tmp)
 tmp = []
