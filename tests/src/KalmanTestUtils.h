@@ -6,10 +6,10 @@ extern fp accel_reference[3];
 extern fp magno_reference[3];
 
 void kalman_test_setup(Eigen::Quaternion<fp> quat = Eigen::Quaternion<fp>(1, 0, 0, 0),
-                       Eigen::Vector3f angular_velocity = Eigen::Vector3f(0, 0, 0),
-                       Eigen::Vector3f position = Eigen::Vector3f(0, 0, 0),
-                       Eigen::Vector3f velocity = Eigen::Vector3f(0, 0, 0),
-                       Eigen::Vector3f acceleration = Eigen::Vector3f(0, 0, 0));
+                       Eigen::Matrix<fp, 3, 1> angular_velocity = Eigen::Matrix<fp, 3, 1>(0, 0, 0),
+                       Eigen::Matrix<fp, 3, 1> position = Eigen::Matrix<fp, 3, 1>(0, 0, 0),
+                       Eigen::Matrix<fp, 3, 1> velocity = Eigen::Matrix<fp, 3, 1>(0, 0, 0),
+                       Eigen::Matrix<fp, 3, 1> acceleration = Eigen::Matrix<fp, 3, 1>(0, 0, 0));
 
 void testEstimateStable(const state_estimate_t &estimate);
 

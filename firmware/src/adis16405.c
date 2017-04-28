@@ -83,32 +83,32 @@ static void adis16405_write_u8(uint8_t addr, uint8_t val) {
     spiReleaseBus(&ADIS16405_SPID);
 }
 
-static void adis16405_write_u16(uint8_t addr, uint16_t val) {
-    // All transfers are 16 bits
-    // Addresses are 7 bits
-    // We therefore address using the following system
-
-    // MSB --- LSB
-    // 1 Write bit, 7 bit address, 8 bits of data
-    // For example, 0xA11F loads 0x1F into location 0x21
-
-    uint16_t txbuf[2] = {
-        ((((uint16_t)(addr+1) | 0x80) << 8) | ((val >> 8) & 0xFF)),
-        ((((uint16_t)addr | 0x80) << 8) | (val & 0xFF))
-    };
-
-    spiAcquireBus(&ADIS16405_SPID);
-    spiStart(&ADIS16405_SPID, &spi_cfg);
-
-    spiSelect(&ADIS16405_SPID);
-    spiSend(&ADIS16405_SPID, 1, (void*)txbuf);
-    spiUnselect(&ADIS16405_SPID);
-    spiSelect(&ADIS16405_SPID);
-    spiSend(&ADIS16405_SPID, 1, (void*)&txbuf[1]);
-    spiUnselect(&ADIS16405_SPID);
-
-    spiReleaseBus(&ADIS16405_SPID);
-}
+//static void adis16405_write_u16(uint8_t addr, uint16_t val) {
+//    // All transfers are 16 bits
+//    // Addresses are 7 bits
+//    // We therefore address using the following system
+//
+//    // MSB --- LSB
+//    // 1 Write bit, 7 bit address, 8 bits of data
+//    // For example, 0xA11F loads 0x1F into location 0x21
+//
+//    uint16_t txbuf[2] = {
+//        ((((uint16_t)(addr+1) | 0x80) << 8) | ((val >> 8) & 0xFF)),
+//        ((((uint16_t)addr | 0x80) << 8) | (val & 0xFF))
+//    };
+//
+//    spiAcquireBus(&ADIS16405_SPID);
+//    spiStart(&ADIS16405_SPID, &spi_cfg);
+//
+//    spiSelect(&ADIS16405_SPID);
+//    spiSend(&ADIS16405_SPID, 1, (void*)txbuf);
+//    spiUnselect(&ADIS16405_SPID);
+//    spiSelect(&ADIS16405_SPID);
+//    spiSend(&ADIS16405_SPID, 1, (void*)&txbuf[1]);
+//    spiUnselect(&ADIS16405_SPID);
+//
+//    spiReleaseBus(&ADIS16405_SPID);
+//}
 
 static int16_t sign_extend(uint16_t val, int bits) {
 	if((val&(1<<(bits-1))) != 0){
@@ -163,34 +163,30 @@ static bool adis16405_burst_read(int16_t rx_buff[10]) {
 
 static void adis16405_init() {
 
-    // Reset calibration to factory defaults
-    adis16405_write_u16(ADIS16405_REG_GLOB_CMD, 0x0001);
-    chThdSleepMilliseconds(100);
-    // Setting the data rate to the default of 819.2 samples per second 0x0001
-    adis16405_write_u16(ADIS16405_REG_SMPL_PRD,0x0001);
-    chThdSleepMilliseconds(50);
-    // Setting sleep mode 0x0000 turn sleep mode off
-    adis16405_write_u16(ADIS16405_REG_SLP_CNT,0x0000);
-    chThdSleepMilliseconds(50);
-    // Setting the data rate to 300 degrees per sec
-    // And the number of filter taps to 0
-    adis16405_write_u16(ADIS16405_REG_SENS_AVG, 0x0402);
-    chThdSleepMilliseconds(50);
-    // Reset GPIO controls
-    adis16405_write_u16(ADIS16405_REG_GPIO_CTRL, 0x0000);
-    chThdSleepMilliseconds(50);
+//    // Reset calibration to factory defaults
+//    adis16405_write_u16(ADIS16405_REG_GLOB_CMD, 0x0001);
+//    chThdSleepMilliseconds(100);
+//    // Setting the data rate to the default of 819.2 samples per second 0x0001
+//    adis16405_write_u16(ADIS16405_REG_SMPL_PRD,0x0001);
+//    chThdSleepMilliseconds(50);
+//    // Setting sleep mode 0x0000 turn sleep mode off
+//    adis16405_write_u16(ADIS16405_REG_SLP_CNT,0x0000);
+//    chThdSleepMilliseconds(50);
+//    // Setting the data rate to 300 degrees per sec
+//    // And the number of filter taps to 0
+//    adis16405_write_u16(ADIS16405_REG_SENS_AVG, 0x0402);
+//    chThdSleepMilliseconds(50);
+//    // Reset GPIO controls
+//    adis16405_write_u16(ADIS16405_REG_GPIO_CTRL, 0x0000);
+//    chThdSleepMilliseconds(50);
     // Enable data ready interrupt
-    adis16405_write_u16(ADIS16405_REG_MSC_CTRL, 0x0086);
+    adis16405_write_u8(ADIS16405_REG_MSC_CTRL, 0x86);
     chThdSleepMilliseconds(50);
-
-    uint16_t value = adis16405_read_u16(ADIS16405_REG_MSC_CTRL);
-    if (value != 0x0086) {
-        COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_error);
-    }
-
-    // Disable Alarms
-    adis16405_write_u16(ADIS16405_REG_ALM_CTRL, 0x0000);
-    chThdSleepMilliseconds(50);
+//
+//
+//    // Disable Alarms
+//    adis16405_write_u16(ADIS16405_REG_ALM_CTRL, 0x0000);
+//    chThdSleepMilliseconds(50);
 
     // Write to flash
     // adis16405_write_u16(ADIS16405_REG_GLOB_CMD, 0x0008);
@@ -224,6 +220,14 @@ static bool adis16405_self_test(void) {
 
     // Self test - Checks if error found when test run
     return errors == 0;
+}
+
+static void adis16405_gyroscope_precision_null_calibration() {
+    adis16405_write_u8(ADIS16405_REG_GLOB_CMD, 0x10);
+
+    while ((adis16405_read_u16(ADIS16405_REG_GLOB_CMD) & 0x10) != 0) {
+        chThdSleepMilliseconds(500);
+    }
 }
 
 void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
@@ -292,6 +296,8 @@ void adis16405_thread(void *arg) {
 
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
 
+    adis16405_gyroscope_precision_null_calibration();
+
     adis16405_init();
 
     messaging_producer_init(&messaging_producer_data);
@@ -311,6 +317,11 @@ void adis16405_thread(void *arg) {
 
         if (!adis16405_burst_read((int16_t*)&data))
             continue;
+
+        uint16_t value = adis16405_read_u16(ADIS16405_REG_MSC_CTRL);
+        if (value != 0x0086) {
+            COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_error);
+        }
 
         message_metadata_t flags = 0;
 

@@ -5,8 +5,8 @@ fp accel_reference[3] = {0, 0, 1};
 fp magno_reference[3] = {0.39134267f, -0.00455851434f, -0.920233727f};
 
 
-void kalman_test_setup(Eigen::Quaternion<fp> quat, Eigen::Vector3f angular_velocity, Eigen::Vector3f position,
-                       Eigen::Vector3f velocity, Eigen::Vector3f acceleration) {
+void kalman_test_setup(Eigen::Quaternion<fp> quat, Eigen::Matrix<fp, 3, 1> angular_velocity, Eigen::Matrix<fp, 3, 1> position,
+                       Eigen::Matrix<fp, 3, 1> velocity, Eigen::Matrix<fp, 3, 1> acceleration) {
     fp quat_arr[4] = {quat.x(), quat.y(), quat.z(), quat.w()};
     fp ang_vel[3] = {angular_velocity.x(), angular_velocity.y(), angular_velocity.z()};
     fp pos[3] = {position.x(), position.y(), position.z()};

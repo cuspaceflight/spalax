@@ -27,9 +27,9 @@ static StateEstimatePhase state_estimate_phase = StateEstimatePhase::Init;
 
 #define NUM_CALIBRATION_SAMPLES 1000
 static int remaining_calibration_samples;
-static Matrix<fp, 3, 1> magno_calibration;
-static Matrix<fp, 3, 1> accel_calibration;
-static Matrix<fp, 3, 1> gyro_calibration;
+static Matrix<float, 3, 1> magno_calibration;
+static Matrix<float, 3, 1> accel_calibration;
+static Matrix<float, 3, 1> gyro_calibration;
 
 static const Vector3f accel_reference(0, 0, 1);
 static const Vector3f magno_reference(0.39134267f, -0.00455851434f, -0.920233727f);
@@ -119,9 +119,9 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         if (state_estimate_phase == StateEstimatePhase::Calibration) {
             remaining_calibration_samples--;
 
-            magno_calibration += Map<const Matrix<fp, 3, 1>>(calibrated_data.magno);
-            accel_calibration += Map<const Matrix<fp, 3, 1>>(calibrated_data.accel);
-            gyro_calibration += Map<const Matrix<fp, 3, 1>>(calibrated_data.gyro);
+            magno_calibration += Map<const Matrix<float, 3, 1>>(calibrated_data.magno);
+            accel_calibration += Map<const Matrix<float, 3, 1>>(calibrated_data.accel);
+            gyro_calibration += Map<const Matrix<float, 3, 1>>(calibrated_data.gyro);
 
             if (remaining_calibration_samples <= 0) {
 
@@ -155,13 +155,13 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                 const float a[2] = {0.5f, 0.5f};
 
                 float initial_orientation[4] = {0, 0, 0, 1};
-                float initial_angular_velocity[3] = {0, 0, 0};
-                float initial_position[3] = {0, 0, 0};
-                float initial_velocity[3] = {0, 0, 0};
-                float initial_acceleration[3] = {0, 0, 0};
-                float initial_accel_bias[3] = {0, 0, 0};
-                float initial_magno_bias[3] = {0, 0, 0};
-                float initial_gyro_bias[3] = {
+                fp initial_angular_velocity[3] = {0, 0, 0};
+                fp initial_position[3] = {0, 0, 0};
+                fp initial_velocity[3] = {0, 0, 0};
+                fp initial_acceleration[3] = {0, 0, 0};
+                fp initial_accel_bias[3] = {0, 0, 0};
+                fp initial_magno_bias[3] = {0, 0, 0};
+                fp initial_gyro_bias[3] = {
                         gyro_calibration.x(),
                         gyro_calibration.y(),
                         gyro_calibration.z()
@@ -171,18 +171,20 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                     COMPONENT_STATE_UPDATE(avionics_component_state_state_estimate, state_error);
                 }
 
-                const float kalman_reference_vectors[2][3] = {
+                const fp kalman_reference_vectors[2][3] = {
                         {accel_reference.x() * 9.80665f,       accel_reference.y() * 9.80665f,
                                 accel_reference.z() * 9.80665f},
                         {new_magno_reference.x() * magno_norm, new_magno_reference.y() * magno_norm,
                                 new_magno_reference.z() * magno_norm}
                 };
 
+                const fp kalman_orientation[4] = {initial_orientation[0], initial_orientation[1], initial_orientation[2], initial_orientation[3]};
+
                 expected_accel_norm = accel_norm;
                 accel_norm_exp_avg = accel_norm;
                 accel_norm_exp_avg_sq = accel_norm*accel_norm;
 
-                kalman_init(kalman_reference_vectors[0], kalman_reference_vectors[1], initial_orientation,
+                kalman_init(kalman_reference_vectors[0], kalman_reference_vectors[1], kalman_orientation,
                             initial_angular_velocity, initial_position, initial_velocity, initial_acceleration,
                             initial_gyro_bias, initial_accel_bias, initial_magno_bias);
 
@@ -191,9 +193,13 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         } else if (state_estimate_phase == StateEstimatePhase::Estimation) {
             kalman_predict(dt);
 
-            kalman_new_gyro(calibrated_data.gyro);
-            kalman_new_magno(calibrated_data.magno);
-            kalman_new_accel(calibrated_data.accel);
+            fp gyro[3] = {calibrated_data.gyro[0], calibrated_data.gyro[1], calibrated_data.gyro[2]};
+            fp magno[3] = {calibrated_data.magno[0], calibrated_data.magno[1], calibrated_data.magno[2]};
+            fp accel[3] = {calibrated_data.accel[0], calibrated_data.accel[1], calibrated_data.accel[2]};
+
+            kalman_new_gyro(gyro);
+            kalman_new_magno(magno);
+            kalman_new_accel(accel);
 
 
             state_estimate_t current_estimate;
@@ -201,20 +207,20 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
             state_estimate_debug_t debug;
             kalman_get_state_debug(&debug);
 
-            gyro_norm_exp_avg = (1 - exp_avg_alpha) * (Map<const Matrix<fp, 3, 1>>(calibrated_data.gyro) -
-                                                       Map<const Matrix<fp, 3, 1>>(debug.gyro_bias)).norm() +
+            gyro_norm_exp_avg = (1 - exp_avg_alpha) * (Map<const Matrix<float, 3, 1>>(calibrated_data.gyro) -
+                                                       Map<const Matrix<float, 3, 1>>(debug.gyro_bias)).norm() +
                                 exp_avg_alpha * gyro_norm_exp_avg;
 
-            accel_norm_exp_avg = (1 - exp_avg_alpha) * (Map<const Matrix<fp, 3, 1>>(calibrated_data.accel) -
-                                                        Map<const Matrix<fp, 3, 1>>(debug.accel_bias)).norm() +
+            accel_norm_exp_avg = (1 - exp_avg_alpha) * (Map<const Matrix<float, 3, 1>>(calibrated_data.accel) -
+                                                        Map<const Matrix<float, 3, 1>>(debug.accel_bias)).norm() +
                                  exp_avg_alpha * accel_norm_exp_avg;
 
-            magno_norm_exp_avg = (1 - exp_avg_alpha) * (Map<const Matrix<fp, 3, 1>>(calibrated_data.magno) -
-                                                        Map<const Matrix<fp, 3, 1>>(debug.magno_bias)).norm() +
+            magno_norm_exp_avg = (1 - exp_avg_alpha) * (Map<const Matrix<float, 3, 1>>(calibrated_data.magno) -
+                                                        Map<const Matrix<float, 3, 1>>(debug.magno_bias)).norm() +
                                  exp_avg_alpha * magno_norm_exp_avg;
 
-            accel_norm_exp_avg_sq = (1 - exp_avg_alpha) * (Map<const Matrix<fp, 3, 1>>(calibrated_data.accel) -
-                                                        Map<const Matrix<fp, 3, 1>>(debug.accel_bias)).squaredNorm() +
+            accel_norm_exp_avg_sq = (1 - exp_avg_alpha) * (Map<const Matrix<float, 3, 1>>(calibrated_data.accel) -
+                                                        Map<const Matrix<float, 3, 1>>(debug.accel_bias)).squaredNorm() +
                                  exp_avg_alpha * accel_norm_exp_avg_sq;
 
             debug.gyro_norm_exp_avg = gyro_norm_exp_avg;

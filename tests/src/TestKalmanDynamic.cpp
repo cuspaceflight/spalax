@@ -80,9 +80,9 @@ static void gyro_test(const Matrix<fp, 3, 1> &angle_increment, const char *filen
         EXPECT_LT(angle, 1.f);
         EXPECT_LT(angle2, 1.f);
 
-        expect_fuzzy_eq(estimate.angular_velocity[0], angle_increment[0] * time_increment, std::max(kalman_gyro_cov, 0.00005f), std::max(kalman_gyro_cov, 0.05f));
-        expect_fuzzy_eq(estimate.angular_velocity[1], angle_increment[1] * time_increment, std::max(kalman_gyro_cov, 0.00005f), std::max(kalman_gyro_cov, 0.05f));
-        expect_fuzzy_eq(estimate.angular_velocity[2], angle_increment[2] * time_increment, std::max(kalman_gyro_cov, 0.00005f), std::max(kalman_gyro_cov, 0.05f));
+        expect_fuzzy_eq(estimate.angular_velocity[0], angle_increment[0] * time_increment, std::max<fp>(kalman_gyro_cov, 0.00005f), std::max<fp>(kalman_gyro_cov, 0.05f));
+        expect_fuzzy_eq(estimate.angular_velocity[1], angle_increment[1] * time_increment, std::max<fp>(kalman_gyro_cov, 0.00005f), std::max<fp>(kalman_gyro_cov, 0.05f));
+        expect_fuzzy_eq(estimate.angular_velocity[2], angle_increment[2] * time_increment, std::max<fp>(kalman_gyro_cov, 0.00005f), std::max<fp>(kalman_gyro_cov, 0.05f));
 
 
         if (filename) {

@@ -167,7 +167,7 @@ void kalman_predict(fp dt) {
     // As it yields better precision
 
     Quaternion<fp> delta = Quaternion<fp>(
-            AngleAxis<fp>(AngleAxis<fp>(ANGULAR_VELOCITY.norm() * dt, ANGULAR_VELOCITY.normalized())));
+            AngleAxis<fp>(AngleAxis<fp>(ANGULAR_VELOCITY.norm()*dt, ANGULAR_VELOCITY.normalized())));
     Quaternion<fp> t = delta * prior_attitude; // Not sure whether quaternions have aliasing protection
     prior_attitude = t;
 
@@ -213,7 +213,7 @@ void kalman_new_accel(const fp accel[3]) {
 
     H1 = q_target_jacobian(g_reference + ACCELERATION, prior_attitude.inverse());
 
-    H2 = Matrix3f::Identity();
+    H2 = Matrix<fp, 3, 3>::Identity();
 
     H3 = mrp_application_jacobian(ATTITUDE_ERROR, a_prime) * -1;
 
@@ -228,14 +228,13 @@ void kalman_new_magno(const fp magno[3]) {
     Matrix<fp, 3, 1> b_prime = prior_attitude.inverse() * b_reference;
     Matrix<fp, 3, 1> predicted_measurement = b_prime + MAGNO_BIAS;
     Matrix<fp, 3, 1> y = Map<const Matrix<fp, 3, 1>>(magno) - predicted_measurement;
-
     Matrix<fp, 3, 3> H = mrp_application_jacobian(ATTITUDE_ERROR, b_prime) * -1;
 
-    Matrix<fp, 3, 3> H_prime = Matrix<fp, 3, 3>::Identity();
+    //Matrix<fp, 3, 3> H_prime = Matrix<fp, 3, 3>::Identity();
 
     do_update_t<3, KALMAN_ATTITUDE_ERR_IDX>(y, H, magno_covariance);
 
-    do_update_t<3, KALMAN_MAGNO_BIAS_IDX>(y, H_prime, magno_covariance);
+    //do_update_t<3, KALMAN_MAGNO_BIAS_IDX>(y, H_prime, magno_covariance);
 }
 
 void kalman_new_gyro(const fp gyro[3]) {
@@ -245,6 +244,7 @@ void kalman_new_gyro(const fp gyro[3]) {
     Matrix<fp, 3, 1> predicted_measurement = g_prime + GYRO_BIAS;
 
     Matrix<fp, 3, 1> y = Map<const Matrix<fp, 3, 1>>(gyro) - predicted_measurement;
+
     Matrix<fp, 3, 3> H1;
     Matrix<fp, 3, 3> H2;
     Matrix<fp, 3, 3> H3;
@@ -261,7 +261,7 @@ void kalman_new_gyro(const fp gyro[3]) {
 }
 
 void kalman_zero_accel() {
-    ACCELERATION = Vector3f::Zero();
+    ACCELERATION = Matrix<fp, 3, 1>::Zero();
 }
 
 

@@ -86,7 +86,7 @@ angular_velocity_jacobian(const Matrix<fp, 3, 1> &velocity, float dt) {
     fp normsq = x*x + y*y + z*z;
     fp norm = std::sqrt(normsq);
 
-    if (norm < 1e-8f)
+    if (norm < 1e-5f)
         return Matrix<fp, 3, 3>::Zero();
 
 
@@ -107,10 +107,10 @@ angular_velocity_jacobian(const Matrix<fp, 3, 1> &velocity, float dt) {
 inline Matrix<fp, 3, 3> q_target_jacobian(const Matrix<fp, 3, 1> &target_vector, const Quaternion<fp> &quat) {
     (void) target_vector;
 
-    Matrix3f ret;
-    ret.block<3, 1>(0, 0) = quat * Vector3f(1, 0, 0);
-    ret.block<3, 1>(0, 1) = quat * Vector3f(0, 1, 0);
-    ret.block<3, 1>(0, 2) = quat * Vector3f(0, 0, 1);
+    Matrix<fp, 3, 3> ret;
+    ret.block<3, 1>(0, 0) = quat * Matrix<fp, 3, 1>(1, 0, 0);
+    ret.block<3, 1>(0, 1) = quat * Matrix<fp, 3, 1>(0, 1, 0);
+    ret.block<3, 1>(0, 2) = quat * Matrix<fp, 3, 1>(0, 0, 1);
     return ret;
 }
 
