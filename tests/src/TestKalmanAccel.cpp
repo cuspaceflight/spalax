@@ -4,12 +4,21 @@
 #include "KalmanTestUtils.h"
 #include <matplotlibcpp.h>
 
+static constexpr float time_increment = 1024;
+
 using namespace Eigen;
 namespace plt = matplotlibcpp;
 
+static Matrix<fp, 3, 1> gyro_jerk_dependence(const Matrix<fp, 3, 1> &jerk) {
+    return Matrix<fp, 3, 1>(2 * jerk[2], -4 * jerk[1], -10 * jerk[0]);
+}
+
+#define JERK_DEPENDENCE 0
+#define ACCEL_MAGNO_ERROR 0
 
 static void
-accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &constant_accel, bool plot = false, int NUM_TESTS=10000) {
+accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &constant_accel, bool plot = false,
+           int NUM_TESTS = 10000, float jerk_mult = 0) {
     state_estimate_t estimate;
     state_estimate_debug_t debug;
 
@@ -21,9 +30,10 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &cons
     std::normal_distribution<fp> accel_distribution(0.0, kalman_accelerometer_cov);
     std::normal_distribution<fp> magno_distribution(0.0, kalman_magno_cov);
     std::normal_distribution<fp> gyro_distribution(0, kalman_gyro_cov);
+    std::normal_distribution<fp> jerk_distribution(0, 1e-6f);
 
     Quaternion<fp> quat(-0.66327167417264843f, -0.34436319883409405f, 0.039508389760580714f, -0.66326748802235758f);
-    const fp time_increment = 1024;
+    //Quaternion<fp> quat(1,0,0,0);
 
     kalman_test_setup(quat.inverse(), time_increment * angle_increment, Matrix<fp, 3, 1>::Zero(),
                       Matrix<fp, 3, 1>::Zero(),
@@ -51,20 +61,55 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &cons
     std::vector<float> rot_axis_y;
     std::vector<float> rot_axis_z;
 
-    std::vector<float> P_vector[KALMAN_NUM_STATES];
+    std::vector<float> accel_x;
+    std::vector<float> accel_y;
+    std::vector<float> accel_z;
 
+    std::vector<float> gyro_x;
+    std::vector<float> gyro_y;
+    std::vector<float> gyro_z;
+
+    std::vector<float> P_vector[KALMAN_NUM_STATES];
 
     std::vector<float> timestamps;
 
+    Eigen::Matrix<fp, 3, 1> variable_accel = constant_accel;
+    Eigen::Matrix<fp, 3, 1> current_velocity = Eigen::Matrix<fp, 3, 1>::Zero();
+    Eigen::Matrix<fp, 3, 1> current_position = Eigen::Matrix<fp, 3, 1>::Zero();
+
     Quaternion<fp> delta(AngleAxis<fp>(angle_increment.norm(), angle_increment.normalized()));
+
+
+    Matrix<fp, 3, 1> accel_magno_error_axis = unrotated_magno.normalized().cross(unrotated_accel.normalized());
 
     for (int i = 0; i < NUM_TESTS; i++) {
         Quaternion<fp> t = quat * delta.inverse();
         quat = t;
 
-        Matrix<fp, 3, 1> rotated_magno = quat * unrotated_magno;
-        Matrix<fp, 3, 1> rotated_accel = quat * (unrotated_accel + constant_accel);
-        Matrix<fp, 3, 1> rotated_gyro = quat * angle_increment;
+
+        Matrix<fp, 3, 1> jerk = Matrix<fp, 3, 1>(
+                sin((i / time_increment * 20 / 60) * 6.28318530718) * 4e-4f + jerk_distribution(generator),
+                sin((i / time_increment * 20 / 60 + 1.25f) * 6.28318530718) * 4e-4f + jerk_distribution(generator),
+                sin((i / time_increment * 20 / 60 + 2.5f) * 6.28318530718) * 4e-4f + jerk_distribution(generator));
+
+        variable_accel += jerk;
+
+
+        Matrix<fp, 3, 1> rotated_accel = quat * (unrotated_accel + variable_accel);
+
+#if ACCEL_MAGNO_ERROR
+        fp accel_magno_error_angle =  sin((i / time_increment * 5 / 60) * 6.28318530718) * 0.1f;
+        AngleAxis<fp> accel_magno_error_quat(accel_magno_error_angle, accel_magno_error_axis);
+        Matrix<fp, 3, 1> rotated_magno = accel_magno_error_quat * quat * unrotated_magno;
+#else
+        Matrix<fp, 3, 1> rotated_magno =  quat * unrotated_magno;
+#endif
+
+#if JERK_DEPENDENCE
+        Matrix<fp, 3, 1> rotated_gyro = quat * (time_increment * angle_increment + gyro_jerk_dependence(jerk));
+#else
+        Matrix<fp, 3, 1> rotated_gyro = quat * (time_increment * angle_increment);
+#endif
 
         fp magno[3] = {rotated_magno.x() + magno_distribution(generator),
                        rotated_magno.y() + magno_distribution(generator),
@@ -72,52 +117,60 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &cons
         fp accel[3] = {rotated_accel.x() + accel_distribution(generator),
                        rotated_accel.y() + accel_distribution(generator),
                        rotated_accel.z() + accel_distribution(generator)};
-        fp gyro[3] = {rotated_gyro.x() * time_increment + gyro_distribution(generator),
-                      rotated_gyro.y() * time_increment + gyro_distribution(generator),
-                      rotated_gyro.z() * time_increment + gyro_distribution(generator)};
+        fp gyro[3] = {rotated_gyro.x() + gyro_distribution(generator),
+                      rotated_gyro.y() + gyro_distribution(generator),
+                      rotated_gyro.z() + gyro_distribution(generator)};
 
         kalman_predict(1.0f / time_increment);
 
-        kalman_new_gyro(gyro);
-        kalman_new_magno(magno);
         kalman_new_accel(accel);
+        kalman_new_magno(magno);
+        kalman_new_gyro(gyro);
 
         kalman_get_state(&estimate);
         kalman_get_state_debug(&debug);
         testEstimateStable(estimate);
 
-
-
-
-
 #if SPALAX_TEST_PLOTS
         if (plot) {
+
+            gyro_x.push_back(gyro[0]);
+            gyro_y.push_back(gyro[1]);
+            gyro_z.push_back(gyro[2]);
+
+            current_position += 1.0 / time_increment * current_velocity;
+            current_velocity += 1.0 / time_increment * (constant_accel + variable_accel);
             timestamps.push_back(i / time_increment);
 
             ang_vel_err_x.push_back(estimate.angular_velocity[0] - angle_increment[0] * time_increment);
             ang_vel_err_y.push_back(estimate.angular_velocity[1] - angle_increment[1] * time_increment);
             ang_vel_err_z.push_back(estimate.angular_velocity[2] - angle_increment[2] * time_increment);
 
-            accel_err_x.push_back(estimate.acceleration[0] - constant_accel[0]);
-            accel_err_y.push_back(estimate.acceleration[1] - constant_accel[1]);
-            accel_err_z.push_back(estimate.acceleration[2] - constant_accel[2]);
+            accel_err_x.push_back(estimate.acceleration[0] - constant_accel[0] - variable_accel[0]);
+            accel_err_y.push_back(estimate.acceleration[1] - constant_accel[1] - variable_accel[1]);
+            accel_err_z.push_back(estimate.acceleration[2] - constant_accel[2] - variable_accel[2]);
 
-            vel_err_x.push_back(estimate.velocity[0] - constant_accel[0] * i / time_increment);
-            vel_err_y.push_back(estimate.velocity[1] - constant_accel[1] * i / time_increment);
-            vel_err_z.push_back(estimate.velocity[2] - constant_accel[2] * i / time_increment);
+            vel_err_x.push_back(estimate.velocity[0] - current_velocity[0]);
+            vel_err_y.push_back(estimate.velocity[1] - current_velocity[1]);
+            vel_err_z.push_back(estimate.velocity[2] - current_velocity[2]);
 
-            pos_err_x.push_back(estimate.position[0] - constant_accel[0] * i / time_increment * i / time_increment * 0.5f);
-            pos_err_y.push_back(estimate.position[1] - constant_accel[1] * i / time_increment * i / time_increment * 0.5f);
-            pos_err_z.push_back(estimate.position[2] - constant_accel[2] * i / time_increment * i / time_increment * 0.5f);
+            pos_err_x.push_back(estimate.position[0] - current_position[0]);
+            pos_err_y.push_back(estimate.position[1] - current_position[1]);
+            pos_err_z.push_back(estimate.position[2] - current_position[2]);
+
+            accel_x.push_back(variable_accel[0]);
+            accel_y.push_back(variable_accel[1]);
+            accel_z.push_back(variable_accel[2]);
+
 
             Quaternion<fp> out(estimate.orientation_q[3], estimate.orientation_q[0], estimate.orientation_q[1],
                                estimate.orientation_q[2]);
 
             AngleAxis<fp> angleAxis = AngleAxis<fp>(quat * out);
-            rot_axis_x.push_back((fp)angleAxis.axis().x());
-            rot_axis_y.push_back((fp)angleAxis.axis().y());
-            rot_axis_z.push_back((fp)angleAxis.axis().z());
-            rot_err.push_back((float)angleAxis.angle());
+            rot_axis_x.push_back((fp) angleAxis.axis().x());
+            rot_axis_y.push_back((fp) angleAxis.axis().y());
+            rot_axis_z.push_back((fp) angleAxis.axis().z());
+            rot_err.push_back((float) angleAxis.angle());
 
             for (int j = 0; j < KALMAN_NUM_STATES; j++) {
                 P_vector[j].push_back(debug.P[j]);
@@ -134,6 +187,7 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &cons
         plt::named_plot("Y Acceleration Error (m/s)", timestamps, accel_err_y);
         plt::named_plot("Z Acceleration Error (m/s)", timestamps, accel_err_z);
 
+        plt::grid(true);
         plt::legend();
         plt::save("Acceleration.png");
 
@@ -153,14 +207,33 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &cons
         plt::legend();
         plt::save("Rotation.png");
 
-//        plt::clf();
-//        plt::named_plot("Rotation Axis X", timestamps, rot_axis_x);
-//        plt::named_plot("Rotation Axis Y", timestamps, rot_axis_y);
-//        plt::named_plot("Rotation Axis Z", timestamps, rot_axis_z);
-//
-//        plt::grid(true);
-//        plt::legend();
-//        plt::save("Rotation Axis.png");
+        plt::clf();
+        plt::named_plot("Actual Acceleration X (m/s^2)", timestamps, accel_x);
+        plt::named_plot("Actual Acceleration Y (m/s^2)", timestamps, accel_y);
+        plt::named_plot("Actual Acceleration Z (m/s^2)", timestamps, accel_z);
+
+        plt::grid(true);
+        plt::legend();
+        plt::save("Acceleration - Actual.png");
+
+
+        plt::clf();
+        plt::named_plot("Gyro X (rad/s)", timestamps, gyro_x);
+        plt::named_plot("Gyro Y (rad/s)", timestamps, gyro_y);
+        plt::named_plot("Gyro Z (rad/s)", timestamps, gyro_z);
+
+        plt::grid(true);
+        plt::legend();
+        plt::save("Gyro - Actual.png");
+
+        plt::clf();
+        plt::named_plot("Rotation Axis X", timestamps, rot_axis_x);
+        plt::named_plot("Rotation Axis Y", timestamps, rot_axis_y);
+        plt::named_plot("Rotation Axis Z", timestamps, rot_axis_z);
+
+        plt::grid(true);
+        plt::legend();
+        plt::save("Rotation Axis.png");
 
         plt::clf();
         plt::named_plot("X Velocity Error (m/s)", timestamps, vel_err_x);
@@ -224,10 +297,6 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &cons
 
     for (int i = 0; i < 3; i++) {
         expect_fuzzy_eq(estimate.angular_velocity[i], angle_increment[i] * time_increment, 0.00005f, 0.05);
-        expect_fuzzy_eq(estimate.position[i], 0.5f * constant_accel[i] * time * time, 0.00005f,
-                        kalman_accelerometer_cov * time * time);
-        expect_fuzzy_eq(estimate.velocity[i], constant_accel[i] * time, 0.00005f, kalman_accelerometer_cov * time);
-        expect_fuzzy_eq(estimate.acceleration[i], constant_accel[i], 0.00005f, 0.002f);
     }
 }
 
@@ -236,13 +305,14 @@ TEST(TestKalmanAccel, TestSimple) {
 }
 
 TEST(TestKalmanAccel, TestComplex) {
-    accel_test(Matrix<fp, 3, 1>(1.0f / 1000, 0, 0), Matrix<fp, 3, 1>(1, 0, 0));
+    accel_test(Matrix<fp, 3, 1>(1.0f / time_increment, 0, 0), Matrix<fp, 3, 1>(1, 0, 0));
 
-    accel_test(Matrix<fp, 3, 1>(1.0f / 1000, 0, 0), Matrix<fp, 3, 1>(0, 1, 0));
+    accel_test(Matrix<fp, 3, 1>(1.0f / time_increment, 0, 0), Matrix<fp, 3, 1>(0, 1, 0));
 
-    accel_test(Matrix<fp, 3, 1>(1.0f / 1000, 0, 0), Matrix<fp, 3, 1>(0, 0, 1));
+    accel_test(Matrix<fp, 3, 1>(1.0f / time_increment, 0, 0), Matrix<fp, 3, 1>(0, 0, 1));
 }
 
 TEST(TestKalmanAccel, TestPlot) {
-    accel_test(Matrix<fp, 3, 1>(0 / 1000,0,0), Matrix<fp, 3, 1>(1, 0, 0), true, 5*60*1024);
+    accel_test(Matrix<fp, 3, 1>(1 / time_increment, 1 / time_increment, 0 / time_increment), Matrix<fp, 3, 1>(0, 0, 0),
+               true, 1 * 60 * time_increment, 2e-4f);
 }

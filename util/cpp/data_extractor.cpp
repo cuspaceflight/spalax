@@ -59,19 +59,19 @@ bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         de->gyro_x.push_back(calibrated_data.gyro[0]);
         de->gyro_y.push_back(calibrated_data.gyro[1]);
         de->gyro_z.push_back(calibrated_data.gyro[2]);
-        de->gyro_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.gyro).norm());
+        de->gyro_norm.push_back(Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.gyro).norm());
 
         de->magno_x.push_back(calibrated_data.magno[0]);
         de->magno_y.push_back(calibrated_data.magno[1]);
         de->magno_z.push_back(calibrated_data.magno[2]);
 
-        float angle = std::acos(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.accel).normalized().transpose() *
-                                Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).normalized());
+        float angle = std::acos(Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.accel).normalized().transpose() *
+                                Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.magno).normalized());
 
         de->accel_magno_angle.push_back(angle);
 
-        de->magno_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).norm());
-        de->accel_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.accel).norm());
+        de->magno_norm.push_back(Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.magno).norm());
+        de->accel_norm.push_back(Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.accel).norm());
 
     } else if (packet->header.id == ts_adis16405_data) {
         if (last_adis_timestamp == 0) {
@@ -94,19 +94,19 @@ bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         de->adis_gyro_x.push_back(calibrated_data.gyro[0]);
         de->adis_gyro_y.push_back(calibrated_data.gyro[1]);
         de->adis_gyro_z.push_back(calibrated_data.gyro[2]);
-        de->adis_gyro_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.gyro).norm());
+        de->adis_gyro_norm.push_back(Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.gyro).norm());
 
         de->adis_magno_x.push_back(calibrated_data.magno[0]);
         de->adis_magno_y.push_back(calibrated_data.magno[1]);
         de->adis_magno_z.push_back(calibrated_data.magno[2]);
 
-        float angle = std::acos(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.accel).normalized().transpose() *
-                                Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).normalized());
+        float angle = std::acos(Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.accel).normalized().transpose() *
+                                Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.magno).normalized());
 
         de->adis_accel_magno_angle.push_back(angle);
 
-        de->adis_magno_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).norm());
-        de->adis_accel_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.accel).norm());
+        de->adis_magno_norm.push_back(Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.magno).norm());
+        de->adis_accel_norm.push_back(Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.accel).norm());
 
 
     } else if (packet->header.id == ts_state_estimate_data) {
@@ -124,7 +124,7 @@ bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         de->se_accel_x.push_back(data->acceleration[0]);
         de->se_accel_y.push_back(data->acceleration[1]);
         de->se_accel_z.push_back(data->acceleration[2]);
-        de->se_accel_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(data->acceleration).norm());
+        de->se_accel_norm.push_back(Eigen::Map<const Matrix<float, 3, 1>>(data->acceleration).norm());
 
 
         Vector3f euler = 180.0f / 3.141592653589793f * quat_to_euler(
@@ -142,7 +142,7 @@ bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         de->se_ang_velocity_y.push_back(data->angular_velocity[1]);
         de->se_ang_velocity_z.push_back(data->angular_velocity[2]);
 
-        de->se_ang_vel_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(data->angular_velocity).norm());
+        de->se_ang_vel_norm.push_back(Eigen::Map<const Matrix<float, 3, 1>>(data->angular_velocity).norm());
     } else if (packet->header.id == ts_state_estimate_debug) {
         auto data = telemetry_get_payload<state_estimate_debug_t>(packet);
 
@@ -163,16 +163,16 @@ bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
         de->se_accel_bias_y.push_back(data->accel_bias[1]);
         de->se_accel_bias_z.push_back(data->accel_bias[2]);
 
-        de->se_accel_bias_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(data->accel_bias).norm());
+        de->se_accel_bias_norm.push_back(Eigen::Map<const Matrix<float, 3, 1>>(data->accel_bias).norm());
 
         de->se_magno_bias_x.push_back(data->magno_bias[0]);
         de->se_magno_bias_y.push_back(data->magno_bias[1]);
         de->se_magno_bias_z.push_back(data->magno_bias[2]);
 
-        de->se_magno_bias_norm.push_back(Eigen::Map<const Matrix<fp, 3, 1>>(data->magno_bias).norm());
+        de->se_magno_bias_norm.push_back(Eigen::Map<const Matrix<float, 3, 1>>(data->magno_bias).norm());
 
-        float angle = std::acos(Eigen::Map<const Matrix<fp, 3, 1>>(data->accel_ref).normalized().transpose() *
-                                Eigen::Map<const Matrix<fp, 3, 1>>(data->magno_ref).normalized());
+        float angle = std::acos(Eigen::Map<const Matrix<float, 3, 1>>(data->accel_ref).normalized().transpose() *
+                                Eigen::Map<const Matrix<float, 3, 1>>(data->magno_ref).normalized());
 
         de->accel_magno_reference_angle.push_back(angle);
 

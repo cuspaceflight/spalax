@@ -44,8 +44,8 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
 
         values[12] = mpu9250_get_heading(&calibrated);
 
-        values[43] = Eigen::Map<const Matrix<fp, 3, 1>>(calibrated.magno).norm();
-        values[45] = Eigen::Map<const Matrix<fp, 3, 1>>(calibrated.accel).norm();
+        values[43] = Eigen::Map<const Matrix<float, 3, 1>>(calibrated.magno).norm();
+        values[45] = Eigen::Map<const Matrix<float, 3, 1>>(calibrated.accel).norm();
 
         mpu9250_update_count++;
     }
@@ -96,11 +96,11 @@ static bool getPacket(const telemetry_t* packet, message_metadata_t metadata) {
         values[39] = calibrated_data.magno[1];
         values[40] = calibrated_data.magno[2];
 
-        values[41] = std::acos(Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.accel).normalized().transpose() *
-                                Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).normalized());
+        values[41] = std::acos(Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.accel).normalized().transpose() *
+                                Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.magno).normalized());
 
-        values[42] = Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.magno).norm();
-        values[44] = Eigen::Map<const Matrix<fp, 3, 1>>(calibrated_data.accel).norm();
+        values[42] = Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.magno).norm();
+        values[44] = Eigen::Map<const Matrix<float, 3, 1>>(calibrated_data.accel).norm();
     }
     return true;
 }

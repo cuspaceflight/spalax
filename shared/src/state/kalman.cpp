@@ -1,11 +1,12 @@
 #include "kalman.h"
 #include <cfloat>
+#include <iostream>
 #include "math_util.h"
 
 using namespace Eigen;
 
 static Matrix<fp, KALMAN_NUM_STATES, 1> prior_state_vector;
-static Matrix<fp, KALMAN_NUM_STATES, KALMAN_NUM_STATES> P;
+static DiagonalMatrix<fp, KALMAN_NUM_STATES> P;
 static Quaternion<fp> prior_attitude;
 
 #define ATTITUDE_ERROR prior_state_vector.block<3,1>(KALMAN_ATTITUDE_ERR_IDX,0)
@@ -47,7 +48,7 @@ void kalman_init(const fp accel_reference[3], const fp magno_reference[3], const
     prior_attitude.z() = initial_orientation[2];
     prior_attitude.w() = initial_orientation[3];
 
-    P = Matrix<fp, KALMAN_NUM_STATES, KALMAN_NUM_STATES>::Zero();
+    P.diagonal() = Matrix<fp, KALMAN_NUM_STATES, 1>::Zero();
 
     for (int i = 0; i < 3; i++) {
         accelerometer_covariance.diagonal()[i] = kalman_accelerometer_cov;
@@ -93,6 +94,14 @@ inline void update_attitude() {
     ATTITUDE_ERROR = Matrix<fp, 3, 1>::Zero();
 }
 
+inline void force_symmetry() {
+//    Matrix<fp, KALMAN_NUM_STATES, KALMAN_NUM_STATES> t = (P + P.transpose()) / 2;
+//    P = t;
+    //IOFormat HeavyFmt(FullPrecision, 0, "f, ", "f,\n", "", "", "{", "f},");
+
+    //std::cout << P.format(HeavyFmt) << std::endl;
+}
+
 void kalman_get_state(state_estimate_t *state) {
     for (int i = 0; i < 3; i++) {
         state->angular_velocity[i] = ANGULAR_VELOCITY[i];
@@ -134,7 +143,9 @@ void kalman_get_covariance(fp covar[KALMAN_NUM_STATES]) {
 template<int N, int I = 0>
 inline void do_update_t(const Matrix<fp, 3, 1> &y, const Matrix<fp, 3, N> &H,
                         const DiagonalMatrix<fp, 3> &sensor_covariance) {
-    auto Pt = P.block<N, N>(I, I);
+    DiagonalMatrix<fp, N, N> Pt;
+    for (int i = 0; i < N; i++)
+        Pt.diagonal()[i] = P.diagonal()[i + I];
 
     Matrix<fp, 3, 3> S = (H * Pt * H.transpose());
     S.diagonal() += sensor_covariance.diagonal();
@@ -148,9 +159,10 @@ inline void do_update_t(const Matrix<fp, 3, 1> &y, const Matrix<fp, 3, N> &H,
         prior_state_vector[i + I] += t1[i];
 
 
-    Matrix<fp, N, N> t2 = (K * H * Pt);
+    Matrix<fp, N, 1> t2 = (K * H * Pt).diagonal();
 
-    Pt -= t2;
+    for (int i = 0; i < N; i++)
+        P.diagonal()[i + I] -= t2[i];
 
     update_attitude();
 }
@@ -196,8 +208,10 @@ void kalman_predict(fp dt) {
     F(KALMAN_VELOCITY_IDX + 1, KALMAN_ACCELERATION_IDX + 1) = dt;
     F(KALMAN_VELOCITY_IDX + 2, KALMAN_ACCELERATION_IDX + 2) = dt;
 
-    P = (F * P * F.transpose());
+    P.diagonal() = (F * P * F.transpose()).diagonal();
     P.diagonal() += dt * process_noise.diagonal();
+
+    force_symmetry();
 }
 
 void kalman_new_accel(const fp accel[3]) {
@@ -230,11 +244,11 @@ void kalman_new_magno(const fp magno[3]) {
     Matrix<fp, 3, 1> y = Map<const Matrix<fp, 3, 1>>(magno) - predicted_measurement;
     Matrix<fp, 3, 3> H = mrp_application_jacobian(ATTITUDE_ERROR, b_prime) * -1;
 
-    //Matrix<fp, 3, 3> H_prime = Matrix<fp, 3, 3>::Identity();
+    Matrix<fp, 3, 3> H_prime = Matrix<fp, 3, 3>::Identity();
 
     do_update_t<3, KALMAN_ATTITUDE_ERR_IDX>(y, H, magno_covariance);
 
-    //do_update_t<3, KALMAN_MAGNO_BIAS_IDX>(y, H_prime, magno_covariance);
+    do_update_t<3, KALMAN_MAGNO_BIAS_IDX>(y, H_prime, magno_covariance);
 }
 
 void kalman_new_gyro(const fp gyro[3]) {

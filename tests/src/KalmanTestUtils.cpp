@@ -1,8 +1,8 @@
 #include "KalmanTestUtils.h"
 #include <gmock/gmock.h>
 
-fp accel_reference[3] = {0, 0, 1};
-fp magno_reference[3] = {0.39134267f, -0.00455851434f, -0.920233727f};
+fp accel_reference[3] = {0, 0, 9.80665f};
+fp magno_reference[3] = {0.70710678118f, 0.70710678118f, 0};
 
 
 void kalman_test_setup(Eigen::Quaternion<fp> quat, Eigen::Matrix<fp, 3, 1> angular_velocity, Eigen::Matrix<fp, 3, 1> position,

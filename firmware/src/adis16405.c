@@ -196,6 +196,7 @@ static void adis16405_init() {
     if (errors != 0) {
         COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_error);
         component_state_update(avionics_component_adis16405, state_error, errors);
+        component_state_update(avionics_component_adis16405, state_error, errors >> 8);
     }
 
     adis16405_initialized = true;
@@ -222,13 +223,13 @@ static bool adis16405_self_test(void) {
     return errors == 0;
 }
 
-static void adis16405_gyroscope_precision_null_calibration() {
-    adis16405_write_u8(ADIS16405_REG_GLOB_CMD, 0x10);
-
-    while ((adis16405_read_u16(ADIS16405_REG_GLOB_CMD) & 0x10) != 0) {
-        chThdSleepMilliseconds(500);
-    }
-}
+//static void adis16405_gyroscope_precision_null_calibration() {
+//    adis16405_write_u8(ADIS16405_REG_GLOB_CMD, 0x10);
+//
+//    while ((adis16405_read_u16(ADIS16405_REG_GLOB_CMD) & 0x10) != 0) {
+//        chThdSleepMilliseconds(500);
+//    }
+//}
 
 void adis16405_wakeup(EXTDriver *extp, expchannel_t channel) {
     (void)extp;
@@ -296,7 +297,7 @@ void adis16405_thread(void *arg) {
 
     COMPONENT_STATE_UPDATE(avionics_component_adis16405, state_initializing);
 
-    adis16405_gyroscope_precision_null_calibration();
+    //adis16405_gyroscope_precision_null_calibration();
 
     adis16405_init();
 
