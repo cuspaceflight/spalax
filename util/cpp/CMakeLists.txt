@@ -19,3 +19,6 @@ add_executable(data_plot data_plot.cpp data_extractor.cpp data_plotter.cpp)
 add_executable(alignment_calibration alignment_calibration.cpp)
 
 add_executable(kalman_calibrator kalman_calibrator.cpp data_extractor.cpp data_plotter.cpp)
+
+
+add_executable(kalman_test_plot kalman_test_plot.cpp)

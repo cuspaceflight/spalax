@@ -15,6 +15,7 @@ static Matrix<fp, 3, 1> gyro_jerk_dependence(const Matrix<fp, 3, 1> &jerk) {
 
 #define JERK_DEPENDENCE 0
 #define ACCEL_MAGNO_ERROR 0
+#define GYRO_SF_ERROR 0
 
 static void
 accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &constant_accel, bool plot = false,
@@ -22,8 +23,8 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &cons
     state_estimate_t estimate;
     state_estimate_debug_t debug;
 
-    Matrix<fp, 3, 1> unrotated_magno = Matrix<fp, 3, 1>(magno_reference[0], magno_reference[1], magno_reference[2]);
-    Matrix<fp, 3, 1> unrotated_accel = Matrix<fp, 3, 1>(accel_reference[0], accel_reference[1], accel_reference[2]);
+    const Matrix<fp, 3, 1> unrotated_magno = Matrix<fp, 3, 1>(magno_reference[0], magno_reference[1], magno_reference[2]);
+    const Matrix<fp, 3, 1> unrotated_accel = Matrix<fp, 3, 1>(accel_reference[0], accel_reference[1], accel_reference[2]);
 
     std::default_random_engine generator(3452456);
 
@@ -31,14 +32,6 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &cons
     std::normal_distribution<fp> magno_distribution(0.0, kalman_magno_cov);
     std::normal_distribution<fp> gyro_distribution(0, kalman_gyro_cov);
     std::normal_distribution<fp> jerk_distribution(0, 1e-6f);
-
-    Quaternion<fp> quat(-0.66327167417264843f, -0.34436319883409405f, 0.039508389760580714f, -0.66326748802235758f);
-    //Quaternion<fp> quat(1,0,0,0);
-
-    kalman_test_setup(quat.inverse(), time_increment * angle_increment, Matrix<fp, 3, 1>::Zero(),
-                      Matrix<fp, 3, 1>::Zero(),
-                      constant_accel);
-
 
     std::vector<float> ang_vel_err_x;
     std::vector<float> ang_vel_err_y;
@@ -69,9 +62,15 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &cons
     std::vector<float> gyro_y;
     std::vector<float> gyro_z;
 
-    std::vector<float> P_vector[KALMAN_NUM_STATES];
+//    std::vector<float> P_vector[KALMAN_NUM_STATES];
 
     std::vector<float> timestamps;
+
+    Quaternion<fp> quat(-0.66327167417264843f, -0.34436319883409405f, 0.039508389760580714f, -0.66326748802235758f);
+
+    kalman_test_setup(quat.inverse(), time_increment * angle_increment, Matrix<fp, 3, 1>::Zero(),
+                      Matrix<fp, 3, 1>::Zero(),
+                      constant_accel);
 
     Eigen::Matrix<fp, 3, 1> variable_accel = constant_accel;
     Eigen::Matrix<fp, 3, 1> current_velocity = Eigen::Matrix<fp, 3, 1>::Zero();
@@ -88,9 +87,9 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &cons
 
 
         Matrix<fp, 3, 1> jerk = Matrix<fp, 3, 1>(
-                sin((i / time_increment * 20 / 60) * 6.28318530718) * 4e-4f + jerk_distribution(generator),
-                sin((i / time_increment * 20 / 60 + 1.25f) * 6.28318530718) * 4e-4f + jerk_distribution(generator),
-                sin((i / time_increment * 20 / 60 + 2.5f) * 6.28318530718) * 4e-4f + jerk_distribution(generator));
+                sin((i / time_increment * 20 / 60) * 6.28318530718) * 8e-4f + jerk_distribution(generator),
+                sin((i / time_increment * 20 / 60 + 1.25f) * 6.28318530718) * 8e-4f + jerk_distribution(generator),
+                sin((i / time_increment * 20 / 60 + 2.5f) * 6.28318530718) * 8e-4f + jerk_distribution(generator));
 
         variable_accel += jerk;
 
@@ -109,6 +108,10 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &cons
         Matrix<fp, 3, 1> rotated_gyro = quat * (time_increment * angle_increment + gyro_jerk_dependence(jerk));
 #else
         Matrix<fp, 3, 1> rotated_gyro = quat * (time_increment * angle_increment);
+#endif
+
+#if GYRO_SF_ERROR
+        rotated_gyro = 1.001f * rotated_gyro;
 #endif
 
         fp magno[3] = {rotated_magno.x() + magno_distribution(generator),
@@ -172,9 +175,9 @@ accel_test(const Matrix<fp, 3, 1> &angle_increment, const Matrix<fp, 3, 1> &cons
             rot_axis_z.push_back((fp) angleAxis.axis().z());
             rot_err.push_back((float) angleAxis.angle());
 
-            for (int j = 0; j < KALMAN_NUM_STATES; j++) {
-                P_vector[j].push_back(debug.P[j]);
-            }
+//            for (int j = 0; j < KALMAN_NUM_STATES; j++) {
+//                P_vector[j].push_back(debug.P[j]);
+//            }
         }
 #endif
     }

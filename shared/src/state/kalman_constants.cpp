@@ -17,7 +17,7 @@ fp initial_acceleration_cov = 1e-7f;
 fp acceleration_process_noise = 1e3f;
 
 fp initial_attitude_err_cov = 1e-5f;
-fp attitude_err_process_noise = 1e-6f;
+fp attitude_err_process_noise = 1e-8f;
 
 fp initial_angular_vel_cov = 1e-4f;
 fp angular_vel_process_noise = 1e-2f;
