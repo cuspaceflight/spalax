@@ -268,71 +268,71 @@ int plot_data(int argc, char **argv, const DataExtractor *de) {
                     it == std::string::npos ? "" : graph_constant.substr(it + 1, graph_constant.size() - it - 1);
 
             if (graph_variable == "AX")
-                plot_with_options("Accelerometer X $(m/s^2)$", de->mpu_timestamps, de->accel_x.data, graph_options, line_count == 1);
+                plot_with_options("MPU Accelerometer X $(m/s^2)$", de->mpu_timestamps, de->accel_x.data, graph_options, line_count == 1);
             else if (graph_variable == "AY")
-                plot_with_options("Accelerometer Y $(m/s^2)$", de->mpu_timestamps, de->accel_y.data, graph_options, line_count == 1);
+                plot_with_options("MPU Accelerometer Y $(m/s^2)$", de->mpu_timestamps, de->accel_y.data, graph_options, line_count == 1);
             else if (graph_variable == "AZ")
-                plot_with_options("Accelerometer Z $(m/s^2)$", de->mpu_timestamps, de->accel_z.data, graph_options, line_count == 1);
+                plot_with_options("MPU Accelerometer Z $(m/s^2)$", de->mpu_timestamps, de->accel_z.data, graph_options, line_count == 1);
 
             else if (graph_variable == "GX")
-                plot_with_options("Gyroscope X (rad/s)", de->mpu_timestamps, de->gyro_x.data, graph_options, line_count == 1);
+                plot_with_options("MPU Gyroscope X (rad/s)", de->mpu_timestamps, de->gyro_x.data, graph_options, line_count == 1);
             else if (graph_variable == "GY")
-                plot_with_options("Gyroscope Y (rad/s)", de->mpu_timestamps, de->gyro_y.data, graph_options, line_count == 1);
+                plot_with_options("MPU Gyroscope Y (rad/s)", de->mpu_timestamps, de->gyro_y.data, graph_options, line_count == 1);
             else if (graph_variable == "GZ")
-                plot_with_options("Gyroscope Z (rad/s)", de->mpu_timestamps, de->gyro_z.data, graph_options, line_count == 1);
+                plot_with_options("MPU Gyroscope Z (rad/s)", de->mpu_timestamps, de->gyro_z.data, graph_options, line_count == 1);
 
             else if (graph_variable == "MX")
-                plot_with_options("Magnetometer X", de->mpu_timestamps, de->magno_x.data, graph_options, line_count == 1);
+                plot_with_options("MPU Magnetometer X", de->mpu_timestamps, de->magno_x.data, graph_options, line_count == 1);
             else if (graph_variable == "MY")
-                plot_with_options("Magnetometer Y", de->mpu_timestamps, de->magno_y.data, graph_options, line_count == 1);
+                plot_with_options("MPU Magnetometer Y", de->mpu_timestamps, de->magno_y.data, graph_options, line_count == 1);
             else if (graph_variable == "MZ")
-                plot_with_options("Magnetometer Z", de->mpu_timestamps, de->magno_z.data, graph_options, line_count == 1);
+                plot_with_options("MPU Magnetometer Z", de->mpu_timestamps, de->magno_z.data, graph_options, line_count == 1);
 
             else if (graph_variable == "AMANGLE")
-                plot_with_options("Field Angle (rad)", de->mpu_timestamps, de->accel_magno_angle.data, graph_options,
+                plot_with_options("MPU Field Angle (rad)", de->mpu_timestamps, de->accel_magno_angle.data, graph_options,
                                   line_count == 1);
             else if (graph_variable == "MNORM")
-                plot_with_options("Magnetometer Magnitude", de->mpu_timestamps, de->magno_norm.data, graph_options,
+                plot_with_options("MPU Magnetometer Magnitude", de->mpu_timestamps, de->magno_norm.data, graph_options,
                                   line_count == 1);
             else if (graph_variable == "ANORM")
-                plot_with_options("Accelerometer Magnitude $(m/s^2)$", de->mpu_timestamps, de->accel_norm.data, graph_options,
+                plot_with_options("MPU Accelerometer Magnitude $(m/s^2)$", de->mpu_timestamps, de->accel_norm.data, graph_options,
                                   line_count == 1);
             else if (graph_variable == "GNORM")
-                plot_with_options("Gyro Magnitude (rad/s)", de->mpu_timestamps, de->gyro_norm.data, graph_options,
+                plot_with_options("MPU Gyro Magnitude (rad/s)", de->mpu_timestamps, de->gyro_norm.data, graph_options,
                                   line_count == 1);
 
             else if (graph_variable == "ADAX")
-                plot_with_options("Accelerometer X $(m/s^2)$", de->adis_timestamps, de->adis_accel_x.data, graph_options, line_count == 1);
+                plot_with_options("ADIS Accelerometer X $(m/s^2)$", de->adis_timestamps, de->adis_accel_x.data, graph_options, line_count == 1);
             else if (graph_variable == "ADAY")
-                plot_with_options("Accelerometer Y $(m/s^2)$", de->adis_timestamps, de->adis_accel_y.data, graph_options, line_count == 1);
+                plot_with_options("ADIS Accelerometer Y $(m/s^2)$", de->adis_timestamps, de->adis_accel_y.data, graph_options, line_count == 1);
             else if (graph_variable == "ADAZ")
-                plot_with_options("Accelerometer Z $(m/s^2)$", de->adis_timestamps, de->adis_accel_z.data, graph_options, line_count == 1);
+                plot_with_options("ADIS Accelerometer Z $(m/s^2)$", de->adis_timestamps, de->adis_accel_z.data, graph_options, line_count == 1);
 
             else if (graph_variable == "ADGX")
-                plot_with_options("Gyroscope X (rad/s)", de->adis_timestamps, de->adis_gyro_x.data, graph_options, line_count == 1);
+                plot_with_options("ADIS Gyroscope X (rad/s)", de->adis_timestamps, de->adis_gyro_x.data, graph_options, line_count == 1);
             else if (graph_variable == "ADGY")
-                plot_with_options("Gyroscope Y (rad/s)", de->adis_timestamps, de->adis_gyro_y.data, graph_options, line_count == 1);
+                plot_with_options("ADIS Gyroscope Y (rad/s)", de->adis_timestamps, de->adis_gyro_y.data, graph_options, line_count == 1);
             else if (graph_variable == "ADGZ")
-                plot_with_options("Gyroscope Z (rad/s)", de->adis_timestamps, de->adis_gyro_z.data, graph_options, line_count == 1);
+                plot_with_options("ADIS Gyroscope Z (rad/s)", de->adis_timestamps, de->adis_gyro_z.data, graph_options, line_count == 1);
 
             else if (graph_variable == "ADMX")
-                plot_with_options("Magnetometer X", de->adis_timestamps, de->adis_magno_x.data, graph_options, line_count == 1);
+                plot_with_options("ADIS Magnetometer X", de->adis_timestamps, de->adis_magno_x.data, graph_options, line_count == 1);
             else if (graph_variable == "ADMY")
-                plot_with_options("Magnetometer Y", de->adis_timestamps, de->adis_magno_y.data, graph_options, line_count == 1);
+                plot_with_options("ADIS Magnetometer Y", de->adis_timestamps, de->adis_magno_y.data, graph_options, line_count == 1);
             else if (graph_variable == "ADMZ")
-                plot_with_options("Magnetometer Z", de->adis_timestamps, de->adis_magno_z.data, graph_options, line_count == 1);
+                plot_with_options("ADIS Magnetometer Z", de->adis_timestamps, de->adis_magno_z.data, graph_options, line_count == 1);
 
             else if (graph_variable == "ADAMANGLE")
-                plot_with_options("Field Angle (rad)", de->adis_timestamps, de->adis_accel_magno_angle.data, graph_options,
+                plot_with_options("ADIS Field Angle (rad)", de->adis_timestamps, de->adis_accel_magno_angle.data, graph_options,
                                   line_count == 1);
             else if (graph_variable == "ADMNORM")
-                plot_with_options("Magnetometer Magnitude", de->adis_timestamps, de->adis_magno_norm.data, graph_options,
+                plot_with_options("ADIS Magnetometer Magnitude", de->adis_timestamps, de->adis_magno_norm.data, graph_options,
                                   line_count == 1);
             else if (graph_variable == "ADANORM")
-                plot_with_options("Accelerometer Magnitude $(m/s^2)$", de->adis_timestamps, de->adis_accel_norm.data, graph_options,
+                plot_with_options("ADIS Accelerometer Magnitude $(m/s^2)$", de->adis_timestamps, de->adis_accel_norm.data, graph_options,
                                   line_count == 1);
             else if (graph_variable == "ADGNORM")
-                plot_with_options("Gyro Magnitude (rad/s)", de->adis_timestamps, de->adis_gyro_norm.data, graph_options,
+                plot_with_options("ADIS Gyro Magnitude (rad/s)", de->adis_timestamps, de->adis_gyro_norm.data, graph_options,
                                   line_count == 1);
 
             else if (graph_variable == "SEAX")

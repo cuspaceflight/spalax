@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-typedef double fp;
+typedef float fp;
 
 #define KALMAN_NUM_STATES 24
 

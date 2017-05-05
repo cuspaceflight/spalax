@@ -86,10 +86,6 @@ angular_velocity_jacobian(const Matrix<fp, 3, 1> &velocity, float dt) {
     fp normsq = x*x + y*y + z*z;
     fp norm = std::sqrt(normsq);
 
-    if (norm < 1e-5f)
-        return Matrix<fp, 3, 3>::Zero();
-
-
     fp norm3 = norm * norm * norm;
 
     fp t = std::tan((dt*norm)/4);
