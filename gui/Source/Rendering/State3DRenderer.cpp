@@ -16,23 +16,20 @@ MESSAGING_CONSUMER(messaging_consumer, ts_all, ts_all_mask, 0, 0, getPacket, 102
 
 State3DRenderer::State3DRenderer() : 
     rocket_renderer_(new RocketRenderer()), 
-    rocket_path_renderer_(new RocketPathRenderer()),
-    mag_renderer_(new VectorRenderer(glm::vec3(1,0,0))),
-    accel_renderer_(new VectorRenderer(glm::vec3(0, 1, 0))) {
+    rocket_path_renderer_(new RocketPathRenderer()){
     FTAssert(s_instance == nullptr, "Only one State3DRenderer instance can exist at once");
 
     auto camera = std::make_shared<FTCameraFPS>();
-    camera->setPosition(glm::vec3(-10, 0, 0));
+    camera->setPosition(glm::vec3(-12, 0, 0));
     // The state estimate uses z as up and x as forwards so we adjust to match
     camera->setAxes(glm::vec3(0, 0, 1), glm::vec3(1, 0, 0));
+    camera->setDrawRectRelative(FTRect<float>(0.66f, 0, 0.33f, 1));
     setCamera(std::move(camera));
-    
+
 
     addChild(rocket_renderer_);
     addChild(rocket_path_renderer_);
 
-    addChild(mag_renderer_);
-    addChild(accel_renderer_);
     s_instance = this;
 
     messaging_consumer_init(&messaging_consumer);
@@ -40,15 +37,15 @@ State3DRenderer::State3DRenderer() :
     LightDescriptor light;
     light.position = glm::normalize(glm::vec4(1, 0, 0, 0));
     light.ambientCoefficient = 0.1f;
-    light.intensity = glm::vec3(0.4, 0, 0);
+    light.intensity = glm::vec3(0.4, 0.4, 0.4);
     //light.attenuation = 0.01f;
     //light.coneAngle = 15.0f;
     //light.coneDirection = glm::normalize(glm::vec3(0,1,-0.5));
     light_manager_->addLight(light);
 
-    light.position = glm::normalize(glm::vec4(-1, 0, 0, 0));
+    light.position = glm::normalize(glm::vec4(-1, 1, 0, 0));
     light.ambientCoefficient = 0.1f;
-    light.intensity = glm::vec3(0, 0, 0.4);
+    light.intensity = glm::vec3(0.2, 0.2, 0.2);
     //light.attenuation = 0.01f;
     //light.coneAngle = 15.0f;
     //light.coneDirection = glm::normalize(glm::vec3(0,1,-0.5));
@@ -69,9 +66,6 @@ bool State3DRenderer::handlePacket(const telemetry_t* packet) const {
 
         mpu9250_calibrated_data_t calibrated;
         mpu9250_calibrate_data(data, &calibrated);
-
-        mag_renderer_->renderVector(glm::vec3(calibrated.magno[0], calibrated.magno[1], calibrated.magno[2]));
-        accel_renderer_->renderVector(glm::vec3(calibrated.accel[0], calibrated.accel[1], calibrated.accel[2]));
     }
     return true;
 }

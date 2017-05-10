@@ -20,6 +20,7 @@ int main() {
 
     if (FTEngine::setup()) {
         setBoardConfig(BoardConfigSpalax);
+        glClearColor(1,1,1, 0.0f);
 
         component_state_start(update_handler, true);
         messaging_all_start();
@@ -27,8 +28,8 @@ int main() {
         std::thread state_estimate(state_estimate_thread, nullptr);
 
         FTEngine::getFileManager()->addSearchPath("Resources");
-        FTEngine::getDirector()->getFontCache()->loadFontStyle("DefaultText", "Resources/Fonts/Vera.ftfont", glm::vec3(1,1,1));
-        FTEngine::getDirector()->getFontCache()->loadFontStyle("DefaultTextPlaceholder", "Resources/Fonts/Vera.ftfont", glm::vec3(0.8,0.8,0.8));
+        FTEngine::getDirector()->getFontCache()->loadFontStyle("DefaultText", "Resources/Fonts/Vera.ftfont", glm::vec3(0,0,0));
+        FTEngine::getDirector()->getFontCache()->loadFontStyle("DefaultTextPlaceholder", "Resources/Fonts/Vera.ftfont", glm::vec3(0.2,0.2,0.2));
 
         auto scene = std::static_pointer_cast<FTScene>(std::make_shared<MainScene>());
         FTEngine::getDirector()->setCurrentScene(scene);

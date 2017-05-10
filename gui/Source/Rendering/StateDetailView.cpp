@@ -119,12 +119,12 @@ StateDetailView::StateDetailView() {
         L"MPU9250 Accel X", L"MPU9250 Accel Y", L"MPU9250 Accel Z", 
         L"MPU9250 Gyro X", L"MPU9250 Gyro Y", L"MPU9250 Gyro Z", 
         L"MPU9250 Magno X", L"MPU9250 Magno Y", L"MPU9250 Magno Z",
-        L"MPU9250 Heading", L"MPU9250 Update Rate", L"State Estimate Update Rate", L"MS5611 Update Rate",
+        L"MPU9250 Heading", L"MPU9250 Update Rate", L"SE Update Rate", L"MS5611 Update Rate",
         L"SE Rotation X", L"SE Rotation Y", L"SE Rotation Z",
         L"SE Angular Velocity X", L"SE Angular Velocity Y", L"SE Angular Velocity Z",
-        L"SE Position X", L"SE Position X", L"SE Position X",
-        L"SE Velocity X", L"SE Velocity X", L"SE Velocity X",
-        L"SE Acceleration X", L"SE Acceleration X", L"SE Acceleration X",
+        L"SE Position X", L"SE Position Y", L"SE Position Z",
+        L"SE Velocity X", L"SE Velocity Y", L"SE Velocity Z",
+        L"SE Acceleration X", L"SE Acceleration Y", L"SE Acceleration Z",
         L"ADIS Supply",
         L"ADIS Gyro X", L"ADIS Gyro Y", L"ADIS Gyro Z",
         L"ADIS Accel X", L"ADIS Accel Y", L"ADIS Accel Z",
@@ -138,7 +138,7 @@ StateDetailView::StateDetailView() {
     addChild(window_size_node);
 
     
-	const float x_padding = 350;
+	const float x_padding = 300;
     const float y_padding = 30.0f;
     float y = -y_padding;
 	float x = 0;
@@ -151,7 +151,8 @@ StateDetailView::StateDetailView() {
 
         label = std::make_shared<FTLabel>(L"0", 6, true);
         window_size_node->addChild(label);
-        label->setPosition(glm::vec2(x + 350, y));
+        label->setPosition(glm::vec2(x + x_padding, y));
+        label->setPosition(glm::vec2(x + x_padding, y));
         label->setAnchorPoint(glm::vec2(1, 0.5f));
 
         value_labels_.push_back(label.get());

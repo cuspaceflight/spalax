@@ -20,7 +20,7 @@ def plot_scatter(data, name, down_sample_factor = 100):
     ax.set_xlabel('X')
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
-    ax.set_title(name)
+    #ax.set_title(name)
 
 def eval_calibrated(data):
     lengths = np.linalg.norm(data, axis=1)
@@ -74,7 +74,7 @@ def calibration_ellipsoid(data):
 
 
     calibrated = transform.dot((data - center.T).T).T
-    plot_scatter(calibrated, "Ellipsoid Calibration", 100)
+    plot_scatter(calibrated, "Calibrated ADIS16405 Magnetometer Data", 100)
     eval = eval_calibrated(calibrated)
 
     print("Ellipsoid Calibration (Transform - {}, Offset - {} Eval - {})".format(
@@ -113,15 +113,15 @@ def calibration_combination(data):
         str(eval)))
 
 def calibration_all(data):
-    plot_scatter(data, "Raw Magno Data")
+    plot_scatter(data, "Raw ADIS16405 Magnetometer Data")
 
-    print ("Performing Basic Calibration")
+    #print ("Performing Basic Calibration")
 
-    calibration_basic(data)
+    #calibration_basic(data)
 
-    print ("Performing Mean Calibration")
+    #print ("Performing Mean Calibration")
 
-    calibration_basic_mean(data)
+    #calibration_basic_mean(data)
 
     print ("Performing Ellipsoid Calibration")
 

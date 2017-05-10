@@ -240,7 +240,7 @@ void plot_with_options(const std::string &name, const std::vector<float> &timest
         plot_data = std::move(pair.first);
         plot_timestamps = std::move(pair.second);
     } else {
-        std::cerr << "Unrecognised Options String " << options;
+        std::cerr << "Unrecognised Options String " << options << std::endl;
     }
 
     plt::named_plot(plot_name, plot_timestamps, plot_data);

@@ -5,15 +5,17 @@
 #include <Eigen/Geometry>
 
 
-#define JERK_DEPENDENCE 0
+#define JERK_DEPENDENCE 1
 #define ACCEL_MAGNO_ERROR 0
-#define GYRO_SF_ERROR 1
-#define ANGULAR_ACCELERATION 0
-#define JERK 0
+#define GYRO_SF_ERROR 0
+#define ANGULAR_ACCELERATION 1
+#define JERK 1
+#define ANGULAR_VEL 1
+#define ACCEL 1
 
 static constexpr float time_increment = 1024;
-static const int num_experiments = 50;
-static const int simulation_minutes = 5;
+static const int num_experiments = 100;
+static const int simulation_minutes = 1;
 
 using namespace Eigen;
 namespace plt = matplotlibcpp;
@@ -23,10 +25,8 @@ static Matrix<fp, 3, 1> gyro_jerk_dependence(const Matrix<fp, 3, 1> &jerk) {
 }
 
 fp accel_reference[3] = {0, 0, 9.80665f};
-fp magno_reference[3] = {1, 0, 0};//{0.39134267f, -0.00455851434f, -0.920233727f};
+fp magno_reference[3] = {0.39134267f, -0.00455851434f, -0.920233727f};
 
-
-static void plot_error_bars(std::vector<float> vector, std::vector<float> pVector[], const std::string &fmt);
 
 static float get_rand(float range = 20) {
     float divisor = RAND_MAX / 2 / range;
@@ -66,7 +66,8 @@ static std::vector<float> average(std::vector<float> input[num_experiments]) {
     return ret;
 }
 
-static void plot_error_bars(std::vector<float> timestamps, std::vector<float> input[num_experiments], const std::string &color) {
+static void
+plot_error_bars(std::vector<float> timestamps, std::vector<float> input[num_experiments], const std::string &color) {
     float t = 0;
     size_t i = 0;
     std::vector<float> plot_timestamps;
@@ -99,11 +100,22 @@ static void plot_error_bars(std::vector<float> timestamps, std::vector<float> in
 
 }
 
-static void
-accel_test(const Matrix<fp, 3, 1> &const_angle_increment, const Matrix<fp, 3, 1> &constant_accel, bool plot = false,
-           int NUM_TESTS = 10000, float jerk_mult = 0) {
+static void accel_test(bool plot = false, int NUM_TESTS = 10000, float jerk_mult = 0) {
     state_estimate_t estimate;
     state_estimate_debug_t debug;
+
+
+#if ANGULAR_VEL
+    const Matrix<fp, 3, 1> &const_angle_increment = Matrix<fp, 3, 1>(get_rand(), get_rand(), get_rand()).normalized();
+#else
+    const Matrix<fp, 3, 1> &const_angle_increment = Matrix<fp, 3, 1>(0, 0, 0);
+#endif
+
+#if ACCEL
+    const Matrix<fp, 3, 1> &constant_accel = Matrix<fp, 3, 1>(get_rand(), get_rand(), get_rand()).normalized() * 2;
+#else
+    const Matrix<fp, 3, 1> &constant_accel = Matrix<fp, 3, 1>(0, 0, 0);
+#endif
 
     const Matrix<fp, 3, 1> unrotated_magno = Matrix<fp, 3, 1>(magno_reference[0], magno_reference[1],
                                                               magno_reference[2]);
@@ -112,16 +124,16 @@ accel_test(const Matrix<fp, 3, 1> &const_angle_increment, const Matrix<fp, 3, 1>
 
     std::default_random_engine generator(3452456);
 
-    std::normal_distribution<fp> accel_distribution(0.0, kalman_accelerometer_cov);
-    std::normal_distribution<fp> magno_distribution(0.0, kalman_magno_cov);
-    std::normal_distribution<fp> gyro_distribution(0, kalman_gyro_cov);
+    std::normal_distribution<fp> accel_distribution(0.0, std::sqrt(kalman_accelerometer_cov));
+    std::normal_distribution<fp> magno_distribution(0.0, std::sqrt(kalman_magno_cov));
+    std::normal_distribution<fp> gyro_distribution(0, std::sqrt(kalman_gyro_cov));
 
-    std::normal_distribution<fp> gyro_bias_distribution(0, gyro_bias_process_noise / time_increment);
-    std::normal_distribution<fp> magno_bias_distribution(0, magno_bias_process_noise / time_increment);
-    std::normal_distribution<fp> accel_bias_distribution(0, accel_bias_process_noise / time_increment);
+    std::normal_distribution<fp> gyro_bias_distribution(0, std::sqrt(gyro_bias_process_noise) / time_increment);
+    std::normal_distribution<fp> magno_bias_distribution(0, std::sqrt(magno_bias_process_noise) / time_increment);
+    std::normal_distribution<fp> accel_bias_distribution(0, std::sqrt(accel_bias_process_noise) / time_increment);
 
-    std::normal_distribution<fp> jerk_distribution(0, acceleration_process_noise / time_increment);
-    std::normal_distribution<fp> angular_accel_distribution(0, angular_vel_process_noise / time_increment);
+    std::normal_distribution<fp> jerk_distribution(0, std::sqrt(acceleration_process_noise) / time_increment);
+    std::normal_distribution<fp> angular_accel_distribution(0, std::sqrt(angular_vel_process_noise) / time_increment);
 
     std::vector<float> ang_vel_err_x[num_experiments];
     std::vector<float> ang_vel_err_y[num_experiments];
@@ -162,13 +174,13 @@ accel_test(const Matrix<fp, 3, 1> &const_angle_increment, const Matrix<fp, 3, 1>
 
     std::vector<float> timestamps;
 
-    fp accel_magno_error_angle = get_rand(0.1f);
-
 
     for (int k = 0; k < num_experiments; k++) {
         printf("Simulation %i\n", k);
 
-        Eigen::Quaternion<fp> quat(Eigen::AngleAxisf(get_rand(), Eigen::Vector3f::UnitZ()) * Eigen::AngleAxisf(get_rand(), Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(get_rand(), Eigen::Vector3f::UnitX()));
+        Eigen::Quaternion<fp> quat(Eigen::AngleAxisf(get_rand(), Eigen::Vector3f::UnitZ()) *
+                                   Eigen::AngleAxisf(get_rand(), Eigen::Vector3f::UnitY()) *
+                                   Eigen::AngleAxisf(get_rand(), Eigen::Vector3f::UnitX()));
 
         kalman_test_setup(quat.inverse(), const_angle_increment, Matrix<fp, 3, 1>::Zero(),
                           Matrix<fp, 3, 1>::Zero(),
@@ -188,15 +200,20 @@ accel_test(const Matrix<fp, 3, 1> &const_angle_increment, const Matrix<fp, 3, 1>
 
         for (int i = 0; i <= NUM_TESTS; i++) {
 
-            gyro_bias += Eigen::Matrix<fp, 3, 1>(gyro_bias_distribution(generator), gyro_bias_distribution(generator), gyro_bias_distribution(generator));
-            accel_bias += Eigen::Matrix<fp, 3, 1>(accel_bias_distribution(generator), accel_bias_distribution(generator), accel_bias_distribution(generator));
+            gyro_bias += Eigen::Matrix<fp, 3, 1>(gyro_bias_distribution(generator), gyro_bias_distribution(generator),
+                                                 gyro_bias_distribution(generator));
+            accel_bias += Eigen::Matrix<fp, 3, 1>(accel_bias_distribution(generator),
+                                                  accel_bias_distribution(generator),
+                                                  accel_bias_distribution(generator));
 
             Quaternion<fp> delta(AngleAxis<fp>(angle_increment.norm() / time_increment, angle_increment.normalized()));
             Quaternion<fp> t = quat * delta.inverse();
             quat = t;
 
 #if ANGULAR_ACCELERATION
-            angle_increment += Eigen::Matrix<fp, 3, 1>(angular_accel_distribution(generator), angular_accel_distribution(generator), angular_accel_distribution(generator));
+            angle_increment += Eigen::Matrix<fp, 3, 1>(angular_accel_distribution(generator),
+                                                       angular_accel_distribution(generator),
+                                                       angular_accel_distribution(generator));
 #endif
 #if JERK
             Matrix<fp, 3, 1> jerk = Matrix<fp, 3, 1>(
@@ -210,8 +227,10 @@ accel_test(const Matrix<fp, 3, 1> &const_angle_increment, const Matrix<fp, 3, 1>
             Matrix<fp, 3, 1> rotated_accel = quat * (unrotated_accel + variable_accel) + accel_bias;
 
 #if ACCEL_MAGNO_ERROR
-        AngleAxis<fp> accel_magno_error_quat(accel_magno_error_angle, accel_magno_error_axis);
-        Matrix<fp, 3, 1> rotated_magno = accel_magno_error_quat * quat * unrotated_magno + magno_bias;
+            fp accel_magno_error_angle = i > time_increment*25 ? (i > time_increment*35 ? 0.05 : 0.1f ): 0;
+
+            AngleAxis<fp> accel_magno_error_quat(accel_magno_error_angle, accel_magno_error_axis);
+            Matrix<fp, 3, 1> rotated_magno = accel_magno_error_quat * quat * unrotated_magno + magno_bias;
 #else
             Matrix<fp, 3, 1> rotated_magno = quat * unrotated_magno + magno_bias;
 #endif
@@ -223,6 +242,7 @@ accel_test(const Matrix<fp, 3, 1> &const_angle_increment, const Matrix<fp, 3, 1>
 #else
             Matrix<fp, 3, 1> rotated_gyro = quat * (angle_increment) + gyro_bias;
 #endif
+
             fp magno[3] = {rotated_magno.x() + magno_distribution(generator),
                            rotated_magno.y() + magno_distribution(generator),
                            rotated_magno.z() + magno_distribution(generator)};
@@ -242,7 +262,6 @@ accel_test(const Matrix<fp, 3, 1> &const_angle_increment, const Matrix<fp, 3, 1>
 
             kalman_get_state(&estimate);
             kalman_get_state_debug(&debug);
-
 
 
             current_position += 1.0 / time_increment * current_velocity;
@@ -310,17 +329,17 @@ accel_test(const Matrix<fp, 3, 1> &const_angle_increment, const Matrix<fp, 3, 1>
     plt::grid(true);
     plt::legend();
     plt::xlabel("Time (s)");
-    plt::save("Acceleration.png");
+    plt::save("Acceleration.svg");
 
-    plt::clf();
-    plt::named_plot("X Angular Velocity Error (rad/s)", timestamps, average(ang_vel_err_x));
-    plt::named_plot("Y Angular Velocity Error (rad/s)", timestamps, average(ang_vel_err_y));
-    plt::named_plot("Z Angular Velocity Error (rad/s)", timestamps, average(ang_vel_err_z));
-
-    plt::grid(true);
-    plt::legend();
-    plt::xlabel("Time (s)");
-    plt::save("Angular Velocity.png");
+//    plt::clf();
+//    plt::named_plot("X Angular Velocity Error (rad/s)", timestamps, average(ang_vel_err_x));
+//    plt::named_plot("Y Angular Velocity Error (rad/s)", timestamps, average(ang_vel_err_y));
+//    plt::named_plot("Z Angular Velocity Error (rad/s)", timestamps, average(ang_vel_err_z));
+//
+//    plt::grid(true);
+//    plt::legend();
+//    plt::xlabel("Time (s)");
+//    plt::save("Angular Velocity.svg");
 
     plt::clf();
     plt::named_plot("Rotation Error (rad)", timestamps, average(rot_err));
@@ -328,17 +347,20 @@ accel_test(const Matrix<fp, 3, 1> &const_angle_increment, const Matrix<fp, 3, 1>
     plt::grid(true);
     plt::legend();
     plt::xlabel("Time (s)");
-    plt::save("Rotation.png");
+    plt::save("Rotation.svg");
 
     plt::clf();
     plt::named_plot("X Velocity Error (m/s)", timestamps, average(vel_err_x));
+    plot_error_bars(timestamps, vel_err_x, "C0");
     plt::named_plot("Y Velocity Error (m/s)", timestamps, average(vel_err_y));
+    plot_error_bars(timestamps, vel_err_y, "C1");
     plt::named_plot("Z Velocity Error (m/s)", timestamps, average(vel_err_z));
+    plot_error_bars(timestamps, vel_err_z, "C2");
 
     plt::grid(true);
     plt::legend();
     plt::xlabel("Time (s)");
-    plt::save("Velocity.png");
+    plt::save("Velocity.svg");
 
     plt::clf();
     plt::named_plot("X Position Error (m)", timestamps, average(pos_err_x));
@@ -351,58 +373,58 @@ accel_test(const Matrix<fp, 3, 1> &const_angle_increment, const Matrix<fp, 3, 1>
     plt::grid(true);
     plt::legend("upper left");
     plt::xlabel("Time (s)");
-    plt::save("Position.png");
+    plt::save("Position.svg");
+//
+//    plt::clf();
+//    plt::named_plot("Accel X (m/s$^2$)", timestamps, accel_x);
+//    plt::named_plot("Accel Y (m/s$^2$)", timestamps, accel_y);
+//    plt::named_plot("Accel Z (m/s$^2$)", timestamps, accel_z);
+//
+//    plt::grid(true);
+//    plt::legend();
+//    plt::xlabel("Time (s)");
+//    plt::save("Accel.svg");
 
-    plt::clf();
-    plt::named_plot("Accel X (m/s$^2$)", timestamps, accel_x);
-    plt::named_plot("Accel Y (m/s$^2$)", timestamps, accel_y);
-    plt::named_plot("Accel Z (m/s$^2$)", timestamps, accel_z);
 
-    plt::grid(true);
-    plt::legend();
-    plt::xlabel("Time (s)");
-    plt::save("Accel.png");
+//    plt::clf();
+//    plt::named_plot("Gyro X (rad/s)", timestamps, gyro_x);
+//    plt::named_plot("Gyro Y (rad/s)", timestamps, gyro_y);
+//    plt::named_plot("Gyro Z (rad/s)", timestamps, gyro_z);
+//
+//    plt::grid(true);
+//    plt::legend();
+//    plt::xlabel("Time (s)");
+//    plt::save("Gyro.svg");
 
+//    plt::clf();
+//    plt::named_plot("Gyro Bias Error X (rad/s)", timestamps, average(gyro_bias_err_x));
+//    plt::named_plot("Gyro Bias Error Y (rad/s)", timestamps, average(gyro_bias_err_y));
+//    plt::named_plot("Gyro Bias Error Z (rad/s)", timestamps, average(gyro_bias_err_z));
+//
+//    plt::grid(true);
+//    plt::legend();
+//    plt::xlabel("Time (s)");
+//    plt::save("Gyro Bias.svg");
+//
+//    plt::clf();
+//    plt::named_plot("Accel Bias Error X (m/s$^2$)", timestamps, average(accel_bias_err_x));
+//    plt::named_plot("Accel Bias Error Y (m/s$^2$)", timestamps, average(accel_bias_err_y));
+//    plt::named_plot("Accel Bias Error Z (m/s$^2$)", timestamps, average(accel_bias_err_z));
+//
+//    plt::grid(true);
+//    plt::legend();
+//    plt::xlabel("Time (s)");
+//    plt::save("Accel Bias.svg");
 
-    plt::clf();
-    plt::named_plot("Gyro X (rad/s)", timestamps, gyro_x);
-    plt::named_plot("Gyro Y (rad/s)", timestamps, gyro_y);
-    plt::named_plot("Gyro Z (rad/s)", timestamps, gyro_z);
-
-    plt::grid(true);
-    plt::legend();
-    plt::xlabel("Time (s)");
-    plt::save("Gyro.png");
-
-    plt::clf();
-    plt::named_plot("Gyro Bias Error X (rad/s)", timestamps, average(gyro_bias_err_x));
-    plt::named_plot("Gyro Bias Error Y (rad/s)", timestamps, average(gyro_bias_err_y));
-    plt::named_plot("Gyro Bias Error Z (rad/s)", timestamps, average(gyro_bias_err_z));
-
-    plt::grid(true);
-    plt::legend();
-    plt::xlabel("Time (s)");
-    plt::save("Gyro Bias.png");
-
-    plt::clf();
-    plt::named_plot("Accel Bias Error X (m/s$^2$)", timestamps, average(accel_bias_err_x));
-    plt::named_plot("Accel Bias Error Y (m/s$^2$)", timestamps, average(accel_bias_err_y));
-    plt::named_plot("Accel Bias Error Z (m/s$^2$)", timestamps, average(accel_bias_err_z));
-
-    plt::grid(true);
-    plt::legend();
-    plt::xlabel("Time (s)");
-    plt::save("Accel Bias.png");
-
-    plt::clf();
-    plt::named_plot("Rot Error Axis X", timestamps, average(rot_axis_x));
-    plt::named_plot("Rot Error Axis Y", timestamps, average(rot_axis_y));
-    plt::named_plot("Rot Error Axis Z", timestamps, average(rot_axis_z));
-
-    plt::grid(true);
-    plt::legend();
-    plt::xlabel("Time (s)");
-    plt::save("Rotation Axis.png");
+//    plt::clf();
+//    plt::named_plot("Rot Error Axis X", timestamps, average(rot_axis_x));
+//    plt::named_plot("Rot Error Axis Y", timestamps, average(rot_axis_y));
+//    plt::named_plot("Rot Error Axis Z", timestamps, average(rot_axis_z));
+//
+//    plt::grid(true);
+//    plt::legend();
+//    plt::xlabel("Time (s)");
+//    plt::save("Rotation Axis.svg");
 
 
 
@@ -415,12 +437,11 @@ accel_test(const Matrix<fp, 3, 1> &const_angle_increment, const Matrix<fp, 3, 1>
 //
 //            plt::grid(true);
 //            plt::legend();
-//            plt::save(name + ".png");
+//            plt::save(name + ".svg");
 //        }
 }
 
 
 int main(int argc, char *argv[]) {
-    accel_test(Matrix<fp, 3, 1>(1, 1, 1), Matrix<fp, 3, 1>(0, 0, 0),
-               true, (int) ((simulation_minutes * 60 + 5) * time_increment), 2e-4f);
+    accel_test(true, (int) ((simulation_minutes * 60 + 5) * time_increment), 2e-4f);
 }

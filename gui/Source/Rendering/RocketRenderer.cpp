@@ -2,7 +2,7 @@
 #include "RocketRenderer.h"
 
 RocketRenderer::RocketRenderer() {
-    auto renderer = std::make_shared<FTCuboid>(glm::vec3(0, 0, 0), glm::vec3(1, 1, 10), glm::vec3(0.6f, 0.6f, 0.6f), FTCuboid::getShaderUtil<FTVertexShaderProgramLighting>());
+    auto renderer = std::make_shared<FTCuboid>(glm::vec3(0, 0, 0), glm::vec3(8, 5, 0.25f), glm::vec3(0.6f, 0.6f, 0.6f), FTCuboid::getShaderUtil<FTVertexShaderProgramLighting>());
     renderer->setAnchorPoint(glm::vec3(0.5f, 0.5f, 0.5f));
     addChild(std::move(renderer));
 }

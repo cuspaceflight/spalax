@@ -25,7 +25,7 @@ enum class StateEstimatePhase {
 
 static StateEstimatePhase state_estimate_phase = StateEstimatePhase::Init;
 
-#define NUM_CALIBRATION_SAMPLES 1000
+#define NUM_CALIBRATION_SAMPLES 10000
 static int remaining_calibration_samples;
 static Matrix<float, 3, 1> magno_calibration;
 static Matrix<float, 3, 1> accel_calibration;
@@ -172,8 +172,8 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
                 }
 
                 const fp kalman_reference_vectors[2][3] = {
-                        {accel_reference.x() * 9.80665f,       accel_reference.y() * 9.80665f,
-                                accel_reference.z() * 9.80665f},
+                        {accel_reference.x() * accel_norm,       accel_reference.y() * accel_norm,
+                                accel_reference.z() * accel_norm},
                         {new_magno_reference.x() * magno_norm, new_magno_reference.y() * magno_norm,
                                 new_magno_reference.z() * magno_norm}
                 };

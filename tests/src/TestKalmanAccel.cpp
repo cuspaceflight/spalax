@@ -314,8 +314,3 @@ TEST(TestKalmanAccel, TestComplex) {
 
     accel_test(Matrix<fp, 3, 1>(1.0f / time_increment, 0, 0), Matrix<fp, 3, 1>(0, 0, 1));
 }
-
-TEST(TestKalmanAccel, TestPlot) {
-    accel_test(Matrix<fp, 3, 1>(1 / time_increment, 1 / time_increment, 0 / time_increment), Matrix<fp, 3, 1>(0, 0, 0),
-               true, 1 * 60 * time_increment, 2e-4f);
-}

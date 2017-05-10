@@ -27,6 +27,7 @@ static void print_help() {
     std::cout << std::endl;
     std::cout << "Filter Options" << std::endl;
     printf("av<N>                      Plot N element average\n");
+    printf("of<N>                      Plot values offset by N\n");
 }
 
 int main(int argc, char *argv[]) {

@@ -21,6 +21,4 @@ public:
 protected:
     std::shared_ptr<RocketRenderer> rocket_renderer_;
     std::shared_ptr<RocketPathRenderer> rocket_path_renderer_;
-    std::shared_ptr<VectorRenderer> mag_renderer_;
-    std::shared_ptr<VectorRenderer> accel_renderer_;
 };

@@ -28,8 +28,8 @@ sensor = 'magno'
 adis = False
 mpu = True
 
-psd = True
-allan = False
+psd = False
+allan = True
 
 if psd:
     plt.ylim([1e-14, 1e-3])
@@ -97,6 +97,14 @@ if (allan):
         plt.loglog(taus, devs_y, label='ADIS Gyro Y')
         plt.loglog(taus, devs_z, label='ADIS Gyro Z')
 
+        for (t, x, y, z) in zip(taus, devs_x, devs_y, devs_z):
+            if (t > 1 and t < 1.1):
+                print("Angle Random Walks")
+                print((x, y, z))
+
+        print "Bias Instabilities"
+        print ((np.min(devs_x), np.min(devs_y), np.min(devs_z)))
+
         (taus, devs_x, _, _) = allantools.oadev(data_mpu[:, 0], rate=mpu_sample_rate, data_type='freq', taus=taus)
         (taus, devs_y, _, _) = allantools.oadev(data_mpu[:, 1], rate=mpu_sample_rate, data_type='freq', taus=taus)
         (taus, devs_z, _, _) = allantools.oadev(data_mpu[:, 2], rate=mpu_sample_rate, data_type='freq', taus=taus)
@@ -120,6 +128,14 @@ if (allan):
         plt.loglog(taus, devs_y, label='ADIS Accel Y')
         plt.loglog(taus, devs_z, label='ADIS Accel Z')
 
+        for (t, x, y, z) in zip(taus, devs_x, devs_y, devs_z):
+            if (t > 1 and t < 1.1):
+                print("Angle Random Walks")
+                print((x, y, z))
+
+        print "Bias Instabilities"
+        print ((np.min(devs_x), np.min(devs_y), np.min(devs_z)))
+
         (taus, devs_x, _, _) = allantools.oadev(data_mpu[:, 0], rate=mpu_sample_rate, data_type='freq', taus=taus)
         (taus, devs_y, _, _) = allantools.oadev(data_mpu[:, 1], rate=mpu_sample_rate, data_type='freq', taus=taus)
         (taus, devs_z, _, _) = allantools.oadev(data_mpu[:, 2], rate=mpu_sample_rate, data_type='freq', taus=taus)
@@ -142,6 +158,14 @@ if (allan):
         plt.loglog(taus, devs_y, label='ADIS Magno Y')
         plt.loglog(taus, devs_z, label='ADIS Magno Z')
 
+        for (t, x, y, z) in zip(taus, devs_x, devs_y, devs_z):
+            if (t > 1 and t < 1.1):
+                print("Angle Random Walks")
+                print((x, y, z))
+
+        print "Bias Instabilities"
+        print ((np.min(devs_x), np.min(devs_y), np.min(devs_z)))
+
         (taus, devs_x, _, _) = allantools.oadev(data_mpu[:, 0], rate=mpu_sample_rate, data_type='freq', taus=taus)
         (taus, devs_y, _, _) = allantools.oadev(data_mpu[:, 1], rate=mpu_sample_rate, data_type='freq', taus=taus)
         (taus, devs_z, _, _) = allantools.oadev(data_mpu[:, 2], rate=mpu_sample_rate, data_type='freq', taus=taus)
@@ -152,9 +176,6 @@ if (allan):
 
         plt.ylabel("Root Allan Variance (Normalised to Local Field Strength)")
         plt.xlabel("Tau (sec)")
-        plt.legend()
-        plt.grid()
-
 elif psd:
 
     if sensor == 'gyro' and adis:
@@ -234,7 +255,7 @@ elif psd:
         plt.xlabel('frequency [Hz]')
 
 
-plt.xlim([0, 300])
+#plt.xlim([0, 300])
 plt.grid()
 plt.legend()
 plt.show()

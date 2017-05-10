@@ -92,7 +92,10 @@ for accel in calibrated_accel:
 #plt.plot(2*np.diff(calibrated_accel, axis=0)[:,2], label="Jerk Z")
 #plt.plot(calibrated_gyro[:,0], label="Gyro X")
 
-plt.plot(-4*np.diff(calibrated_accel, axis=0)[:,1], label="Jerk Y")
+plt.ylabel("Angular Velocity (rad/s)")
+plt.xlabel("Time (s)")
+
+plt.plot(-4*np.diff(calibrated_accel, axis=0)[:,1], label="-4 $\\times$ Jerk Y")
 plt.plot(calibrated_gyro[:,1], label="Gyro Y")
 
 #plt.plot(calibrated_accel[:,0], label="Accel X")
