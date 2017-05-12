@@ -23,10 +23,10 @@ void update_handler(avionics_component_t component, avionics_component_state_t s
 
 
 template<typename T>
-float mean(T a_begin, T a_end) {
+fp mean(T a_begin, T a_end) {
     auto a_i = a_begin;
 
-    float mean = 0;
+    fp mean = 0;
     int i = 0;
 
     while (a_i != a_end) {
@@ -34,16 +34,16 @@ float mean(T a_begin, T a_end) {
         i++;
     }
 
-    return mean / (float) i;
+    return mean / (fp) i;
 }
 
 
 template<typename T>
-float delta_mean(T a_begin, T a_end, T b_begin, T b_end) {
+fp delta_mean(T a_begin, T a_end, T b_begin, T b_end) {
     auto a_i = a_begin;
     auto b_i = b_begin;
 
-    float mean = 0;
+    fp mean = 0;
     int i = 0;
 
     while (a_i != a_end && b_i != b_end) {
@@ -51,15 +51,15 @@ float delta_mean(T a_begin, T a_end, T b_begin, T b_end) {
         i++;
     }
 
-    return mean / (float) i;
+    return mean / (fp) i;
 }
 
 template<typename T>
-float angle_delta_mean(T a_begin, T a_end, T b_begin, T b_end) {
+fp angle_delta_mean(T a_begin, T a_end, T b_begin, T b_end) {
     auto a_i = a_begin;
     auto b_i = b_begin;
 
-    float mean = 0;
+    fp mean = 0;
     int i = 0;
 
     while (a_i != a_end && b_i != b_end) {
@@ -69,11 +69,11 @@ float angle_delta_mean(T a_begin, T a_end, T b_begin, T b_end) {
         b_i++;
     }
 
-    return mean / (float) i;
+    return mean / (fp) i;
 }
 
 
-float compute_score() {
+fp compute_score() {
     DataExtractor de;
 
     de.se_rotation_x.enabled = true;
@@ -87,7 +87,7 @@ float compute_score() {
 
     run_data_extractor(input, true, &de);
 
-    float score = 0;
+    fp score = 0;
 
     // The length of time to take averages over
     const int average_length = 100;
@@ -113,31 +113,31 @@ float compute_score() {
 
 #define NUM_TUNING_CONSTANTS 2
 
-float *tuning_constants[NUM_TUNING_CONSTANTS] = {
+fp *tuning_constants[NUM_TUNING_CONSTANTS] = {
         &magno_bias_process_noise,
         &accel_bias_process_noise
 };
 
-const float initial_delta_mult = 1.f;
-const float min_delta_mult = 1 / 128.f;
-const float delta_mult_factor = 0.5f;
+const fp initial_delta_mult = 1.f;
+const fp min_delta_mult = 1 / 128.f;
+const fp delta_mult_factor = 0.5f;
 
-float delta_mult = initial_delta_mult;
+fp delta_mult = initial_delta_mult;
 
-float compute_derivatives(float pos_derivatives[NUM_TUNING_CONSTANTS], float neg_derivatives[NUM_TUNING_CONSTANTS]) {
-    float original_score = compute_score();
+fp compute_derivatives(fp pos_derivatives[NUM_TUNING_CONSTANTS], fp neg_derivatives[NUM_TUNING_CONSTANTS]) {
+    fp original_score = compute_score();
 
     for (int i = 0; i < NUM_TUNING_CONSTANTS; i++) {
-        float delta = std::max(delta_mult * *tuning_constants[i], 1e-8f * delta_mult);
+        fp delta = std::max(delta_mult * *tuning_constants[i], 1e-8f * delta_mult);
 
-        float original = *tuning_constants[i];
+        fp original = *tuning_constants[i];
         *tuning_constants[i] += delta;
 
-        float score1 = compute_score();
+        fp score1 = compute_score();
 
-        *tuning_constants[i] = std::max(original - delta, 0.f);
+        *tuning_constants[i] = std::max<fp>(original - delta, 0.f);
 
-        float score2 = compute_score();
+        fp score2 = compute_score();
 
         pos_derivatives[i] = score1 - original_score;
 
@@ -149,8 +149,8 @@ float compute_derivatives(float pos_derivatives[NUM_TUNING_CONSTANTS], float neg
     return original_score;
 }
 
-int min_index(float derivative[NUM_TUNING_CONSTANTS]) {
-    float min = std::numeric_limits<float>::max();
+int min_index(fp derivative[NUM_TUNING_CONSTANTS]) {
+    fp min = std::numeric_limits<fp>::max();
     int index = 0;
 
     for (int i = 0; i < NUM_TUNING_CONSTANTS; i++) {
@@ -182,15 +182,15 @@ int main(int argc, char *argv[]) {
     component_state_start(update_handler, false);
     messaging_all_start_options(false, false);
 
-    float reset = -1;
+    fp reset = -1;
     int delta_mult_index = 0;
 
     while (true) {
-        float pos_derivative[NUM_TUNING_CONSTANTS];
-        float neg_derivative[NUM_TUNING_CONSTANTS];
+        fp pos_derivative[NUM_TUNING_CONSTANTS];
+        fp neg_derivative[NUM_TUNING_CONSTANTS];
 
 
-        float score = compute_derivatives(pos_derivative, neg_derivative);
+        fp score = compute_derivatives(pos_derivative, neg_derivative);
         std::cout << "Score: " << score << std::endl;
 
 #if DEBUG_LOGGING
@@ -213,13 +213,13 @@ int main(int argc, char *argv[]) {
         if (neg_derivative[min_i_neg] < -1e-3f || pos_derivative[min_i_pos] < -1e-3f) {
             reset = -1;
             if (neg_derivative[min_i_neg] < pos_derivative[min_i_pos]) {
-                float delta = std::max(delta_mult * *tuning_constants[min_i_neg], 1e-9f * delta_mult);
-                *tuning_constants[min_i_neg] = std::max(*tuning_constants[min_i_neg] -delta, 0.f);
+                fp delta = std::max(delta_mult * *tuning_constants[min_i_neg], 1e-9f * delta_mult);
+                *tuning_constants[min_i_neg] = std::max<fp>(*tuning_constants[min_i_neg] -delta, 0.f);
 #if DEBUG_LOGGING
                 std::cout << "Subtracting Index: " << min_i_neg << std::endl;
 #endif
             } else {
-                float delta = std::max(delta_mult * *tuning_constants[min_i_pos], 1e-9f * delta_mult);
+                fp delta = std::max(delta_mult * *tuning_constants[min_i_pos], 1e-9f * delta_mult);
                 *tuning_constants[min_i_pos] += delta;
 #if DEBUG_LOGGING
                 std::cout << "Adding Index: " << min_i_pos << std::endl;
