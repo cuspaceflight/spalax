@@ -5,16 +5,16 @@
 #include <Eigen/Geometry>
 
 
-#define JERK_DEPENDENCE 1
+#define JERK_DEPENDENCE 0
 #define ACCEL_MAGNO_ERROR 0
 #define GYRO_SF_ERROR 0
 #define ANGULAR_ACCELERATION 1
 #define JERK 1
-#define ANGULAR_VEL 1
-#define ACCEL 1
+#define ANGULAR_VEL 0
+#define ACCEL 0
 
 static constexpr float time_increment = 1024;
-static const int num_experiments = 100;
+static const int num_experiments = 2;
 static const int simulation_minutes = 1;
 
 using namespace Eigen;
@@ -268,7 +268,7 @@ static void accel_test(bool plot = false, int NUM_TESTS = 10000, float jerk_mult
             current_velocity += 1.0 / time_increment * variable_accel;
 
 
-            if (k == 0) {
+            if (k == 1) {
                 timestamps.push_back(i / time_increment);
                 accel_x.push_back(accel[0]);
                 accel_y.push_back(accel[1]);
@@ -374,27 +374,27 @@ static void accel_test(bool plot = false, int NUM_TESTS = 10000, float jerk_mult
     plt::legend("upper left");
     plt::xlabel("Time (s)");
     plt::save("Position.svg");
-//
-//    plt::clf();
-//    plt::named_plot("Accel X (m/s$^2$)", timestamps, accel_x);
-//    plt::named_plot("Accel Y (m/s$^2$)", timestamps, accel_y);
-//    plt::named_plot("Accel Z (m/s$^2$)", timestamps, accel_z);
-//
-//    plt::grid(true);
-//    plt::legend();
-//    plt::xlabel("Time (s)");
-//    plt::save("Accel.svg");
+
+    plt::clf();
+    plt::named_plot("Accel X (m/s$^2$)", timestamps, accel_x);
+    plt::named_plot("Accel Y (m/s$^2$)", timestamps, accel_y);
+    plt::named_plot("Accel Z (m/s$^2$)", timestamps, accel_z);
+
+    plt::grid(true);
+    plt::legend();
+    plt::xlabel("Time (s)");
+    plt::save("Accel.svg");
 
 
-//    plt::clf();
-//    plt::named_plot("Gyro X (rad/s)", timestamps, gyro_x);
-//    plt::named_plot("Gyro Y (rad/s)", timestamps, gyro_y);
-//    plt::named_plot("Gyro Z (rad/s)", timestamps, gyro_z);
-//
-//    plt::grid(true);
-//    plt::legend();
-//    plt::xlabel("Time (s)");
-//    plt::save("Gyro.svg");
+    plt::clf();
+    plt::named_plot("Gyroscope X (rad/s)", timestamps, gyro_x);
+    plt::named_plot("Gyroscope Y (rad/s)", timestamps, gyro_y);
+    plt::named_plot("Gyroscope Z (rad/s)", timestamps, gyro_z);
+
+    plt::grid(true);
+    plt::legend();
+    plt::xlabel("Time (s)");
+    plt::save("Gyro.svg");
 
 //    plt::clf();
 //    plt::named_plot("Gyro Bias Error X (rad/s)", timestamps, average(gyro_bias_err_x));

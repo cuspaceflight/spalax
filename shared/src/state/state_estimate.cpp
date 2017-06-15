@@ -47,8 +47,8 @@ static const float exp_avg_alpha = 0.99f;
 
 #define USE_ADIS 1
 
-MESSAGING_PRODUCER(messaging_producer, ts_state_estimate_data, sizeof(state_estimate_t), 20)
-MESSAGING_PRODUCER(messaging_producer_debug, ts_state_estimate_debug, sizeof(state_estimate_debug_t), 20)
+MESSAGING_PRODUCER(messaging_producer, ts_state_estimate_data, sizeof(state_estimate_t), 100)
+MESSAGING_PRODUCER(messaging_producer_debug, ts_state_estimate_debug, sizeof(state_estimate_debug_t), 100)
 MESSAGING_CONSUMER(messaging_consumer, ts_raw_data, ts_raw_data, 0, 0, getPacket, 1024);
 
 void state_estimate_init() {
@@ -233,7 +233,7 @@ static bool getPacket(const telemetry_t *packet, message_metadata_t metadata) {
             //    kalman_zero_accel();
             //}
 
-            messaging_producer_send_timestamp(&messaging_producer, 0, (const uint8_t *) &current_estimate,
+            messaging_producer_send_timestamp(&messaging_producer, message_flags_send_over_can, (const uint8_t *) &current_estimate,
                                               data_timestamp);
 
             messaging_producer_send_timestamp(&messaging_producer_debug, message_flags_dont_send_over_usb,

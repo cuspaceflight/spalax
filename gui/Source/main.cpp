@@ -15,7 +15,7 @@ void update_handler(avionics_component_t component, avionics_component_state_t s
 		FTLogError("Error in component %i with line %i", component, line);
 }
 
-int main() {
+int main(int argc, char** argv) {
     int ret = -1;
 
     if (FTEngine::setup()) {
@@ -25,7 +25,12 @@ int main() {
         component_state_start(update_handler, true);
         messaging_all_start();
 
-        std::thread state_estimate(state_estimate_thread, nullptr);
+        const bool state_estimates = argc > 1 && std::string(argv[1]) == "-s";
+
+        std::thread* state_estimate = nullptr;
+
+        if (state_estimates)
+            state_estimate = new std::thread(state_estimate_thread, nullptr);
 
         FTEngine::getFileManager()->addSearchPath("Resources");
         FTEngine::getDirector()->getFontCache()->loadFontStyle("DefaultText", "Resources/Fonts/Vera.ftfont", glm::vec3(0,0,0));
@@ -37,9 +42,12 @@ int main() {
 
         ret = FTEngine::run();
 
-        state_estimate_terminate();
+        if (state_estimates) {
+            state_estimate_terminate();
+            state_estimate->join();
+            delete state_estimate;
+        }
 
-        state_estimate.join();
 
         FTEngine::cleanup();
     }

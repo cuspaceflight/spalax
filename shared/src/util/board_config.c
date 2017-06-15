@@ -41,8 +41,8 @@ board_config_t board_configs[BoardConfigMax] = {
                 .has_gps = false,
                 .has_mpu9250 = true,
                 .has_ms5611 = true,
-                .has_sdcard = false,
-                .run_state_estimators = false,
+                .has_sdcard = true,
+                .run_state_estimators = true,
 
                 .mpu9250_magno_transform = {3.61694852e-03f, 1.20641814e-06f, 1.36351719e-06f,
                                             1.20641814e-06f, 3.64952393e-03f, 7.28715828e-05f,
@@ -79,12 +79,12 @@ board_config_t board_configs[BoardConfigMax] = {
         {
                 .name = BoardConfigSpalaxBrokenSD,
                 .board_id = {3670059, 875778316, 808991032},
-                .has_adis = false,
+                .has_adis = true,
                 .has_gps = false,
                 .has_mpu9250 = true,
                 .has_ms5611 = true,
                 .has_sdcard = false,
-                .run_state_estimators = true,
+                .run_state_estimators = false,
 
                 .mpu9250_magno_transform = {  0.00356189f,   5.5954e-05f,  0.000142585f,
                                               -7.67756e-05f,   0.00353788f,   0.00021073f,
@@ -101,6 +101,22 @@ board_config_t board_configs[BoardConfigMax] = {
                 .mpu9250_accel_offset = {33.26432818f,  36.48421574f, 47.63982994f},
 
                 .mpu9250_gyro_sf = 500.0f * 0.01745329251f / 32767.0f,
+
+                .adis16405_magno_transform = {
+                        1.07324296e-03f,   1.08874269e-07f,   1.15957865e-06f,
+                        1.08874269e-07f,   1.07225669e-03f,  -1.51182347e-07f,
+                        1.15957865e-06f,  -1.51182347e-07f,   1.06725842e-03f,
+                },
+
+                .adis16405_magno_offset = {75.08393187f,   65.82024124f, -190.60708519f},
+
+                .adis16405_accel_transform = {
+                        3.34132659e-03f,  -3.04054733e-05f,   1.38907583e-05f,
+                        -3.04054733e-05f,   3.34291600e-03f,  -6.09264084e-06f,
+                        1.38907583e-05f,  -6.09264084e-06f,   3.31029391e-03f,
+                },
+
+                .adis16405_accel_offset = {  5.59740051f, -9.31069979f,  3.52833252f, }
 
         }
 };
