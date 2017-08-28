@@ -118,7 +118,37 @@ board_config_t board_configs[BoardConfigMax] = {
 
                 .adis16405_accel_offset = {  5.59740051f, -9.31069979f,  3.52833252f, }
 
-        }
+        },
+        {
+            .name = BoardConfigM3v2a,
+            .board_id = {3801151, 875974930, 926233649},
+            .has_adis = false,
+            .has_gps = false,
+            .has_mpu9250 = true,
+            .has_ms5611 = true,
+            .has_sdcard = true,
+            .run_state_estimators = false,
+        },
+        {
+            .name = BoardConfigM3v2b,
+            .board_id = {3801153, 875974930, 926233649},
+            .has_adis = false,
+            .has_gps = false,
+            .has_mpu9250 = true,
+            .has_ms5611 = true,
+            .has_sdcard = true,
+            .run_state_estimators = false,
+        },
+        {
+            .name = BoardConfigM3v2c,
+            .board_id = {3801170, 875974930, 926233649},
+            .has_adis = false,
+            .has_gps = false,
+            .has_mpu9250 = true,
+            .has_ms5611 = true,
+            .has_sdcard = true,
+            .run_state_estimators = false,
+        },
 };
 
 #if defined(MESSAGING_OS_STD)

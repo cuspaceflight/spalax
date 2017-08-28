@@ -9,6 +9,8 @@
 #include "messaging.h"
 #include "platform.h"
 
+#if BUILD_ADIS
+
 static binary_semaphore_t adis16405_semaphore;
 static const uint32_t adis16405_send_over_usb_count = 0; // Will send 1 in every 100 samples
 static const uint32_t adis16405_send_over_can_count = 0;
@@ -344,3 +346,5 @@ void adis16405_thread(void *arg) {
 
     }
 }
+
+#endif

@@ -1,0 +1,40 @@
+name: M3IMU
+lsefreq: 0
+hsefreq: 26000000
+voltage: 3.3
+mcutype: STM32F405xx
+default: input, pushpull, starthigh, pullup, highspeed
+pins:
+    JTMS: pa13, af0, pulldown
+    JTCK: pa14, af0, pulldown
+    JTDI: pa15, af0, pullup
+    JTDO: pb3, af0
+    CAN_RX: pb8, af9
+    CAN_TX: pb9, af9
+
+    MPU_IRQ: pb11
+    MPU_CS: pb12, output
+
+    IMU_SCLK: pb13, af5
+    IMU_MISO: pb14, af5
+    IMU_MOSI: pb15, af5
+
+    BARO_CS: pc4, output
+    BARO_SCLK: pa5, af5
+    BARO_SDO: pa6, af5
+    BARO_SDI: pa7, af5
+
+    USB_DETECT: pa9
+    OTG_FS_DM: pa11, af10
+    OTG_FS_DP: pa12, af10
+
+    SD_DAT0: pc8, af12
+    SD_DAT1: pc9, af12
+    SD_DAT2: pc10, af12
+    SD_DAT3: pc11, af12
+    SD_CLK: pc12, af12
+
+    SD_CMD: pd2, af12
+
+    LED_RED: pa1, output, startlow
+    LED_GREEN: pa2, output, startlow

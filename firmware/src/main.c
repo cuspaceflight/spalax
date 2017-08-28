@@ -12,8 +12,10 @@
 static THD_WORKING_AREA(waMPU, 256);
 static THD_WORKING_AREA(waBadThing, 256);
 static THD_WORKING_AREA(waMS5611, 256);
-static THD_WORKING_AREA(waADIS, 256);
 static THD_WORKING_AREA(waGPS, 1024);
+#if BUILD_ADIS
+static THD_WORKING_AREA(waADIS, 256);
+#endif
 
 #if BUILD_STATE_ESTIMATORS
 #include <state/state_estimate.h>
@@ -48,9 +50,10 @@ int main(void) {
 
     if (config->has_gps)
         chThdCreateStatic(waGPS, sizeof(waGPS), NORMALPRIO, ublox_thread, NULL);
-
+#if BUILD_ADIS
     if (config->has_adis)
         chThdCreateStatic(waADIS, sizeof(waADIS), NORMALPRIO, adis16405_thread, NULL);
+#endif
 #if BUILD_STATE_ESTIMATORS
     if (config->run_state_estimators)
         chThdCreateStatic(waStateEstimators, sizeof(waStateEstimators), NORMALPRIO, state_estimate_thread, NULL);
