@@ -52,7 +52,6 @@
 #ifndef STM32F405xx
 #define STM32F405xx
 #endif
-
 /*
     IO pins assignments.
 */
@@ -78,7 +77,7 @@
 #define GPIOB_PIN1                     1U
 #define GPIOB_PIN2                     2U
 #define GPIOB_JTDO                     3U
-#define GPIOB_PIN4                     4U
+#define GPIOB_NJTRST                   4U
 #define GPIOB_PIN5                     5U
 #define GPIOB_PIN6                     6U
 #define GPIOB_PIN7                     7U
@@ -231,6 +230,7 @@
 #define LINE_LED_RED                   PAL_LINE(GPIOA, 1U)
 #define LINE_MPU_CS                    PAL_LINE(GPIOB, 12U)
 #define LINE_MPU_IRQ                   PAL_LINE(GPIOB, 11U)
+#define LINE_NJTRST                    PAL_LINE(GPIOB, 4U)
 #define LINE_OTG_FS_DM                 PAL_LINE(GPIOA, 11U)
 #define LINE_OTG_FS_DP                 PAL_LINE(GPIOA, 12U)
 #define LINE_SD_CLK                    PAL_LINE(GPIOC, 12U)
@@ -387,7 +387,7 @@
  * PB1  - PIN1                         (unused).
  * PB2  - PIN2                         (unused).
  * PB3  - JTDO                         (af0).
- * PB4  - PIN4                         (unused).
+ * PB4  - NJTRST                       (af0, pullup).
  * PB5  - PIN5                         (unused).
  * PB6  - PIN6                         (unused).
  * PB7  - PIN7                         (unused).
@@ -404,7 +404,7 @@
                                         PIN_MODE_INPUT(GPIOB_PIN1) | \
                                         PIN_MODE_INPUT(GPIOB_PIN2) | \
                                         PIN_MODE_ALTERNATE(GPIOB_JTDO) | \
-                                        PIN_MODE_INPUT(GPIOB_PIN4) | \
+                                        PIN_MODE_ALTERNATE(GPIOB_NJTRST) | \
                                         PIN_MODE_INPUT(GPIOB_PIN5) | \
                                         PIN_MODE_INPUT(GPIOB_PIN6) | \
                                         PIN_MODE_INPUT(GPIOB_PIN7) | \
@@ -420,7 +420,7 @@
                                         PIN_OTYPE_PUSHPULL(GPIOB_PIN1) | \
                                         PIN_OTYPE_PUSHPULL(GPIOB_PIN2) | \
                                         PIN_OTYPE_PUSHPULL(GPIOB_JTDO) | \
-                                        PIN_OTYPE_PUSHPULL(GPIOB_PIN4) | \
+                                        PIN_OTYPE_PUSHPULL(GPIOB_NJTRST) | \
                                         PIN_OTYPE_PUSHPULL(GPIOB_PIN5) | \
                                         PIN_OTYPE_PUSHPULL(GPIOB_PIN6) | \
                                         PIN_OTYPE_PUSHPULL(GPIOB_PIN7) | \
@@ -436,7 +436,7 @@
                                         PIN_OSPEED_HIGH(GPIOB_PIN1) | \
                                         PIN_OSPEED_HIGH(GPIOB_PIN2) | \
                                         PIN_OSPEED_HIGH(GPIOB_JTDO) | \
-                                        PIN_OSPEED_HIGH(GPIOB_PIN4) | \
+                                        PIN_OSPEED_HIGH(GPIOB_NJTRST) | \
                                         PIN_OSPEED_HIGH(GPIOB_PIN5) | \
                                         PIN_OSPEED_HIGH(GPIOB_PIN6) | \
                                         PIN_OSPEED_HIGH(GPIOB_PIN7) | \
@@ -452,7 +452,7 @@
                                         PIN_PUPD_PULLUP(GPIOB_PIN1) | \
                                         PIN_PUPD_PULLUP(GPIOB_PIN2) | \
                                         PIN_PUPD_PULLUP(GPIOB_JTDO) | \
-                                        PIN_PUPD_PULLUP(GPIOB_PIN4) | \
+                                        PIN_PUPD_PULLUP(GPIOB_NJTRST) | \
                                         PIN_PUPD_PULLUP(GPIOB_PIN5) | \
                                         PIN_PUPD_PULLUP(GPIOB_PIN6) | \
                                         PIN_PUPD_PULLUP(GPIOB_PIN7) | \
@@ -468,7 +468,7 @@
                                         PIN_OD_HIGH(GPIOB_PIN1) | \
                                         PIN_OD_HIGH(GPIOB_PIN2) | \
                                         PIN_OD_HIGH(GPIOB_JTDO) | \
-                                        PIN_OD_HIGH(GPIOB_PIN4) | \
+                                        PIN_OD_HIGH(GPIOB_NJTRST) | \
                                         PIN_OD_HIGH(GPIOB_PIN5) | \
                                         PIN_OD_HIGH(GPIOB_PIN6) | \
                                         PIN_OD_HIGH(GPIOB_PIN7) | \
@@ -484,7 +484,7 @@
                                         PIN_AFIO_AF(GPIOB_PIN1, 0U) | \
                                         PIN_AFIO_AF(GPIOB_PIN2, 0U) | \
                                         PIN_AFIO_AF(GPIOB_JTDO, 0U) | \
-                                        PIN_AFIO_AF(GPIOB_PIN4, 0U) | \
+                                        PIN_AFIO_AF(GPIOB_NJTRST, 0U) | \
                                         PIN_AFIO_AF(GPIOB_PIN5, 0U) | \
                                         PIN_AFIO_AF(GPIOB_PIN6, 0U) | \
                                         PIN_AFIO_AF(GPIOB_PIN7, 0U))
